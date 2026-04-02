@@ -1,0 +1,62 @@
+(index):527  GET http://localhost:3003/api/auth/status net::ERR_CONNECTION_REFUSED
+checkAuth @ (index):527
+init @ (index):481
+await in init
+(anonymous) @ (index):1945Understand this error
+(index):527  Uncaught (in promise) TypeError: Failed to fetch
+    at checkAuth ((index):527:31)
+    at init ((index):481:19)
+0
+: 
+"Death"
+1
+: 
+"Duck"
+2
+: 
+"HitReact"
+3
+: 
+"Idle"
+4
+: 
+"Idle_Attack"
+5
+: 
+"Idle_Hold"
+6
+: 
+"Jump"
+7
+: 
+"Jump_Idle"
+8
+: 
+"Jump_Land"
+9
+: 
+"No"
+10
+: 
+"Punch"
+11
+: 
+"Run"
+12
+: 
+"Run_Attack"
+13
+: 
+"Run_Hold"
+14
+: 
+"Walk"
+15
+: 
+"Walk_Hold"
+16
+: 
+"Wave"
+17
+: 
+"Yes"

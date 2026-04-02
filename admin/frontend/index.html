@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeworld Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #050507;
+            --accent-indigo: #6366f1;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --text-light: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-light);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        canvas {
+            image-rendering: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            background: #111;
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-premium:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+    <nav class="w-full glass border-b border-white/5 px-8 py-4 mb-8 sticky top-0 z-50 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-slate-500 shadow-[0_0_10px_rgba(100,116,139,0.5)]"></div>
+                <span id="statusText" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Awaiting Link...</span>
+            </div>
+            <div class="h-4 w-[1px] bg-white/10"></div>
+            <div class="flex items-center gap-2">
+                <button onclick="controlServer('start')" class="px-3 py-1 text-[9px] font-bold text-emerald-400 hover:bg-emerald-400/10 rounded-md transition-all border border-emerald-400/30">START</button>
+                <button onclick="controlServer('stop')" class="px-3 py-1 text-[9px] font-bold text-rose-400 hover:bg-rose-400/10 rounded-md transition-all border border-rose-400/30">STOP</button>
+                <button onclick="controlServer('restart')" class="px-3 py-1 text-[9px] font-bold text-indigo-400 hover:bg-indigo-400/10 rounded-md transition-all border border-indigo-400/30">RESTART</button>
+            </div>
+        </div>
+        <div class="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em]">Server Management Protocol v1.4</div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-8 pb-12">
+        <header class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-white">Homeworld Admin</h1>
+                    <p class="text-xs text-indigo-400 font-bold uppercase tracking-widest">Global Server Controller</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p id="adminName" class="text-white font-medium">oleg</p>
+                <p class="text-xs text-indigo-400">ADMINISTRATOR</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="space-y-8">
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></span>
+                        World Settings
+                    </h2>
+                    <div id="worldStats" class="space-y-4 mb-8">
+                        <div class="flex justify-between text-sm py-2 border-b border-white/5">
+                            <span class="text-white/40">Grid Size</span>
+                            <span class="text-white font-bold" id="statSize">100 x 100</span>
+                        </div>
+                        <div class="flex justify-between text-sm py-2 border-b border-white/5">
+                            <span class="text-white/40">Total Tiles</span>
+                            <span class="text-white font-bold" id="statTiles">10,000</span>
+                        </div>
+                        <div class="flex justify-between text-sm py-2 border-b border-white/5">
+                            <span class="text-white/40">Current Objects</span>
+                            <span class="text-white font-bold" id="statObjects">--</span>
+                        </div>
+                    </div>
+                    <button onclick="regenerateWorld()" id="syncBtn" class="btn-premium w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-white">
+                        <span id="btnText">REGENERATE WORLD</span>
+                        <div id="btnLoader" class="loader"></div>
+                    </button>
+                    <p class="text-[10px] text-center mt-3 text-white/30 uppercase tracking-widest">Caution: Destructive Action</p>
+                </div>
+
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                        Atmospheric Controls
+                    </h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setWeather(true)" class="bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-600/30 text-indigo-100 text-xs font-bold py-3 rounded-xl transition-all">
+                            FORCE STORM
+                        </button>
+                        <button onclick="setWeather(false)" class="bg-rose-600/20 hover:bg-rose-600/40 border border-rose-600/30 text-rose-100 text-xs font-bold py-3 rounded-xl transition-all">
+                            CLEAR SKIES
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-center mt-3 text-white/30 uppercase tracking-widest">Weather State Override</p>
+                </div>
+
+                <div class="glass p-6 rounded-3xl">
+                    <h3 class="text-sm font-bold text-white/40 uppercase tracking-widest mb-4">Biome Legend</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 bg-[#FFFFFF] rounded-sm border border-white/10"></div>
+                            <span class="text-xs text-white/80">Snow (Peaks)</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 bg-[#404040] rounded-sm"></div>
+                            <span class="text-xs text-white/80">Cliff (Rock)</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 bg-[#1B3F1D] rounded-sm"></div>
+                            <span class="text-xs text-white/80">Forest</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 bg-[#458B47] rounded-sm"></div>
+                            <span class="text-xs text-white/80">Grassland</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 bg-[#C2B280] rounded-sm"></div>
+                            <span class="text-xs text-white/80">Desert</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 bg-[#2040C0] rounded-sm"></div>
+                            <span class="text-xs text-white/80">Water (Lakes/Rivers)</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 bg-[#2C3E2E] rounded-sm"></div>
+                            <span class="text-xs text-white/80">Swamp (Marsh)</span>
+                        </div>
+                        <div class="flex items-center gap-3 border-t border-white/5 pt-3 mt-1">
+                            <i class="text-indigo-400 text-[10px] uppercase tracking-tighter">Aquatic Flora</i>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+                            <span class="text-xs text-white/60 italic">Reed / Lily / Grass / Bush / Dead</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 glass p-8 rounded-3xl flex flex-col items-center justify-center min-h-[600px]">
+                <h3 class="text-sm font-bold text-white/40 uppercase tracking-widest mb-6 self-start">Territory Topography</h3>
+                <div class="relative group cursor-crosshair">
+                    <canvas id="worldCanvas" width="500" height="500"></canvas>
+                    <div class="absolute inset-0 border border-white/5 rounded-lg pointer-events-none group-hover:border-indigo-500/30 transition-all"></div>
+                </div>
+                <div id="mapCoordinates" class="mt-4 text-xs text-indigo-400/50 font-mono">X: 0, Y: 0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('worldCanvas');
+        const ctx = canvas.getContext('2d');
+        const TILE_SIZE = 5;
+
+        function getTileColor(b, e) {
+            let h, s, l;
+            switch(b) {
+                case 'g': h = 122; s = 33; l = 41; break; // Grass
+                case 'f': h = 123; s = 40; l = 18; break; // Forest
+                case 'd': h = 46; s = 36; l = 63; break;  // Desert
+                case 'w': h = 228; s = 71; l = 44; break; // Water
+                case 's': h = 0; s = 0; l = 95; break;    // Snow
+                case 'c': h = 0; s = 0; l = 25; break;    // Cliff
+                case 'm': h = 127; s = 16; l = 21; break; // Swamp
+                default: h = 122; s = 33; l = 41;
+            }
+            // Subtle shift: 2.5% per meter
+            const shift = Math.max(-20, Math.min(20, (e || 0) * 2.5));
+            l = Math.max(5, Math.min(95, l + shift));
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/admin/world/status');
+                const data = await res.json();
+                document.getElementById('statObjects').textContent = data.objects.toLocaleString();
+                drawMap();
+            } catch (e) { console.error(e); }
+        }
+
+        async function drawMap() {
+            try {
+                const [tilesRes, objsRes] = await Promise.all([
+                    fetch('/api/admin/world/tiles'),
+                    fetch('/api/admin/world/objects')
+                ]);
+                const tiles = await tilesRes.json();
+                const objects = await objsRes.json();
+
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                tiles.forEach(t => {
+                    ctx.fillStyle = getTileColor(t.b, t.e);
+                    ctx.fillRect(t.x * TILE_SIZE, t.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                });
+
+                objects.forEach(o => {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(o.x * TILE_SIZE, o.y * TILE_SIZE, 1.2, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // 4. Render Players
+                try {
+                    const pRes = await fetch('/api/admin/world/players');
+                    const players = await pRes.json();
+                    
+                    players.forEach(p => {
+                        const px = p.x * (TILE_SIZE / 2); // TILE_SCALE (2) vs TILE_SIZE (5)
+                        const pz = p.z * (TILE_SIZE / 2);
+                        
+                        // Pulse Glow
+                        ctx.shadowBlur = 15;
+                        ctx.shadowColor = '#6366f1';
+                        ctx.fillStyle = '#6366f1';
+                        ctx.beginPath();
+                        ctx.arc(px, pz, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                        
+                        // Label
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 9px Outfit';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(p.username.toUpperCase(), px, pz - 12);
+                    });
+                } catch (e) {
+                    console.warn("[Admin] Player sync skipped:", e);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function regenerateWorld() {
+            if (!confirm("Confirm world collapse and regeneration? All existing entities will be recycled.")) return;
+            
+            const btn = document.getElementById('syncBtn');
+            const loader = document.getElementById('btnLoader');
+            const text = document.getElementById('btnText');
+
+            btn.disabled = true;
+            loader.style.display = 'block';
+            text.textContent = 'RECONSTRUCTING...';
+
+            try {
+                await fetch('/api/admin/world/generate', { method: 'POST' });
+                await fetchStatus();
+            } catch (e) {
+                alert("Neural Link Interrupted");
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+                text.textContent = 'REGENERATE WORLD';
+            }
+        }
+
+        async function setWeather(isRaining) {
+            const btn = event.currentTarget;
+            const originalText = btn.textContent;
+            btn.textContent = 'TRANSMITTING...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/weather', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_raining: isRaining })
+                });
+                
+                if (res.ok) {
+                    btn.textContent = 'LINK ESTABLISHED';
+                    btn.classList.add('bg-emerald-600/40');
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                        btn.classList.remove('bg-emerald-600/40');
+                    }, 2000);
+                } else {
+                    throw new Error("Link Failed");
+                }
+            } catch (e) {
+                alert("Climate Link Interrupted");
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / TILE_SIZE);
+            const y = Math.floor((e.clientY - rect.top) / TILE_SIZE);
+            if (x >= 0 && x < 100 && y >= 0 && y < 100) {
+                document.getElementById('mapCoordinates').textContent = `COORDS: X${x} Y${y}`;
+            }
+        });
+
+        async function checkServerStatus() {
+            try {
+                const res = await fetch('/api/admin/server/status');
+                const data = await res.json();
+                const dot = document.getElementById('statusDot');
+                const text = document.getElementById('statusText');
+                
+                if (data.status === 'online') {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)] animate-pulse";
+                    text.className = "text-[10px] font-bold text-emerald-400 uppercase tracking-widest";
+                    text.textContent = "Server Online";
+                } else {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]";
+                    text.className = "text-[10px] font-bold text-rose-400 uppercase tracking-widest";
+                    text.textContent = "Server Offline";
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function controlServer(cmd) {
+            try {
+                await fetch('/api/admin/server/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd })
+                });
+                // Immediate check after command
+                setTimeout(checkServerStatus, 2000);
+            } catch (e) { alert("Management Neural Interrupted"); }
+        }
+
+        setInterval(checkServerStatus, 5000);
+        setInterval(drawMap, 2000); // Poll for player positions and world updates
+        checkServerStatus();
+        fetchStatus();
+    </script>
+</body>
+</html>

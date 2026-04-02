@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeworld - 3D Exploration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-deep: #050507;
+            --accent-indigo: #6366f1;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --text-light: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-light);
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .ui-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        .selection-frame {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            padding: 24px;
+            border-radius: 2rem;
+            transition: all 0.5s ease;
+        }
+
+        .avatar-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-card.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--accent-indigo);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        #tooltip {
+            position: fixed;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--accent-indigo);
+            border-radius: 8px;
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+            transform: translate(-50%, -100%);
+            margin-top: -10px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .hud-top {
+            display: none;
+            padding: 20px 40px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+
+        .controls-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: none;
+        }
+
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #interaction-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            padding: 24px;
+            border-radius: 20px;
+            z-index: 100;
+            display: none;
+            text-align: center;
+        }
+
+        .close-btn {
+            margin-top: 16px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Pirata+One&display=swap');
+
+        /* --- MAPPING UI --- */
+        #minimap-wrapper {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 4px double #CD7F32; /* Bronze */
+            outline: 2px solid #D4AF37; /* Gold */
+            background: #000;
+            overflow: hidden;
+            z-index: 100;
+            cursor: pointer;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.6);
+            display: none; /* Shown after enterWorld */
+        }
+        #minimap-canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* Rotation handled via Javascript style.transform for transparency/layering if needed, 
+               but we do it via ctx.rotate for drawing performance */
+        }
+        #minimap-pointer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 16px;
+            background: #D4AF37; /* Gold pointer */
+            transform: translate(-50%, -50%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 110;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
+        }
+        #minimap-compass {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 102;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .compass-label {
+            position: absolute;
+            font-family: 'Pirata One', cursive;
+            font-weight: normal;
+            font-size: 20px;
+            color: white;
+            /* High-Contrast 3D Stack plus Deep Halo filter */
+            text-shadow: 
+                2px 2px 0px rgba(0,0,0,1), 
+                -1px -1px 0px rgba(255,255,255,0.4);
+            filter: drop-shadow(0 0 4px rgba(0,0,0,1)) drop-shadow(0 0 8px rgba(0,0,0,0.8));
+        }
+        .compass-n { position: absolute; top: 6px; color: #ffbc00; } /* Golden North */
+        .compass-e { position: absolute; right: 6px; }
+        .compass-s { position: absolute; bottom: 6px; }
+        .compass-w { position: absolute; left: 6px; }
+
+        #coord-panel {
+            position: fixed;
+            top: 212px;
+            right: 24px;
+            width: 180px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            border: 2px solid #ddd;
+            color: #ddd;
+            font-family: 'Pirata One', cursive;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 101;
+            letter-spacing: 1px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        #big-map-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5); /* Reduced dimming */
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #big-map-canvas {
+            background: #111;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 4px double #CD7F32;
+            outline: 2px solid #D4AF37;
+            border-radius: 8px;
+        }
+        .map-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--accent-indigo);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+        .map-hint {
+            margin-top: 20px;
+            color: rgba(255,255,255,0.3);
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading-screen">
+        <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+        <p id="loading-text" class="text-indigo-400 font-bold tracking-widest text-sm uppercase">Synchronizing Realities...</p>
+    </div>
+
+    <div id="canvas-container"></div>
+    <div id="tooltip">Target: Mushroom</div>
+
+    <!-- MAPPING COMPONENTS -->
+    <div id="minimap-wrapper">
+        <div id="minimap-compass">
+            <div class="compass-n">N</div>
+            <div class="compass-e">E</div>
+            <div class="compass-s">S</div>
+            <div class="compass-w">W</div>
+        </div>
+        <div id="minimap"><canvas id="minimap-canvas"></canvas></div>
+    </div>
+
+    <!-- [Tactical] Chat Overlay -->
+    <div id="chat-container">
+        <div id="chat-log"></div>
+        <input type="text" id="chat-input" placeholder="Whisper to the void... (Enter to send)" maxlength="140">
+    </div>
+
+    <div id="coord-panel">
+        X: <span id="pos-x">0</span> | Z: <span id="pos-z">0</span><br>
+        <span class="text-[9px] text-indigo-400/50 uppercase">Elev: <span id="pos-elev">0</span> m</span>
+    </div>
+
+    <div id="big-map-overlay">
+        <div class="map-title">World</div>
+        <canvas id="big-map-canvas" width="750" height="750"></canvas>
+        <div style="margin-top: 20px; font-size: 14px; opacity: 0.8; letter-spacing: 2px;">WORLD TOPOGRAPHY</div>
+    </div>
+
+    <!-- INTERACTION PANEL -->
+    <div id="interaction-panel" class="glass interactive" onmousedown="event.stopPropagation()">
+        <div class="text-xs text-indigo-400 font-bold uppercase tracking-widest mb-2">Object Inspection</div>
+        <h3 id="panelObjectName" class="text-2xl font-bold text-white mb-4">Mushroom</h3>
+        <div class="text-sm text-white/50 mb-6">Environmental data synchronized successfully.</div>
+        <div onclick="closePanel()" class="close-btn text-xs font-bold text-white/70">DISMISS</div>
+    </div>
+
+    <div class="ui-layer">
+        <!-- TOP HUD -->
+        <header id="hudTop" class="hud-top flex items-center justify-between w-full">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-white leading-tight">Homeworld</h2>
+                    <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Explorer Active</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6 interactive">
+                <div class="text-right">
+                    <span id="userName" class="text-indigo-100 font-medium block">--</span>
+                    <span class="text-[10px] text-white/30 uppercase tracking-widest">Sector 01</span>
+                </div>
+                <button onclick="logout()" class="px-3 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-400/10 rounded-lg transition-all">TERMINATE</button>
+            </div>
+        </header>
+
+        <!-- SELECTION OVERLAY -->
+        <div id="selectionUI" class="selection-frame glass interactive animate-fade-in flex flex-col gap-6">
+            <div class="flex items-center justify-between px-4">
+                <h3 class="text-xl font-bold text-white tracking-tight">Identity Matrix</h3>
+                <p class="text-xs text-white/40 uppercase tracking-widest">Choose Your Avatar</p>
+            </div>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="avatar-card" onclick="selectAvatar('Character_Female_1')" id="card-Character_Female_1">
+                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Explorer</div>
+                    <div class="text-[9px] text-white/30 uppercase">Nova</div>
+                </div>
+                <div class="avatar-card" onclick="selectAvatar('Character_Female_2')" id="card-Character_Female_2">
+                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Scientist</div>
+                    <div class="text-[9px] text-white/30 uppercase">Astra</div>
+                </div>
+                <div class="avatar-card" onclick="selectAvatar('Character_Male_1')" id="card-Character_Male_1">
+                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Scout</div>
+                    <div class="text-[9px] text-white/30 uppercase">Orion</div>
+                </div>
+                <div class="avatar-card" onclick="selectAvatar('Character_Male_2')" id="card-Character_Male_2">
+                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Engineer</div>
+                    <div class="text-[9px] text-white/30 uppercase">Atlas</div>
+                </div>
+            </div>
+            <button onclick="enterWorld()" id="confirmBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-indigo-600/20 uppercase tracking-widest">
+                ENTER WORLD
+            </button>
+        </div>
+
+        <!-- CONTROLS HINT -->
+        <div id="controlsHint" class="controls-hint">
+            WASD - MOVE • SHIFT - SPRINT • G - DIG • RMB - ORBIT • LMB - INTERACT
+        </div>
+
+        <!-- WEATHER STATUS HUD -->
+        <div id="weatherHUD" class="fixed top-24 left-8 glass px-4 py-2 rounded-xl text-[10px] font-bold text-indigo-400 uppercase tracking-widest pointer-events-none" style="display: none;">
+            Satellite Link: <span id="syncIndicator" class="text-emerald-400">Stable</span><br/>
+            Atmosphere: <span id="weatherText" class="text-white">Analyzing...</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+
+        // --- CONSTANTS ---
+        const GRID_SIZE = 100;
+        const TILE_SCALE = 2; 
+        const AVATARS = ['Character_Female_1', 'Character_Female_2', 'Character_Male_1', 'Character_Male_2'];
+        
+        // --- GLOBALS ---
+        let scene, camera, renderer, clock;
+        let player, mixer, currentAnimation;
+        let playerBaseGroup = new THREE.Group();
+        let moveSpeed = 0.1;
+        let rotationSpeed = 5;
+        let isSprinting = false;
+        let isActionPlaying = false; 
+        
+        let state = 'SELECTION';
+        let models = {};                // [Tactical] Asset Registry Restored
+        const INJECTED_BASE = window.CONFIG?.API_BASE;
+        const DEFAULT_BASE = `http://${window.location.hostname}:3003`;
+        let username = ""; // [Tactical] Identity Registry Restored
+        
+        // If injected base is localhost but we're NOT on localhost, use the current hostname
+        const API_BASE = (INJECTED_BASE && !INJECTED_BASE.includes('localhost')) 
+            ? INJECTED_BASE 
+            : (window.location.hostname !== 'localhost' ? DEFAULT_BASE : (INJECTED_BASE || DEFAULT_BASE));
+            
+        console.log(`[Homeworld] Connectivity Bridge initialized: ${API_BASE}`);
+        const API_OPTIONS = { credentials: 'include' };
+
+        let worldData = null;
+        let selectedAvatarId = 'Character_Female_1';
+        
+        let orbit_angle_horizontal = Math.PI;
+        let orbit_angle_vertical = 0.5;
+        let orbit_distance = 6;
+        let isOrbiting = false;
+        let lastChatSync = 0; // [Tactical] Chat Frequency Registry
+        let chatMessages = [];
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let targetObject = null;
+
+        const keys = { 'KeyW': false, 'KeyA': false, 'KeyS': false, 'KeyD': false, 'ShiftLeft': false, 'KeyG': false, 'Space': false };
+        const playerRadius = 0.6;
+        let isRaining = false;
+        let rainIntensity = 0.0;
+        
+        const collisions = []; 
+        let currentAvatarId = 'Human_1.gltf';
+        let terrainHeightMap = {};
+        let waterMat, rainSystemA, rainSystemB; 
+        
+        window.weatherMaterials = [];
+        let grassMat, forestMat, desertMat, snowMat, cliffMat, swampMat;
+        let barkDetail, foliageDetail, stoneDetail;
+        
+        let leaves, leafData = [];
+        let treeTops = [];
+        let lightningFlash = 0;
+        let lightningTimer = 0;
+
+        async function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a12);
+            scene.fog = new THREE.FogExp2(0x0a0a12, 0.04);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            const ambient = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambient);
+
+            const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+            sun.position.set(20, 40, 20); 
+            sun.castShadow = true;
+            sun.shadow.camera.left = -20;
+            sun.shadow.camera.right = 20;
+            sun.shadow.camera.top = 20;
+            sun.shadow.camera.bottom = -20;
+            sun.shadow.camera.near = 0.1;
+            sun.shadow.camera.far = 100;
+            sun.shadow.mapSize.width = 2048;
+            sun.shadow.mapSize.height = 2048;
+            scene.add(sun);
+            scene.sun = sun; 
+
+            const loader = new GLTFLoader();
+            const texLoader = new THREE.TextureLoader();
+            barkDetail = texLoader.load('/static/static/textures/bark_detail.png');
+            foliageDetail = texLoader.load('/static/static/textures/foliage_detail.png');
+            stoneDetail = texLoader.load('/static/static/textures/stone_detail.png');
+            [barkDetail, foliageDetail, stoneDetail].forEach(t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; });
+
+            const charPath = '/models/Characters/glTF/';
+            for (const id of AVATARS) {
+                const gltf = await loader.loadAsync(`${charPath}${id}.gltf`);
+                gltf.scene.visible = false;
+                gltf.scene.traverse(c => { if(c.isMesh) { c.castShadow = true; c.receiveShadow = true; }});
+                models[id] = gltf;
+                scene.add(gltf.scene);
+            }
+
+            await checkAuth();
+
+            selectAvatar(selectedAvatarId);
+            
+            document.getElementById('loading').style.display = 'none';
+            
+            setupRain();
+            setInterval(syncWeather, 1000); 
+            syncWeather();
+            
+            window.addEventListener('keydown', e => { 
+                if (e.code === 'KeyG') {
+                    performDig();
+                }
+                if (e.code === 'KeyM') {
+                    toggleBigMap();
+                }
+                if (e.code === 'KeyT') {
+                    const input = document.getElementById('chat-input');
+                    input.style.display = 'block';
+                    input.focus();
+                }
+                if (e.code === 'Enter') {
+                    const input = document.getElementById('chat-input');
+                    if (document.activeElement === input) {
+                        sendChat();
+                    } else {
+                        input.style.display = 'block';
+                        input.focus();
+                    }
+                }
+                if (e.code === 'Escape') {
+                    const input = document.getElementById('chat-input');
+                    input.style.display = 'none';
+                    input.blur();
+                    if (isBigMapOpen) toggleBigMap();
+                    if (isPanelOpen) closePanel();
+                }
+                if (e.code in keys) {
+                    keys[e.code] = true;
+                }
+            });
+            window.addEventListener('keyup', e => { 
+                if (e.code in keys) {
+                    keys[e.code] = false; 
+                }
+            });
+        window.addEventListener('mousedown', e => { if(e.button === 2) isOrbiting = true; });
+            window.addEventListener('mouseup', e => { if(e.button === 2) isOrbiting = false; });
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('click', onMouseClick);
+            window.addEventListener('contextmenu', e => e.preventDefault());
+            window.addEventListener('wheel', e => {
+                orbit_distance = Math.max(2, Math.min(20, orbit_distance + e.deltaY * 0.005));
+            });
+            window.addEventListener('resize', onWindowResize);
+            
+            animate();
+        }
+
+        async function checkAuth() {
+            const res = await fetch(`${API_BASE}/api/auth/status`, API_OPTIONS);
+            const data = await res.json();
+            if(!data.logged_in) window.location.href = '/login';
+            username = data.username; // [Tactical] Populate global identity for filtering
+            document.getElementById('userName').textContent = (data.full_name || data.username).toUpperCase();
+        }
+
+        window.selectAvatar = (id) => {
+            selectedAvatarId = id;
+            AVATARS.forEach(cid => models[cid].scene.visible = (cid === id));
+            
+            const gltf = models[id];
+            if(mixer) mixer.stopAllAction();
+            mixer = new THREE.AnimationMixer(gltf.scene);
+
+            const idle = THREE.AnimationClip.findByName(gltf.animations, 'Idle');
+            if(idle) mixer.clipAction(idle).play();
+
+            camera.position.set(0, 1.5, 4);
+            camera.lookAt(0, 1, 0);
+
+            document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`card-${id}`).classList.add('active');
+        };
+
+        window.enterWorld = async () => {
+             // HARD RESET ALL STATES
+             if (window.playerPhysics) {
+                 window.playerPhysics.velocityY = 0;
+                 window.playerPhysics.isJumping = false;
+             }
+             Object.keys(keys).forEach(k => keys[k] = false);
+
+             state = 'LOADING';
+             document.getElementById('selectionUI').style.display = 'none';
+             document.getElementById('loading').style.display = 'flex';
+             document.getElementById('loading-text').textContent = 'Generating World Matrix...';
+
+             try {
+                 const [tilesRes, objsRes] = await Promise.all([
+                     fetch(`${API_BASE}/api/game/world/tiles`, API_OPTIONS),
+                     fetch(`${API_BASE}/api/game/world/objects`, API_OPTIONS)
+                 ]);
+                 const tiles = await tilesRes.json();
+                 const worldObjs = await objsRes.json();
+                 
+                 await buildWorld(tiles, worldObjs);
+                 
+                 window.allTiles = tiles;
+                 
+                 setupLeaves(worldObjs);
+                 setupExplorer();
+
+                 document.getElementById('loading').style.display = 'none';
+                 const hud = document.getElementById('hudTop');
+                 if(hud) hud.style.display = 'flex';
+            
+                 const mini = document.getElementById('minimap-wrapper');
+                 const coord = document.getElementById('coord-panel');
+                 if(mini) mini.style.display = 'block';
+                 if(coord) coord.style.display = 'block';
+
+                 document.getElementById('controlsHint').style.display = 'block';
+                 document.getElementById('weatherHUD').style.display = 'block';
+                 state = 'EXPLORING';
+                 
+                 // POSITION PERSISTENCE: Recall last position/rotation from database
+                 try {
+                     const snapRes = await fetch(`${API_BASE}/api/game/state`, API_OPTIONS);
+                     const snapshot = await snapRes.json();
+                     if (snapshot && snapshot.pos) {
+                         playerBaseGroup.position.set(snapshot.pos.x, snapshot.pos.y, snapshot.pos.z);
+                         player.rotation.y = snapshot.rot_y || 0;
+                         console.log("[Persistence] Recalled Position:", snapshot.pos);
+                     }
+                 } catch(pe) { console.warn("[Persistence] Failed to recall position.", pe); }
+                 
+                 // EXPOSE FOR DEBUGGING
+                 window.playerExposed = playerBaseGroup;
+                 window.heightMapExposed = terrainHeightMap;
+                 window.keysExposed = keys;
+
+                 window.addEventListener('keydown', e => {
+                     if (e.key.toLowerCase() === 'g') performDig();
+                 });
+                 
+             } catch (e) {
+                 console.error(e);
+                 alert("Failed to materialize world.");
+             }
+         };
+
+        async function buildWorld(tiles, worldObjs) {
+            const TILE_DEPTH = 10;
+            const boxGeo = new THREE.BoxGeometry(TILE_SCALE, TILE_DEPTH, TILE_SCALE);
+            
+            const loader = new THREE.TextureLoader();
+            const texPath = './static/static/textures/';
+            
+            const loadTex = (name) => {
+                const t = loader.load(`${texPath}${name}`);
+                t.wrapS = t.wrapT = THREE.RepeatWrapping;
+                t.repeat.set(1, 1);
+                return t;
+            };
+
+            const grassTex = loadTex('grass_texture_1775012617625.png');
+            const rockTex = loadTex('rock_texture_1775012630808.png');
+            const sandTex = loadTex('sand_texture_1775012647704.png');
+            const snowTex = loadTex('snow_texture_1775012663559.png');
+            window.waterNormal = loadTex('water_normal_map_1775012680802.png');
+            window.waterNormal2 = loadTex('water_normal_map_1775012680802.png');
+            window.waterNormal.repeat.set(0.15, 0.15); 
+            window.waterNormal2.repeat.set(0.12, 0.12);
+
+            // BIOME MATERIALS (Higher specularity for 'wet' look)
+            grassMat = new THREE.MeshPhongMaterial({ map: grassTex, specular: 0x333333, shininess: 25 });
+            forestMat = new THREE.MeshPhongMaterial({ map: grassTex, color: 0x224422, specular: 0x222222, shininess: 20 });
+            desertMat = new THREE.MeshPhongMaterial({ map: sandTex, specular: 0x111111, shininess: 5 });
+            snowMat = new THREE.MeshStandardMaterial({ map: snowTex, roughness: 0.1, metalness: 0.5 });
+            cliffMat = new THREE.MeshPhongMaterial({ map: rockTex, specular: 0x555555, shininess: 40 });
+            swampMat = new THREE.MeshPhongMaterial({ map: grassTex, color: 0x222211, specular: 0x223322, shininess: 15 });
+
+            waterMat = new THREE.MeshStandardMaterial({ 
+                color: 0x2040C0, 
+                transparent: true, 
+                opacity: 0.7,
+                roughness: 0.1,
+                metalness: 0.3,
+                normalMap: waterNormal
+            });
+
+              [grassMat, forestMat, desertMat, snowMat, cliffMat, swampMat, waterMat].forEach(m => {
+                  if (m) {
+                      patchTerrainMaterial(m);
+                      window.weatherMaterials.push(m);
+                  }
+              });
+              
+              // Force immediate sync for new materials
+              syncWeather();
+
+            waterMat.onBeforeCompile = (shader) => {
+                shader.uniforms.uTime = { value: 0 };
+                shader.uniforms.uIsRaining = { value: 0.0 }; 
+                shader.uniforms.normalMap2 = { value: waterNormal2 };
+                
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <common>',
+                    `#include <common>
+                     varying vec2 vTileUv;
+                     uniform float uTime;`
+                );
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <begin_vertex>',
+                    `#include <begin_vertex>
+                     vTileUv = uv; 
+                     vec4 worldPos = instanceMatrix * vec4(position, 1.0);
+                     float bob = sin(uTime * 1.5 + worldPos.x * 0.2 + worldPos.z * 0.2) * 0.18;
+                     transformed.z += bob;`
+                );
+
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <normalmap_pars_fragment>',
+                    `#include <normalmap_pars_fragment>
+                     varying vec2 vTileUv;
+                     uniform sampler2D normalMap2;
+                     uniform float uTime;
+                     uniform float uIsRaining;`
+                );
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <normal_fragment_maps>',
+                    `#include <normal_fragment_maps>
+                     vec3 normal2 = texture2D(normalMap2, vNormalMapUv).xyz * 2.0 - 1.0;
+                     
+                     float dist = length(vTileUv - 0.5);
+                     vec2 id = floor(vNormalMapUv * 40.0) + floor(uTime * 0.1); 
+                     float hitProb = fract(sin(dot(id, vec2(12.9898, 78.233))) * 43758.5453);
+                     float ripple = 0.0;
+                     
+                     if (uIsRaining > 0.5 && hitProb > 0.94) { 
+                         float rainSeed = fract(sin(dot(id, vec2(93.11, 23.13))) * 1234.5);
+                         float rainTime = fract(uTime * 0.2 + rainSeed) * 5.0; 
+                         ripple = sin(clamp(dist * 30.0 - rainTime * 15.0, -3.14, 3.14)) * 0.5 + 0.5;
+                         ripple *= smoothstep(0.48, 0.0, dist); 
+                         ripple *= smoothstep(5.0, 0.0, rainTime); 
+                     }
+                     
+                     normal = normalize(normal * 0.4 + normal2 * 0.4 + vec3(ripple * 0.7, ripple * 0.7, 1.0));`
+                );
+                
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <color_fragment>',
+                    `#include <color_fragment>
+                     diffuseColor.rgb *= (0.92 + 0.08 * sin(uTime * 1.5));`
+                );
+                
+                waterMat.userData.shader = shader; 
+            };
+            
+            // POPULATE ACCURATE TERRAIN HEIGHT MAP FROM ALL TILES
+            tiles.forEach(t => {
+                terrainHeightMap[`${t.x},${t.y}`] = t.e;
+            });
+            
+            const grassTiles = tiles.filter(t => t.b === 'g');
+            const forestTiles = tiles.filter(t => t.b === 'f');
+            const desertTiles = tiles.filter(t => t.b === 'd');
+            const waterTiles = tiles.filter(t => t.b === 'w');
+            const snowTiles = tiles.filter(t => t.b === 's');
+            const cliffTiles = tiles.filter(t => t.b === 'c');
+            const swampTiles = tiles.filter(t => t.b === 'm');
+
+            const grassMesh = new THREE.InstancedMesh(boxGeo, grassMat, grassTiles.length);
+            const forestMesh = new THREE.InstancedMesh(boxGeo, forestMat, forestTiles.length);
+            const desertMesh = new THREE.InstancedMesh(boxGeo, desertMat, desertTiles.length + waterTiles.length);
+            const snowMesh = new THREE.InstancedMesh(boxGeo, snowMat, snowTiles.length);
+            const cliffMesh = new THREE.InstancedMesh(boxGeo, cliffMat, cliffTiles.length);
+            const swampMesh = new THREE.InstancedMesh(boxGeo, swampMat, swampTiles.length);
+            
+            const waterPlaneGeo = new THREE.PlaneGeometry(TILE_SCALE, TILE_SCALE);
+            const waterMesh = new THREE.InstancedMesh(waterPlaneGeo, waterMat, waterTiles.length);
+            
+            waterMesh.receiveShadow = true;
+            const WATER_LEVEL = -1.8;
+            
+            grassMesh.receiveShadow = true;
+            forestMesh.receiveShadow = true;
+            desertMesh.receiveShadow = true;
+            waterMesh.receiveShadow = true;
+            snowMesh.receiveShadow = true;
+            cliffMesh.receiveShadow = true;
+            swampMesh.receiveShadow = true;
+            
+            const dummy = new THREE.Object3D();
+
+            function drawTiles(list, mesh, isWater = false) {
+                list.forEach((t, i) => {
+                    const yPos = isWater ? -1.8 : (t.e || 0);
+                    dummy.position.set(t.x * TILE_SCALE, yPos - (isWater ? 0 : TILE_DEPTH / 2), t.y * TILE_SCALE);
+                    if (isWater) {
+                        dummy.rotation.x = -Math.PI / 2; 
+                    } else {
+                        dummy.rotation.x = 0;
+                    }
+                    dummy.updateMatrix();
+                    mesh.setMatrixAt(i, dummy.matrix);
+                });
+            }
+
+            tiles.forEach(t => {
+                terrainHeightMap[`${t.x},${t.y}`] = t.e || 0;
+            });
+
+            drawTiles(grassTiles, grassMesh);
+            drawTiles(forestTiles, forestMesh);
+            
+            drawTiles(desertTiles, desertMesh);
+            waterTiles.forEach((t, i) => {
+                const floorY = t.e || -1.8;
+                dummy.position.set(t.x * TILE_SCALE, floorY - (TILE_DEPTH / 2), t.y * TILE_SCALE);
+                dummy.scale.set(1, 1, 1);
+                dummy.updateMatrix();
+                desertMesh.setMatrixAt(desertTiles.length + i, dummy.matrix);
+            });
+            desertMesh.instanceMatrix.needsUpdate = true;
+
+            drawTiles(waterTiles, waterMesh, true);
+            drawTiles(snowTiles, snowMesh);
+            drawTiles(cliffTiles, cliffMesh);
+            drawTiles(swampTiles, swampMesh);
+
+            scene.add(grassMesh, forestMesh, desertMesh, waterMesh, snowMesh, cliffMesh, swampMesh);
+            
+            window.meshes = { 
+                g: { mesh: grassMesh, list: grassTiles },
+                f: { mesh: forestMesh, list: forestTiles },
+                d: { mesh: desertMesh, list: desertTiles },
+                w: { mesh: waterMesh, list: waterTiles },
+                s: { mesh: snowMesh, list: snowTiles },
+                c: { mesh: cliffMesh, list: cliffTiles },
+                m: { mesh: swampMesh, list: swampTiles }
+            };
+
+            const envLoader = new GLTFLoader();
+            const envPath = '/models/Environment/glTF/';
+            const uniqueModels = [...new Set(worldObjs.map(o => o.m))];
+            
+            // Wind Global State
+            window.vegUniforms = { 
+                uTime: { value: 0 },
+                uWindIntensity: { value: 0.5 } 
+            };
+            window.targetWind = 0.5;
+
+            function patchVegMaterial(m, modelName) {
+                const nameUpper = modelName.toUpperCase();
+                const isTree = nameUpper.includes('TREE');
+                const isRock = nameUpper.includes('ROCK') || nameUpper.includes('STONE');
+                const isVeg = isTree || isRock || ['GRASS', 'FLOWER', 'REED', 'SEAWEED', 'BUSH', 'PLANT', 'MUSHROOM', 'LILY', 'STUMP', 'LOG', 'TRUNK', 'BRANCH', 'DEAD'].some(v => nameUpper.includes(v));
+                
+                if (!isVeg || m.userData.isVegPatched) return;
+                m.userData.isVegPatched = true;
+
+                m.onBeforeCompile = (shader) => {
+                    shader.uniforms.uTime = window.vegUniforms.uTime;
+                    shader.uniforms.uIntensity = { value: 1.0 }; 
+                    shader.uniforms.uIsRaining = { value: 0.0 };
+                    shader.uniforms.uBarkDetail = { value: barkDetail };
+                    shader.uniforms.uFoliageDetail = { value: foliageDetail };
+                    shader.uniforms.uStoneDetail = { value: stoneDetail };
+                    
+                    const isMushroom = nameUpper.includes('MUSHROOM');
+                    const isFlower = nameUpper.includes('FLOWER');
+                    const isDead = nameUpper.includes('DEAD') || nameUpper.includes('STUMP') || nameUpper.includes('LOG') || nameUpper.includes('TRUNK') || nameUpper.includes('BRANCH');
+                    const isStatic = isDead || isRock || isMushroom;
+                    const speed = (isTree && !isDead) ? 0.8 : 1.8;
+                    const noise = isTree ? 0.2 : 0.4;
+                    const strength = (isStatic) ? 0.0 : (isTree ? 0.15 : 0.25);
+                    const curve = isTree ? 'pow(position.y * 0.15, 2.0)' : 'position.y';
+                    
+                    m.customProgramCacheKey = () => `${modelName}_${isDead}_${isRock}_${isMushroom}_vBloom`;
+                    m.needsUpdate = true;
+                    
+                    console.log(`[Material] Finalizing ${modelName} | Static: ${isStatic}, Sway: ${strength.toFixed(2)}`);
+
+
+                    shader.vertexShader = `
+                        uniform float uTime;
+                        uniform float uIntensity;
+                        varying vec3 vWindWorldPos;
+                        varying vec2 vWindUv;
+                        varying float vSeed;
+                        varying float vLocalY;
+                        varying vec3 vLocalPos;
+                        ${shader.vertexShader}
+                    `.replace(
+                        '#include <begin_vertex>',
+                        `#include <begin_vertex>
+                         vec4 wPos = modelMatrix * vec4(position, 1.0);
+                         vec4 oPos = modelMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+                         vWindWorldPos = wPos.xyz;
+                         vWindUv = uv;
+                         vSeed = fract(sin(oPos.x * 12.9898 + oPos.z * 78.233) * 43758.5453);
+                         vLocalY = position.y; 
+                         vLocalPos = position;
+                         bool kIsStatic = ${isDead || isRock || nameUpper.includes('MUSHROOM')};
+                         float wind = kIsStatic ? 0.0 : (sin(uTime * ${speed.toFixed(2)} + wPos.x * ${noise.toFixed(2)} + wPos.z * ${noise.toFixed(2)}) * ${curve} * ${strength.toFixed(3)} * uIntensity);
+                         transformed.x += wind;
+                         transformed.z += wind * 0.5;
+                        `
+                    );
+
+                    shader.fragmentShader = `
+                        uniform sampler2D uBarkDetail;
+                        uniform sampler2D uFoliageDetail;
+                        uniform sampler2D uStoneDetail;
+                        varying vec3 vWindWorldPos;
+                        varying vec2 vWindUv;
+                        varying float vSeed;
+                        varying float vLocalY;
+                        varying vec3 vLocalPos;
+
+                        vec3 hueShift(vec3 color, float shift) {
+                            vec3 k = vec3(0.57735);
+                            float cosAngle = cos(shift);
+                            return color * cosAngle + cross(k, color) * sin(shift) + k * dot(k, color) * (1.0 - cosAngle);
+                        }
+
+                        ${shader.fragmentShader}
+                    `.replace(
+                        /\t?#include <opaque_fragment>/g,
+                        `#include <opaque_fragment>
+                                           // Determine if we are foliage (even slightly green), rock, or bark
+                         bool isLeaf = (gl_FragColor.g > gl_FragColor.r * 0.85 && gl_FragColor.g > gl_FragColor.b * 0.85);
+                         bool isRock = ${isRock}; 
+                                    if (isRock) {
+                             vec2 rockUv = (vWindWorldPos.xy + vWindWorldPos.zy) * 0.8 + vSeed;
+                             vec4 detail = texture2D(uStoneDetail, rockUv);
+                             gl_FragColor.rgb = mix(gl_FragColor.rgb, detail.rgb * 0.6, 0.45);
+                             gl_FragColor.rgb *= (0.8 + vSeed * 0.4);
+                         } else if (${nameUpper.includes('MUSHROOM')}) {
+                             // Procedural Mushroom Color based on LOCAL HEIGHT
+                             bool isCap = vLocalY > 0.35; 
+                             if (isCap) {
+                                vec3 red = vec3(0.45, 0.05, 0.02); // 2x Darker
+                                vec3 brown = vec3(0.2, 0.1, 0.06); // 2x Darker
+                                gl_FragColor.rgb = (vSeed > 0.5) ? red : brown;
+                                // White spots for red mushrooms
+                                if (vSeed > 0.5) {
+                                    float spots = step(0.9, fract(vWindUv.x * 12.0) * fract(vWindUv.y * 12.0));
+                                    gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.8), spots);
+                                }
+                             } else {
+                                gl_FragColor.rgb = vec3(0.85, 0.8, 0.7); // Stem
+                             }
+                         } else if (${nameUpper.includes('FLOWER')}) {
+                             // FLOWERS EXEMPT - Use original textures
+                         } else if (isLeaf) {
+                             // Use world-space XZ for foliage tiling
+                             vec2 leafUv = vWindWorldPos.xz * 1.5 + vSeed;
+                             vec4 detail = texture2D(uFoliageDetail, leafUv);
+                             gl_FragColor.rgb = mix(gl_FragColor.rgb, detail.rgb * 0.8, 0.35);
+                             gl_FragColor.rgb = hueShift(gl_FragColor.rgb, (vSeed - 0.5) * 0.4);
+                         } else {
+                             // Use world-space Y and XZ for bark verticality
+                             vec2 barkUv = vec2(vWindWorldPos.x + vWindWorldPos.z, vWindWorldPos.y * 0.4) * 8.0 + vSeed;
+                             vec4 detail = texture2D(uBarkDetail, barkUv);
+                             gl_FragColor.rgb = mix(gl_FragColor.rgb, detail.rgb * 0.6, 0.3);
+                             gl_FragColor.rgb *= vec3(0.85, 0.65, 0.45); // Dark Mahogany/Brown Tint
+                             gl_FragColor.rgb *= (0.8 + vSeed * 0.5); 
+                         }
+                        `
+                    );
+
+                    m.userData.shader = shader;
+                    window.weatherMaterials.push(m);
+                };
+            }
+
+            const modelPrototypes = {};
+            for(const mName of uniqueModels) {
+                try {
+                    const firstObj = worldObjs.find(o => o.m === mName);
+                    const identifier = (firstObj ? firstObj.t : mName) + "_" + mName;
+                    
+                    const gltf = await envLoader.loadAsync(`${envPath}${mName}`);
+                    gltf.scene.traverse(c => { 
+                        if(c.isMesh) { 
+                            c.castShadow = true; 
+                            c.receiveShadow = true; 
+                            if(c.material) {
+                                // CLONE MATERIALS TO AVOID CROSS-POLLINATION BETWEEN DEAD/ALIVE TREES
+                                if(Array.isArray(c.material)) {
+                                    c.material = c.material.map(mat => {
+                                        const m2 = mat.clone();
+                                        m2.userData.isVegPatched = false;
+                                        patchVegMaterial(m2, identifier);
+                                        return m2;
+                                    });
+                                } else {
+                                    const m2 = c.material.clone();
+                                    m2.userData.isVegPatched = false;
+                                    patchVegMaterial(m2, identifier);
+                                    c.material = m2;
+                                }
+                            }
+                        }
+                    });
+                    modelPrototypes[mName] = gltf.scene;
+                } catch (e) {
+                    console.error(`Link Failure: Failed to materialize prototype ${mName}. Model skipped.`, e);
+                }
+            }
+
+            worldObjs.forEach(o => {
+                const clone = modelPrototypes[o.m].clone();
+                const worldX = o.x * TILE_SCALE;
+                const worldZ = o.y * TILE_SCALE;
+                const tx = Math.round(o.x);
+                const ty = Math.round(o.y);
+                const elev = terrainHeightMap[`${tx},${ty}`] || 0;
+
+                const typeUpper = o.t.toUpperCase();
+                let yPos = elev;
+                let finalScale = o.s || 1.0;
+                let rotY = o.r * (Math.PI / 180);
+
+                if (typeUpper === 'LILYPAD') {
+                    yPos = -1.8;
+                    finalScale *= 0.8;
+                } else if (typeUpper === 'REED') {
+                    yPos = elev - 0.2;
+                    finalScale *= 1.2;
+                    rotY = Math.random() * Math.PI * 2;
+                } else if (typeUpper === 'SEAWEED') {
+                    yPos = elev - 0.1;
+                    finalScale *= 0.9;
+                    rotY = Math.random() * Math.PI * 2;
+                }
+
+                clone.position.set(worldX, yPos, worldZ);
+                clone.scale.set(finalScale, finalScale, finalScale);
+                clone.rotation.y = rotY;
+
+                if (typeUpper === 'TREE') {
+                    clone.scale.set(o.s * 0.8, o.s * 1.2, o.s * 0.8); 
+                }
+                
+                clone.userData = { type: o.t };
+                scene.add(clone);
+
+                if (typeUpper.includes('TREE') || typeUpper.includes('ROCK')) {
+                    const isSmallRock = (typeUpper.includes('ROCK') && o.s < 1.1);
+                    
+                    if (!isSmallRock) {
+                        collisions.push({
+                            x: worldX,
+                            z: worldZ,
+                            y: yPos,
+                            h: typeUpper.includes('TREE') ? 5.0 * o.s : 0.8 * o.s,
+                            r: typeUpper.includes('TREE') ? 0.5 * o.s : 1.2 * o.s 
+                        });
+                    }
+                }
+            });
+        }
+
+        function setupExplorer() {
+            const gltf = models[selectedAvatarId];
+            player = gltf.scene;
+            player.visible = true;
+            player.position.set(0, 0, 0); 
+            
+            playerBaseGroup.add(player);
+            scene.add(playerBaseGroup);
+
+            // Calculate starting height correctly
+            const startTX = 50;
+            const startTY = 50;
+            const startElev = terrainHeightMap[`${startTX},${startTY}`] || 0;
+            const startY = startElev;
+            
+            playerBaseGroup.position.set(startTX * TILE_SCALE, startY, startTY * TILE_SCALE);
+            
+            // RESET PHYSICS FOR SPAWN
+            if (!window.playerPhysics) window.playerPhysics = { velocityY: 0, isJumping: false };
+            window.playerPhysics.velocityY = 0;
+            window.playerPhysics.isJumping = false;
+            Object.keys(keys).forEach(k => keys[k] = false);
+            window.debugFrames = 0; // Start diagnostic timer
+
+            mixer = new THREE.AnimationMixer(player);
+            playAnimation('Idle');
+        }
+
+        async function syncWeather() {
+            try {
+                const res = await fetch(`${API_BASE}/api/game/weather?nc=${Math.random()}`, API_OPTIONS);
+                if (!res.ok) throw new Error("Server communication failure");
+                const data = await res.json();
+                
+                isRaining = !!data.is_raining;
+                rainIntensity = data.intensity || 0;
+                
+                // Update HUD
+                const weatherText = document.getElementById('weatherText');
+                if (weatherText) {
+                    weatherText.textContent = isRaining ? `Storm (Intensity: ${(rainIntensity * 100).toFixed(0)}%)` : "Clear Skies";
+                    weatherText.className = isRaining ? "text-amber-400" : "text-emerald-400";
+                }
+                const syncInd = document.getElementById('syncIndicator');
+                if (syncInd) {
+                    syncInd.textContent = "Online";
+                    syncInd.classList.add('animate-pulse');
+                    setTimeout(() => syncInd.classList.remove('animate-pulse'), 500);
+                }
+
+                // Target Wind Intensity
+                window.weatherWindTarget = isRaining ? (0.8 + rainIntensity * 1.5) : 0.45;
+                if(!window.weatherWindCurrent) window.weatherWindCurrent = 0.45;
+
+                // --- TARGET COLORS ---
+                window.targetBgColor = isRaining ? new THREE.Color(0x0a0a12) : new THREE.Color(0x0a1a2e);
+                if(!window.currentBgColor) window.currentBgColor = new THREE.Color(0x0a1a2e);
+                
+                window.weatherMaterials.forEach(m => {
+                    if (m && m.userData.shader && m.userData.shader.uniforms.uIsRaining) {
+                        m.userData.shader.uniforms.uIsRaining.value = isRaining ? 1.0 : 0.0;
+                    }
+                });
+                
+                if (isRaining) {
+                    if (rainSystemA) rainSystemA.visible = true;
+                    if (rainSystemB) rainSystemB.visible = true;
+                } else {
+                    if (rainSystemA) rainSystemA.visible = false;
+                    if (rainSystemB) rainSystemB.visible = false;
+                }
+            } catch (e) {
+                console.error("Meteorological Sync Error:", e);
+                const weatherText = document.getElementById('weatherText');
+                if (weatherText) weatherText.textContent = "ERROR: " + e.message;
+                const syncInd = document.getElementById('syncIndicator');
+                if (syncInd) syncInd.textContent = "Offline";
+            }
+        }
+
+        function patchTerrainMaterial(mat) {
+            mat.onBeforeCompile = (shader) => {
+                shader.uniforms.uTime = { value: 0 };
+                shader.uniforms.uIsRaining = { value: 0.0 };
+                
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <common>',
+                    `#include <common>
+                     varying vec2 vTileUv;
+                     uniform float uTime;`
+                );
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <begin_vertex>',
+                    `#include <begin_vertex>
+                     vTileUv = uv;`
+                );
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <common>',
+                    `#include <common>
+                     varying vec2 vTileUv;
+                     uniform float uTime;
+                     uniform float uIsRaining;`
+                );
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <lights_fragment_begin>',
+                    `#include <lights_fragment_begin>
+                     // Only splash on flat, upward-facing surfaces (vNormal.y > 0.9)
+                     if (uIsRaining > 0.5 && vNormal.y > 0.9) {
+                        vec2 gridUv = fract(vTileUv * 8.0);
+                        vec2 gridId = floor(vTileUv * 8.0);
+                        vec2 seedId = gridId + floor(uTime * 0.1); 
+                        float hitProb = fract(sin(dot(seedId, vec2(12.9898, 78.233))) * 43758.5453);
+                        if (hitProb > 0.94) {
+                            float rainSeed = fract(sin(dot(gridId, vec2(93.11, 23.13))) * 1234.5);
+                            float rainTime = fract(uTime * 0.4 + rainSeed) * 2.5; 
+                            float dist = length(gridUv - 0.5);
+                            float ripple = sin(clamp(dist * 50.0 - rainTime * 25.0, -3.14, 3.14)) * 0.5 + 0.5;
+                            ripple *= smoothstep(0.48, 0.0, dist);
+                            ripple *= smoothstep(2.5, 0.0, rainTime);
+                            // Visual Spark (Hard White Mix for visibility)
+                            float burst = smoothstep(0.18, 0.0, dist) * smoothstep(1.0, 0.0, rainTime) * 1.5;
+                            diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.9, 0.9, 1.0), clamp(burst, 0.0, 1.0));
+                            // Normal Distortion
+                            normal = normalize(normal + vec3(ripple * 0.6, ripple * 0.6, 0.0));
+                        }
+                        diffuseColor.rgb *= 0.85;
+                     }
+`
+                );
+                mat.userData.shader = shader;
+            };
+        }
+
+        function setupRain() {
+            const rainGeo = new THREE.BufferGeometry();
+            const rainCount = 4000;
+            const positions = new Float32Array(rainCount * 3);
+            for(let i=0; i<rainCount*3; i+=3) {
+                positions[i] = (Math.random() - 0.5) * 60;   
+                positions[i+1] = Math.random() * 40;         
+                positions[i+2] = (Math.random() - 0.5) * 60; 
+            }
+            rainGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const rainMat = new THREE.PointsMaterial({
+                color: 0xaaaaaa, size: 0.12, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending
+            });
+            
+            rainSystemA = new THREE.Points(rainGeo, rainMat);
+            rainSystemB = rainSystemA.clone();
+            rainSystemB.position.y = 40; 
+            scene.add(rainSystemA);
+            scene.add(rainSystemB);
+        }
+
+        function playAnimation(name) {
+            try {
+                if(currentAnimation === name) return;
+                const animations = models[selectedAvatarId].animations;
+                const clip = THREE.AnimationClip.findByName(animations, name);
+                
+                if(clip) {
+                    const newAction = mixer.clipAction(clip);
+                    if(currentAnimation) {
+                        const oldClip = THREE.AnimationClip.findByName(animations, currentAnimation);
+                        if (oldClip) {
+                            const oldAction = mixer.clipAction(oldClip);
+                            oldAction.fadeOut(0.2);
+                        }
+                    }
+                    newAction.reset().fadeIn(0.2).play();
+                    currentAnimation = name;
+                } else {
+                    console.warn(`Animation not found: ${name}`);
+                    // Fallback to Idle if Walk/Run are missing
+                    if (name !== 'Idle') playAnimation('Idle');
+                }
+            } catch (e) {
+                console.error("Animation system failed:", e);
+            }
+        }
+
+        function playAction(name, duration = 1000) {
+            if (isActionPlaying) return;
+            playAnimation(name);
+            isActionPlaying = true;
+            setTimeout(() => {
+                isActionPlaying = false;
+            }, duration);
+        }
+
+        function onMouseMove(e) {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            if (isOrbiting && state === 'EXPLORING') {
+                orbit_angle_horizontal -= e.movementX * 0.01;
+                orbit_angle_vertical = Math.max(0.1, Math.min(1.4, orbit_angle_vertical + e.movementY * 0.01));
+                document.body.style.cursor = 'none'; // Hide cursor while orbiting
+            } else {
+                document.body.style.cursor = 'default';
+            }
+        }
+
+        function onMouseClick() {
+            if (targetObject) {
+                // Distance Check (e.g. 10 meters / 5 tiles)
+                const dist = playerBaseGroup.position.distanceTo(targetObject.position);
+                if (dist < 10) {
+                    showPanel(targetObject.userData.type.toUpperCase());
+                } else {
+                    console.log("Too far to interact:", dist);
+                    // Optionally show a "Too far" indicator
+                }
+            } else {
+                closePanel();
+            }
+        }
+
+        window.showPanel = (name) => {
+            const panel = document.getElementById('interaction-panel');
+            document.getElementById('panelObjectName').textContent = name;
+            panel.style.display = 'block';
+        };
+
+        window.closePanel = () => {
+            document.getElementById('interaction-panel').style.display = 'none';
+        }
+
+        // --- MAPPING LOGIC ---
+        let lastSyncTime = 0;
+        let lastRemoteSync = 0;
+        const remotePlayers = new Map();
+
+        class RemotePlayer {
+            constructor(username, avatarId) {
+                this.username = username;
+                this.avatarId = avatarId;
+                // [Tactical] Add safety guard for missing avatar IDs or unloaded models
+                const model = models[avatarId] || models['Character_Female_1'];
+                if (!model || !model.scene) {
+                    console.warn(`[Multiplayer] Model for ${avatarId} not loaded yet or invalid. Using empty group placeholder.`, username);
+                    this.group = new THREE.Group();
+                } else {
+                    // [Tactical] Use SkeletonUtils for animated models to ensure bone hierarchy clones correctly
+                    this.group = SkeletonUtils.clone(model.scene);
+                    this.group.traverse(o => { if(o.isMesh) o.visible = true; });
+                }
+                this.group.visible = true;
+                
+                // Add Name Tag
+                const canvas = document.createElement('canvas');
+                canvas.width = 256; canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                ctx.font = 'bold 32px "Pirata One"';
+                ctx.fillStyle = '#D4AF37'; // Gold
+                ctx.textAlign = 'center';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 4;
+                ctx.strokeText(username, 128, 48);
+                ctx.fillText(username, 128, 48);
+                
+                const tex = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: tex });
+                this.nameTag = new THREE.Sprite(spriteMat);
+                this.nameTag.position.y = 2.2;
+                this.nameTag.scale.set(4, 1, 1);
+                this.group.add(this.nameTag);
+
+                // Animation Mixer
+                this.mixer = new THREE.AnimationMixer(this.group);
+                this.actions = {};
+                if (model && model.animations) {
+                    model.animations.forEach(clip => {
+                        this.actions[clip.name] = this.mixer.clipAction(clip);
+                    });
+                }
+                
+                this.currentStatus = 'Idle';
+                if(this.actions['Idle']) this.actions['Idle'].play();
+
+                this.targetPos = new THREE.Vector3();
+                this.targetRot = 0;
+                
+                scene.add(this.group);
+            }
+
+            update(data, delta) {
+                this.targetPos.set(data.x, data.y, data.z);
+                this.targetRot = data.rot_y;
+                
+                if(this.currentStatus !== data.status && this.actions[data.status]) {
+                    const oldAction = this.actions[this.currentStatus];
+                    const newAction = this.actions[data.status];
+                    if(oldAction) oldAction.fadeOut(0.3);
+                    newAction.reset().fadeIn(0.3).play();
+                    this.currentStatus = data.status;
+                }
+                
+                this.mixer.update(delta);
+            }
+
+            lerp(deltaFactor) {
+                this.group.position.lerp(this.targetPos, 0.1 * deltaFactor);
+                this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, this.targetRot, 0.1 * deltaFactor);
+            }
+
+            dispose() {
+                scene.remove(this.group);
+                this.mixer.stopAllAction();
+            }
+        }
+        let isBigMapOpen = false;
+
+        function getTileColor(b, e) {
+            let h, s, l;
+            switch(b) {
+                case 'g': h = 122; s = 33; l = 41; break; // Grass
+                case 'f': h = 123; s = 40; l = 18; break; // Forest
+                case 'd': h = 46; s = 36; l = 63; break;  // Desert
+                case 'w': h = 228; s = 71; l = 44; break; // Water
+                case 's': h = 0; s = 0; l = 95; break;    // Snow
+                case 'c': h = 0; s = 0; l = 25; break;    // Cliff
+                case 'm': h = 127; s = 16; l = 21; break; // Swamp
+                default: h = 122; s = 33; l = 41;
+            }
+            // Subtle shift: 2.5% per meter. Peaks 8m (+20%), Valleys -5m (-12%)
+            const shift = Math.max(-20, Math.min(20, (e || 0) * 2.5));
+            l = Math.max(5, Math.min(95, l + shift));
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
+
+        function updateMaps(delta, deltaFactor) {
+            if (state !== 'EXPLORING') return;
+
+            const tx = Math.round(playerBaseGroup.position.x / TILE_SCALE);
+            const ty = Math.round(playerBaseGroup.position.z / TILE_SCALE);
+            const elev = playerBaseGroup.position.y.toFixed(1);
+
+            // 1. Update HUD
+            document.getElementById('pos-x').textContent = tx;
+            document.getElementById('pos-z').textContent = ty;
+            document.getElementById('pos-elev').textContent = elev;
+
+            // 2. Render Minimap (15 block radius, rotating)
+            const miniCanvas = document.getElementById('minimap-canvas');
+            const mctx = miniCanvas.getContext('2d');
+            const R = 15; // Radius
+            const T = 12; // Draw size
+            
+            mctx.setTransform(1, 0, 0, 1, 0, 0);
+            mctx.clearRect(0, 0, 400, 400);
+            mctx.fillStyle = '#111';
+            mctx.fillRect(0,0,400,400);
+
+            mctx.translate(200, 200);
+            mctx.rotate(orbit_angle_horizontal); // Inverted direction 
+
+            // Update DOM Compass Rotation to match
+            const compass = document.getElementById('minimap-compass');
+            if(compass) compass.style.transform = `rotate(${orbit_angle_horizontal}rad)`;
+
+            // Draw nearby tiles
+            for(let x = tx - R; x <= tx + R; x++) {
+                for(let y = ty - R; y <= ty + R; y++) {
+                    const tile = window.allTiles.find(t => t.x === x && t.y === y);
+                    if(tile) {
+                        mctx.fillStyle = getTileColor(tile.b, tile.e);
+                        // Using slight overlap (T + 0.5) to remove "block borders" artifacts
+                        mctx.fillRect((x - tx) * T - 0.5, (y - ty) * T - 0.5, T + 0.5, T + 0.5);
+                    }
+                }
+            }
+
+            // --- DRAW REMOTE PLAYERS ON MINIMAP ---
+            for(let rp of remotePlayers.values()) {
+                const rx = Math.round(rp.group.position.x / TILE_SCALE);
+                const rz = Math.round(rp.group.position.z / TILE_SCALE);
+                if(Math.abs(rx - tx) <= R && Math.abs(rz - ty) <= R) {
+                    mctx.fillStyle = '#fff';
+                    mctx.shadowBlur = 4;
+                    mctx.shadowColor = '#fff';
+                    mctx.beginPath();
+                    mctx.arc((rx - tx) * T, (rz - ty) * T, 3, 0, Math.PI * 2);
+                    mctx.fill();
+                    mctx.shadowBlur = 0;
+                }
+            }
+
+            // 3. Render Big Map (if open)
+            if(isBigMapOpen) {
+                const bcanvas = document.getElementById('big-map-canvas');
+                const bctx = bcanvas.getContext('2d');
+                const S = 7.5; // Scale for 750px
+                
+                bctx.fillStyle = '#111';
+                bctx.fillRect(0,0,750,750);
+
+                window.allTiles.forEach(t => {
+                    bctx.fillStyle = getTileColor(t.b, t.e);
+                    // Using slight overlap to remove gaps
+                    bctx.fillRect(t.x * S - 0.5, t.y * S - 0.5, S + 0.5, S + 0.5);
+                });
+
+                // DRAW REMOTE PLAYERS ON BIG MAP
+                for(let rp of remotePlayers.values()) {
+                    const rx = Math.round(rp.group.position.x / TILE_SCALE);
+                    const rz = Math.round(rp.group.position.z / TILE_SCALE);
+                    bctx.fillStyle = '#fff';
+                    bctx.shadowBlur = 5;
+                    bctx.shadowColor = '#fff';
+                    bctx.beginPath();
+                    bctx.arc(rx * S, rz * S, 4, 0, Math.PI * 2);
+                    bctx.fill();
+                    bctx.shadowBlur = 0;
+                }
+
+                // Player icon on big map
+                bctx.fillStyle = '#6366f1';
+                bctx.beginPath();
+                bctx.arc(tx * S, ty * S, 4, 0, Math.PI*2);
+                bctx.fill();
+                bctx.strokeStyle = 'white';
+                bctx.lineWidth = 1;
+                bctx.stroke();
+            }
+
+            // 4. Heartbeat (Every 100ms for real-time fidelity)
+            const now = Date.now();
+            if(now - lastSyncTime > 100) { 
+                lastSyncTime = now;
+                savePlayerState();
+            }
+            
+            if (now - lastRemoteSync > 150) {
+                updateRemotePlayers();
+                updateChatLog();
+                lastRemoteSync = now;
+            }
+
+            // --- PROXIMITY CULLING & ANIMATION ---
+            const distLimit = 50 * TILE_SCALE;
+            for(let rp of remotePlayers.values()) {
+                const dist = playerBaseGroup.position.distanceTo(rp.group.position);
+                // Name Tag only visible within 50 blocks
+                rp.nameTag.visible = dist < distLimit;
+                
+                rp.lerp(deltaFactor);
+                rp.mixer.update(delta);
+            }
+        }
+
+        async function updateChatLog() {
+            try {
+                const now = Date.now();
+                if (now - lastChatSync < 1500) return;
+                lastChatSync = now;
+
+                const fetchUrl = API_BASE ? `${API_BASE}/api/game/chat/messages` : "/api/game/chat/messages";
+                const res = await fetch(fetchUrl, API_OPTIONS);
+                const msgs = await res.json();
+                
+                if (msgs.length !== chatMessages.length) {
+                    const log = document.getElementById('chat-log');
+                    log.innerHTML = '';
+                    msgs.forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = 'chat-msg';
+                        div.innerHTML = `<span class="chat-user">${m.username}:</span> ${m.message}`;
+                        log.appendChild(div);
+                    });
+                    log.scrollTop = log.scrollHeight;
+                    chatMessages = msgs;
+                }
+            } catch(e) { console.warn("[Chat] Sync failed", e); }
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            try {
+                const fetchUrl = API_BASE ? `${API_BASE}/api/game/chat/send` : "/api/game/chat/send";
+                await fetch(fetchUrl, {
+                    ...API_OPTIONS,
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+                input.value = '';
+                input.style.display = 'none';
+                updateChatLog();
+            } catch(e) { console.error("[Chat] Send failed", e); }
+        }
+
+        async function updateRemotePlayers() {
+            try {
+                // [Tactical] Use relative pathing if on same origin for maximum reliability
+                const fetchUrl = API_BASE ? `${API_BASE}/api/game/player/all` : "/api/game/player/all";
+                const res = await fetch(fetchUrl, API_OPTIONS);
+                const players = await res.json();
+                const activeNames = new Set();
+                
+                players.forEach(p => {
+                    if (p.username === username || !p.username) return; // Skip self/invalid entries
+                    activeNames.add(p.username);
+                    
+                    if (!remotePlayers.has(p.username)) {
+                        remotePlayers.set(p.username, new RemotePlayer(p.username, p.avatar_id));
+                    }
+                    
+                    const rp = remotePlayers.get(p.username);
+                    rp.update(p, 1.5); // Delta doesn't matter much for initial catch
+                });
+                
+                // Cleanup disconnected players
+                for (let [name, rp] of remotePlayers) {
+                    if (!activeNames.has(name)) {
+                        rp.dispose();
+                        remotePlayers.delete(name);
+                    }
+                }
+            } catch(e) { 
+                console.warn("[Multiplayer] Sync failed", e); 
+            }
+        }
+
+        function toggleBigMap() {
+            isBigMapOpen = !isBigMapOpen;
+            const overlay = document.getElementById('big-map-overlay');
+            overlay.style.display = isBigMapOpen ? 'flex' : 'none';
+        }
+
+        let lastSentState = { x: 0, y: 0, z: 0, rot_y: 0, status: '' };
+        async function savePlayerState() {
+            const pos = playerBaseGroup.position;
+            const rot = player.rotation.y;
+            // Derive Status
+            let status = currentAnimation;
+            if(isActionPlaying) {
+                if(currentAnimation.startsWith('Jump')) status = 'Jump';
+                if(currentAnimation.includes('Dig')) status = 'Dig'; 
+                if(currentAnimation.includes('Punch') || currentAnimation.includes('Attack')) status = 'Punch';
+            }
+
+            // [Tactical] Optimize: Only send if something has changed significantly
+            // This prevents the server from being flooded by static players
+            const changedPos = Math.abs(pos.x - lastSentState.x) > 0.05 || Math.abs(pos.z - lastSentState.z) > 0.05 || Math.abs(pos.y - lastSentState.y) > 0.05;
+            const changedRot = Math.abs(rot - lastSentState.rot_y) > 0.1;
+            const changedStatus = status !== lastSentState.status;
+
+            if (!changedPos && !changedRot && !changedStatus && (Date.now() - lastSyncTime < 5000)) {
+                return; // Standing still, avoid spam but keep heartbeat every 5s
+            }
+
+            lastSentState = { x: pos.x, y: pos.y, z: pos.z, rot_y: rot, status: status };
+
+            try {
+                await fetch(`${API_BASE}/api/game/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    ...API_OPTIONS,
+                    body: JSON.stringify({
+                        pos: { x: pos.x, y: pos.y, z: pos.z },
+                        rot_y: rot,
+                        status: status,
+                        avatar_id: selectedAvatarId
+                    })
+                });
+            } catch (e) {
+                console.warn("[Map] Heartbeat failed:", e);
+            }
+        }
+
+
+        function updateExplorer(delta) {
+            try {
+                if(state !== 'EXPLORING') return;
+                
+                const phys = window.playerPhysics;
+                const tx = Math.round(playerBaseGroup.position.x / TILE_SCALE);
+                const ty = Math.round(playerBaseGroup.position.z / TILE_SCALE);
+                const groundHeight = terrainHeightMap[`${tx},${ty}`] !== undefined ? terrainHeightMap[`${tx},${ty}`] : 0;
+                const terrainY = groundHeight;
+
+                // DIAGNOSTIC TRACE (For debugging floating issues)
+                if (window.debugFrames < 100 || phys.isJumping || isActionPlaying) {
+                    window.debugFrames++;
+                    if (window.debugFrames % 5 === 0) { // Every 5 frames to avoid console lag
+                         console.log(`[Trace] Pos(${playerBaseGroup.position.x.toFixed(1)}, ${playerBaseGroup.position.y.toFixed(2)}, ${playerBaseGroup.position.z.toFixed(1)}) | Anim: ${currentAnimation} | Action: ${isActionPlaying} | Jump: ${phys.isJumping}`);
+                    }
+                    if (window.debugFrames > 1000) window.debugFrames = 101; // Cycle
+                }
+
+            // --- Jump Physics State ---
+            if (!phys) {
+                window.playerPhysics = { velocityY: 0, isJumping: false };
+            }
+            const deltaFactor = delta * 60; 
+            const gravity = 0.015 * deltaFactor;
+            const jumpStrength = 0.38 * deltaFactor;
+
+            // Handle Jump Input (Space) - ONE SHOT
+            if (keys.Space === true && !phys.isJumping) {
+                phys.velocityY = jumpStrength;
+                phys.isJumping = true;
+                keys.Space = false; // Prevent repeat jump while holding
+                playAction('Jump', 500); // FIXED NAME: Jump (formerly Jump_Start)
+                console.log(`[Jump] At: ${playerBaseGroup.position.y.toFixed(2)}, Floor: ${terrainY.toFixed(2)}`);
+            }
+
+            if (!phys.isJumping) {
+                // Ensure we don't 'sink' into terrain
+                if (Math.abs(playerBaseGroup.position.y - terrainY) > 0.01) {
+                    playerBaseGroup.position.y = THREE.MathUtils.lerp(playerBaseGroup.position.y, terrainY, 0.2 * deltaFactor);
+                }
+            }
+
+            // 2. Movement Logic
+            let moveX = 0;
+            let moveZ = 0;
+
+            if(keys.KeyW) moveZ -= 1;
+            if(keys.KeyS) moveZ += 1;
+            if(keys.KeyA) moveX -= 1;
+            if(keys.KeyD) moveX += 1;
+
+            const speed = keys.ShiftLeft ? 0.35 : 0.15;
+            const isMoving = (moveX !== 0 || moveZ !== 0);
+
+            if(isMoving) {
+                const camRotY = orbit_angle_horizontal;
+                const forward = new THREE.Vector3(-Math.sin(camRotY), 0, -Math.cos(camRotY));
+                const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0));
+
+                const direction = new THREE.Vector3()
+                    .addScaledVector(forward, -moveZ)
+                    .addScaledVector(right, moveX)
+                    .normalize();
+
+                const moveDist = speed * deltaFactor; 
+                const nextX = playerBaseGroup.position.x + direction.x * moveDist;
+                const nextZ = playerBaseGroup.position.z + direction.z * moveDist;
+                
+                let canMoveX = true;
+                let canMoveZ = true;
+
+                for (const col of collisions) {
+                    if (playerBaseGroup.position.y > col.y + col.h) continue;
+                    
+                    const dx = nextX - col.x;
+                    const dz = playerBaseGroup.position.z - col.z;
+                    const distSQ = dx*dx + dz*dz;
+                    const minDist = playerRadius + col.r;
+                    if (distSQ < minDist * minDist) {
+                        canMoveX = false;
+                    }
+
+                    const dx2 = playerBaseGroup.position.x - col.x;
+                    const dz2 = nextZ - col.z;
+                    const distSQ2 = dx2*dx2 + dz2*dz2;
+                    if (distSQ2 < minDist * minDist) {
+                        canMoveZ = false;
+                    }
+                }
+
+                if (canMoveX) playerBaseGroup.position.x = nextX;
+                if (canMoveZ) playerBaseGroup.position.z = nextZ;
+                
+                let targetRotation;
+                if (isOrbiting) {
+                    targetRotation = camRotY + Math.PI; 
+                } else {
+                    targetRotation = Math.atan2(direction.x, direction.z);
+                }
+                
+                player.rotation.y = THREE.MathUtils.lerp(player.rotation.y, targetRotation, delta * 15);
+            }
+
+            // Handle Jump Logic
+            if (phys.isJumping) {
+                // If we are airborne and the launch animation (Jump) is finished, switch to Jump_Idle
+                if (!isActionPlaying && currentAnimation !== 'Jump_Idle') {
+                    playAnimation('Jump_Idle');
+                }
+            } else if (isMoving) {
+                // Moving on ground
+                if (!isActionPlaying) {
+                    playAnimation(keys.ShiftLeft ? 'Run' : 'Walk');
+                }
+            } else {
+                // Idle on ground
+                if (!isActionPlaying) {
+                    playAnimation('Idle');
+                }
+            }
+
+            // --- Apply Gravity & Jump ---
+            if (phys.isJumping) {
+                // Apply Gravity
+                phys.velocityY -= gravity;
+                playerBaseGroup.position.y += phys.velocityY;
+
+                // Ground check (ONLY trigger when falling and actually reaching the floor)
+                // We also add a threshold to prevent landing on data glitches mid-climb
+                if (phys.velocityY < 0 && playerBaseGroup.position.y <= terrainY) {
+                    playerBaseGroup.position.y = terrainY;
+                    phys.velocityY = 0;
+                    phys.isJumping = false;
+                    playAction('Jump_Land', 400); // TRIGGER LANDING (400ms lock)
+                    console.log(`[Impact] Landed on Floor: ${terrainY.toFixed(2)}`);
+                }
+            }
+
+            // 2. Update Camera Orbit
+            const camX = playerBaseGroup.position.x + orbit_distance * Math.sin(orbit_angle_horizontal) * Math.cos(orbit_angle_vertical);
+            const camY = playerBaseGroup.position.y + orbit_distance * Math.sin(orbit_angle_vertical) + 1.5;
+            const camZ = playerBaseGroup.position.z + orbit_distance * Math.cos(orbit_angle_horizontal) * Math.cos(orbit_angle_vertical);
+
+            camera.position.set(camX, camY, camZ);
+            camera.lookAt(playerBaseGroup.position.x, playerBaseGroup.position.y + 1.5, playerBaseGroup.position.z);
+
+            // 3. Update Sun/Shadow (Follow Player)
+            if (scene.sun) {
+                scene.sun.position.set(playerBaseGroup.position.x + 20, 40, playerBaseGroup.position.z + 20);
+                scene.sun.target = playerBaseGroup;
+            }
+
+            // 4. Raycasting for Tooltip
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            const filtered = intersects.filter(i => i.object.parent && i.object.parent.userData && i.object.parent.userData.type);
+            
+            const tooltip = document.getElementById('tooltip');
+            if(filtered.length > 0) {
+                targetObject = filtered[0].object.parent;
+                tooltip.style.display = 'block';
+                tooltip.style.left = `${(mouse.x + 1) / 2 * 100}%`;
+                tooltip.style.top = `${-(mouse.y - 1) / 2 * 100}%`;
+                tooltip.textContent = targetObject.userData.type.toUpperCase();
+            } else {
+                targetObject = null;
+                tooltip.style.display = 'none';
+            }
+
+            // --- Update UI Maps ---
+            updateMaps(delta, deltaFactor);
+
+        } catch (e) {
+            console.error("Explorer Update Loop Failed:", e);
+        }
+    }
+
+        async function performDig() {
+            if (state !== 'EXPLORING') return;
+
+            playAction('Punch', 1200); // USING 'Punch' AS SUBSTITUTE FOR 'Dig'
+            
+            // For simplicity, we dig the tile the player is CURRENTLY STANDING ON
+            // but we could also use raycasting for 'forward' digging
+            const tx = Math.round(playerBaseGroup.position.x / TILE_SCALE);
+            const ty = Math.round(playerBaseGroup.position.z / TILE_SCALE);
+            
+            try {
+                const res = await fetch(`${API_BASE}/api/game/world/dig`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    ...API_OPTIONS,
+                    body: JSON.stringify({ x: tx, y: ty })
+                });
+                const newTile = await res.json();
+                
+                // Update local heightmap for physics/climbing
+                terrainHeightMap[`${tx},${ty}`] = newTile.e;
+                
+                // Find and update instance in Three.js
+                const oldTile = window.allTiles.find(t => t.x === tx && t.y === ty);
+                
+                // If biome changed (e.g. Grass to Water), we reload or rebuild
+                // For now, reload is easiest for biome-mesh migrations
+                if (oldTile.b !== newTile.b) {
+                    window.location.reload(); 
+                    return;
+                }
+                
+                oldTile.e = newTile.e;
+                
+                // Real-time mesh update
+                const meshData = window.meshes[newTile.b];
+                const TILE_DEPTH = 10;
+                const dummy = new THREE.Object3D();
+                
+                meshData.list.forEach((t, i) => {
+                   if (t.x === tx && t.y === ty) {
+                       dummy.position.set(t.x * TILE_SCALE, (t.e || 0) - (TILE_DEPTH / 2), t.y * TILE_SCALE);
+                       dummy.updateMatrix();
+                       meshData.mesh.setMatrixAt(i, dummy.matrix);
+                   }
+                });
+                meshData.mesh.instanceMatrix.needsUpdate = true;
+                
+            } catch (e) {
+                console.error("Dig cycle failed:", e);
+            }
+        }
+
+        function setupLeaves(worldObjs) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#2b5826';
+            ctx.beginPath();
+            ctx.moveTo(32, 5);
+            ctx.quadraticCurveTo(55, 32, 32, 59);
+            ctx.quadraticCurveTo(9, 32, 32, 5);
+            ctx.fill();
+            const leafTex = new THREE.CanvasTexture(canvas);
+
+            const aliveTrees = worldObjs.filter(o => {
+                const name = o.m.toUpperCase();
+                const isTree = name.includes('TREE');
+                const isDead = name.includes('DEAD');
+                if (!isTree || isDead || !window.allTiles) return false;
+                
+                const tx = Math.round(o.x);
+                const ty = Math.round(o.y);
+                const tile = window.allTiles.find(t => t.x === tx && t.y === ty);
+                const biome = tile ? tile.b : 'g';
+                return biome !== 's' && biome !== 'c'; // Skip Desert and Cliff
+            });
+
+            if (aliveTrees.length === 0) return;
+
+            treeTops = aliveTrees.map(o => {
+                const tx = Math.round(o.x);
+                const ty = Math.round(o.y);
+                const elev = terrainHeightMap[`${tx},${ty}`] || 0;
+                return { x: o.x * TILE_SCALE, y: elev + (3.2 * (o.s || 1.0)), z: o.y * TILE_SCALE };
+            });
+
+            const leafGeo = new THREE.PlaneGeometry(0.12, 0.12);
+            const leafMat = new THREE.MeshLambertMaterial({ map: leafTex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.5 });
+            leaves = new THREE.InstancedMesh(leafGeo, leafMat, 600);
+            scene.add(leaves);
+
+            const dummy = new THREE.Object3D();
+            for (let i = 0; i < 600; i++) {
+                const tree = treeTops[Math.floor(Math.random() * treeTops.length)];
+                const data = {
+                    pos: new THREE.Vector3(tree.x + (Math.random()-0.5)*2.5, tree.y + Math.random()*2, tree.z + (Math.random()-0.5)*2.5),
+                    vel: new THREE.Vector3((Math.random()-0.5)*0.015, -0.01 - Math.random()*0.02, (Math.random()-0.5)*0.015),
+                    rot: new THREE.Vector3(Math.random()*Math.PI, Math.random()*Math.PI, 0),
+                    rotVel: new THREE.Vector3(Math.random()*0.05, Math.random()*0.05, Math.random()*0.05),
+                };
+                leafData.push(data);
+            }
+        }
+
+        function updateLeaves(delta, time) {
+            if (!leaves || !treeTops.length) return;
+            const dummy = new THREE.Object3D();
+            const activeWind = Math.max(0.1, window.weatherWindCurrent || 0.4);
+            const intensity = isRaining ? rainIntensity : 0.2;
+
+            for (let i = 0; i < 600; i++) {
+                const d = leafData[i];
+                d.pos.y += d.vel.y * delta * (1.0 + intensity * 2.0);
+                d.pos.x += d.vel.x + (Math.sin(time + d.pos.y) * 0.008 * activeWind);
+                d.pos.z += d.vel.z + (Math.cos(time + d.pos.x) * 0.008 * activeWind);
+                d.rot.x += d.rotVel.x; d.rot.y += d.rotVel.y;
+
+                if (d.pos.y < (terrainHeightMap[`${Math.round(d.pos.x/TILE_SCALE)},${Math.round(d.pos.z/TILE_SCALE)}`] || -2)) {
+                    const tree = treeTops[Math.floor(Math.random() * treeTops.length)];
+                    d.pos.set(tree.x + (Math.random()-0.5)*2.5, tree.y + Math.random()*1.5, tree.z + (Math.random()-0.5)*2.5);
+                }
+                dummy.position.copy(d.pos); dummy.rotation.set(d.rot.x, d.rot.y, d.rot.z); dummy.updateMatrix();
+                leaves.setMatrixAt(i, dummy.matrix);
+            }
+            leaves.instanceMatrix.needsUpdate = true;
+            leaves.visible = (activeWind > 0.45 || isRaining);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+            
+            if(mixer) mixer.update(delta);
+
+            if (waterMat) {
+                if (waterMat.userData.shader) {
+                    waterMat.uniforms ? waterMat.uniforms.uTime.value = time : waterMat.userData.shader.uniforms.uTime.value = time;
+                }
+                if (window.vegUniforms) window.vegUniforms.uTime.value = time;
+                
+                // Texture offset updates (using global references if they exist)
+                if (window.waterNormal) {
+                    window.waterNormal.offset.x += delta * 0.02;
+                    window.waterNormal.offset.y += delta * 0.01;
+                }
+                if (window.waterNormal2) {
+                    window.waterNormal2.offset.x -= delta * 0.01;
+                    window.waterNormal2.offset.y += delta * 0.02;
+                }
+            }
+            
+            // Update all active shaders via registry
+            if(window.weatherWindTarget !== undefined) {
+                window.weatherWindCurrent = THREE.MathUtils.lerp(window.weatherWindCurrent || 0.45, window.weatherWindTarget, 0.015);
+            }
+
+            window.weatherMaterials.forEach(m => {
+                if (m && m.userData.shader) {
+                    const s = m.userData.shader;
+                    s.uniforms.uTime.value = time;
+                    if(s.uniforms.uIntensity) s.uniforms.uIntensity.value = window.weatherWindCurrent;
+                    if(s.uniforms.uIsRaining) s.uniforms.uIsRaining.value = isRaining ? 1.0 : 0.0;
+                }
+            });
+            
+            [rainSystemA, rainSystemB].forEach(rs => {
+                if (rs) {
+                    rs.position.y -= delta * 35; // Falling speed
+                    if (playerBaseGroup) {
+                        rs.position.x = playerBaseGroup.position.x;
+                        rs.position.z = playerBaseGroup.position.z;
+                    }
+                    if (rs.position.y < -20) rs.position.y += 40; 
+                }
+            });
+
+            // --- LEAVES & LIGHTNING ---
+            updateLeaves(delta, time);
+            
+            // Background/Fog Lerp (Color Transition)
+            if(window.targetBgColor) {
+               window.currentBgColor.lerp(window.targetBgColor, 0.02);
+               scene.background.copy(window.currentBgColor);
+               scene.fog.color.copy(window.currentBgColor);
+            }
+
+            if (isRaining && rainIntensity > 0.6) {
+                lightningTimer -= delta;
+                if (lightningTimer < 0) {
+                    lightningFlash = 0.5 + Math.random() * 0.5;
+                    lightningTimer = 5 + Math.random() * 15;
+                    console.log("[WEATHER] Lightning Strike Executed.");
+                }
+            }
+            if (lightningFlash > 0) {
+                lightningFlash -= delta * 5.0; 
+                const flashVal = Math.pow(Math.max(0, lightningFlash), 2.0);
+                const col = 0.04 + flashVal;
+                // Add lightning flash on top of current background color
+                scene.background.r += flashVal;
+                scene.background.g += flashVal;
+                scene.background.b += (flashVal + 0.03);
+                scene.fog.color.copy(scene.background);
+            }
+            
+            if(state === 'EXPLORING') {
+                updateExplorer(delta);
+                // Update remote player interpolation
+                const deltaFactor = delta * 60;
+                for(let rp of remotePlayers.values()) {
+                    rp.lerp(deltaFactor);
+                    rp.mixer.update(delta); // Local mixer update for smooth anims
+                }
+            } else if(state === 'SELECTION') {
+                if(player) player.rotation.y += delta * 0.5;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.logout = () => { window.location.href = '/login'; };
+
+        init();
+    </script>
+</body>
+</html>
