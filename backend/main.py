@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 import datetime
 import os
 import json
-from models import get_auth_db, get_game_db, User, DbSession, PlayerState, WorldTile, WorldObject
+from models import get_auth_db, get_game_db, User, DbSession, PlayerState, WorldTile, WorldObject, Item
 from auth import verify_password, generate_session_token, get_current_user
 import random
 
@@ -62,7 +62,7 @@ weather_system = WeatherManager()
 
 # Mount models and frontend static directories
 app.mount("/models", StaticFiles(directory="/work/homeworld/models"), name="models")
-app.mount("/static", StaticFiles(directory="/work/homeworld/frontend"), name="static")
+app.mount("/static", StaticFiles(directory="/work/homeworld/frontend/static"), name="static")
 
 # Global Config from Environment
 CONFIG = {
@@ -82,10 +82,14 @@ async def read_root(request: Request, user: User = Depends(get_current_user)):
         # Dynamic API Base Detection
         host = request.base_url.hostname
         api_base = os.getenv("HOMEWORLD_API_BASE")
-        if not api_base or "localhost" in api_base:
-            api_base = f"http://{host}:3003"
+        if not api_base:
+            # If port 3003 is NOT in the URL, assume we are behind a proxy path /homeworld
+            if ":3003" not in str(request.url):
+                api_base = "/homeworld"
+            else:
+                api_base = f"http://{host}:3003"
             
-        config = {"API_BASE": api_base}
+        config = {"API_BASE": api_base, "username": user.username}
         config_script = f"<script>window.CONFIG = {json.dumps(config)};</script>"
         content = content.replace("<head>", f"<head>{config_script}")
         
@@ -186,7 +190,11 @@ def get_game_state(
     
     state = db.query(PlayerState).filter(PlayerState.user_id == user.id).first()
     if not state:
-        state = PlayerState(user_id=user.id)
+        state = PlayerState(
+            user_id=user.id,
+            inventory=[None] * 20,
+            equipment={}
+        )
         db.add(state)
         db.commit()
         db.refresh(state)
@@ -196,6 +204,7 @@ def get_game_state(
         "rot_y": state.rot_y,
         "avatar_id": state.avatar_id,
         "inventory": state.inventory,
+        "equipment": state.equipment,
         "stats": state.stats,
         "user_id": state.user_id,
         "last_saved": state.last_saved.isoformat() if state.last_saved else None
@@ -223,9 +232,12 @@ async def save_game_state(
     if "rot_y" in data: state.rot_y = data["rot_y"]
     if "status" in data: state.status = data["status"]
     if "avatar_id" in data: state.avatar_id = data["avatar_id"]
+    if "inventory" in data: state.inventory = data["inventory"]
+    if "equipment" in data: state.equipment = data["equipment"]
     
-    state.last_saved = datetime.datetime.utcnow()
+    state.last_saved = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
     db.commit()
+    print(f"[HEARTBEAT] {user.username} at {state.last_saved.strftime('%H:%M:%S')}")
     return {"status": "success"}
 
 @app.get("/api/game/world/tiles")
@@ -280,8 +292,13 @@ async def dig_terrain(request: Request, db: Session = Depends(get_game_db), user
 
 @app.get("/api/game/player/all")
 def get_all_players(db: Session = Depends(get_game_db), auth_db: Session = Depends(get_auth_db)):
-    # Since we use two different databases, we fetch states first, then join usernames in-memory
-    states = db.query(PlayerState).all()
+    # Use consistent UTC-based timezone for filtering
+    threshold = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) - datetime.timedelta(seconds=60)
+    states = db.query(PlayerState).filter(PlayerState.last_saved >= threshold).all()
+    
+    if not states:
+        return []
+        
     user_ids = [s.user_id for s in states]
     
     # Batch fetch usernames from HomeServer DB
@@ -297,9 +314,32 @@ def get_all_players(db: Session = Depends(get_game_db), auth_db: Session = Depen
             "rot_y": s.rot_y,
             "status": s.status,
             "avatar_id": s.avatar_id,
+            "equipment": s.equipment,
             "last_saved": s.last_saved.isoformat() if s.last_saved else None
         } for s in states
     ]
+
+@app.get("/api/game/items")
+def get_items(db: Session = Depends(get_game_db)):
+    return db.query(Item).all()
+
+def seed_items():
+    db = next(get_game_db())
+    existing = db.query(Item).count()
+    if existing > 0:
+        return
+        
+    items = [
+        Item(id="sword_stone", name="Stone Sword", type="WEAPON", icon="⚔️", model="Sword_Stone.gltf", stackable=False),
+        Item(id="wood", name="Raw Wood", type="MATERIAL", icon="🪵", model=None, stackable=True, max_stack=100),
+        Item(id="stone", name="Rough Stone", type="MATERIAL", icon="🪨", model=None, stackable=True, max_stack=100)
+    ]
+    db.add_all(items)
+    db.commit()
+    print("[INIT] Database Seeded with Items")
+
+# Run seeding in a separate thread to avoid blocking startup
+threading.Thread(target=seed_items, daemon=True).start()
 
 # [Tactical] Chat Endpoints
 @app.post("/api/game/chat/send")

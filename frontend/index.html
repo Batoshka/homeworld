@@ -14,6 +14,7 @@
             }
         }
     </script>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <style>
         :root {
             --bg-deep: #050507;
@@ -104,19 +105,49 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
         }
 
-        .controls-hint {
+        .toolbar {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            font-size: 10px;
-            color: rgba(255,255,255,0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: rgba(0,0,0,0.4);
-            padding: 10px 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.05);
-            display: none;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            z-index: 100;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.8);
+            display: none; /* Shown after enterWorld */
+        }
+
+        .toolbar-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            color: rgba(212, 175, 55, 0.8);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px double #CD7F32;
+            outline: 1px solid #D4AF37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(40, 40, 45, 0.4);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+
+        .toolbar-btn:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .toolbar-btn.active {
+            color: #fff;
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #D4AF37;
+            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.4), 0 0 15px rgba(212, 175, 55, 0.3);
         }
 
         .loading-screen {
@@ -255,6 +286,147 @@
             outline: 2px solid #D4AF37;
             border-radius: 8px;
         }
+
+        /* INVENTORY STYLES */
+        #inventory-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            z-index: 2100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .inventory-window {
+            width: 950px;
+            max-width: 95vw;
+            max-height: 85vh;
+            background: rgba(20, 20, 30, 0.95);
+            border: 4px double #CD7F32;
+            outline: 2px solid #D4AF37;
+            border-radius: 12px;
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            color: white;
+            overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        .inv-section {
+            display: flex;
+            flex-direction: column;
+        }
+        .inv-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #D4AF37;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 5px;
+        }
+        .char-panel {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .inv-grid {
+            flex: 1.5;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(60px, 1fr));
+            grid-template-rows: repeat(4, minmax(60px, 1fr));
+            gap: 12px;
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .inv-slot {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(205, 127, 50, 0.3);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .inv-slot:hover {
+            background: rgba(205, 127, 50, 0.1);
+            border-color: #D4AF37;
+        }
+        .inv-slot.equipped {
+            border-color: #D4AF37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+        .inv-slot.selected {
+            border-color: #fff;
+            box-shadow: 0 0 15px #D4AF37, inset 0 0 10px #D4AF37;
+            background: rgba(212, 175, 55, 0.2);
+        }
+        .inv-item-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            user-select: none;
+            pointer-events: none;
+        }
+        .inv-stack-size {
+            position: absolute;
+            bottom: 2px;
+            right: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+        .slot-label {
+            position: absolute;
+            top: -12px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+        }
+        
+        /* Specific Slot Layout */
+        .slot-head { grid-area: 1 / 2 / 2 / 3; }
+        .slot-neck { grid-area: 2 / 2 / 3 / 3; }
+        .slot-torso { grid-area: 3 / 2 / 4 / 3; }
+        .slot-hips { grid-area: 4 / 2 / 5 / 3; }
+        
+        .slot-shoulder-l { grid-area: 2 / 1 / 3 / 2; }
+        .slot-fist-l { grid-area: 3 / 1 / 4 / 2; }
+        .slot-ring-1 { grid-area: 4 / 1 / 5 / 2; }
+        .slot-foot-l { grid-area: 5 / 1 / 6 / 2; }
+        
+        .slot-shoulder-r { grid-area: 2 / 3 / 3 / 4; }
+        .slot-fist-r { grid-area: 3 / 3 / 4 / 4; }
+        .slot-ring-2 { grid-area: 4 / 3 / 5 / 4; }
+        .slot-foot-r { grid-area: 5 / 3 / 6 / 4; }
+
+        .slot-bag-1 { grid-area: 5 / 2 / 6 / 3; }
+        .slot-bag-2 { grid-area: 5 / 3 / 6 / 4; } /* Overlaps foot-r if not careful, adjust */
+        
+        /* Correct grid-area for bags to avoid overlaps */
+        .slot-bag-1 { grid-area: 1 / 1 / 2 / 2; }
+        .slot-bag-2 { grid-area: 1 / 3 / 2 / 4; }
         .map-title {
             font-size: 12px;
             font-weight: bold;
@@ -370,14 +542,41 @@
             </button>
         </div>
 
-        <!-- CONTROLS HINT -->
-        <div id="controlsHint" class="controls-hint">
-            WASD - MOVE • SHIFT - SPRINT • G - DIG • RMB - ORBIT • LMB - INTERACT
+        <!-- ACTION TOOLBAR -->
+        <div id="toolbar" class="toolbar interactive glass">
+            <div id="btn-inventory" onclick="toggleInventory()" class="toolbar-btn" title="Inventory (I)">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            </div>
+            <div id="btn-map" onclick="toggleBigMap()" class="toolbar-btn" title="Toggle Map">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+            </div>
+            <div id="btn-build" onclick="toggleBuildMode()" class="toolbar-btn" title="Build Mode">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            </div>
         </div>
 
+        <!-- INVENTORY OVERLAY -->
+        <div id="inventory-overlay" onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="if(event.target==this) { toggleInventory(); } event.stopPropagation();">
+            <div class="inventory-window" style="pointer-events: auto;">
+                <div class="inv-section" style="flex: 1;">
+                    <div class="inv-section-title">Character</div>
+                    <div class="char-panel" id="equipment-slots">
+                        <!-- Slots generated by JS -->
+                    </div>
+                </div>
+                <div class="inv-section" style="flex: 1.5;">
+                    <div class="inv-section-title">Inventory</div>
+                    <div class="inv-grid" id="inventory-grid">
+                        <!-- Slots generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="text" id="inv-drag-bridge" style="display:none">
+
         <!-- WEATHER STATUS HUD -->
-        <div id="weatherHUD" class="fixed top-24 left-8 glass px-4 py-2 rounded-xl text-[10px] font-bold text-indigo-400 uppercase tracking-widest pointer-events-none" style="display: none;">
-            Satellite Link: <span id="syncIndicator" class="text-emerald-400">Stable</span><br/>
+        <div id="weatherHUD" class="fixed top-24 left-8 glass px-4 py-2 rounded-xl text-[10px] font-bold text-indigo-400 uppercase tracking-widest pointer-events-none" style="display: block;">
+            Satellite Link: <span id="syncIndicator" class="text-amber-400">Connecting...</span><br/>
             Atmosphere: <span id="weatherText" class="text-white">Analyzing...</span>
         </div>
     </div>
@@ -400,18 +599,45 @@
         let rotationSpeed = 5;
         let isSprinting = false;
         let isActionPlaying = false; 
+        window.lastActionStartTime = 0;
+        window.lastActionName = "";
+        window.lastSendTime = 0;
+        window.lastReceiveTime = 0;
+        window.lastAckTime = 0;
+        window.pendingAction = null;
         
         let state = 'SELECTION';
         let models = {};                // [Tactical] Asset Registry Restored
         const INJECTED_BASE = window.CONFIG?.API_BASE;
         const DEFAULT_BASE = `http://${window.location.hostname}:3003`;
+        const API_BASE = INJECTED_BASE || (window.location.origin + window.location.pathname).replace(/\/$/, "");
         let username = ""; // [Tactical] Identity Registry Restored
+        let isBuildMode = false;
+        let isInventoryOpen = false;
+        let selectedSlot = null; // { type: 'INV'|'EQUIP', id: number|string }
+
+        // Inventory State
+        const inventory = Array(20).fill(null);
+        const equipment = {
+            head: null, neck: null, shoulderL: null, shoulderR: null,
+            fistL: null, fistR: null, torso: null, hips: null,
+            ring1: null, ring2: null, footL: null, footR: null,
+            bag1: null, bag2: null
+        };
+
+        // Item Metadata
+        const ITEMS = {
+            'stone_sword': { id: 'stone_sword', name: 'Stone Sword', type: 'WEAPON', model: API_BASE + '/models/Tools/glTF/Sword_Stone.gltf', stackable: false },
+            'wood': { id: 'wood', name: 'Raw Wood', type: 'MATERIAL', icon: '🪵', stackable: true, maxStack: 100 },
+            'stone': { id: 'stone', name: 'Rough Stone', type: 'MATERIAL', icon: '🪨', stackable: true, maxStack: 100 }
+        };
+
+        // Initial items
+        inventory[0] = { ...ITEMS.stone_sword };
+        inventory[1] = { ...ITEMS.wood, count: 12 };
+        inventory[2] = { ...ITEMS.stone, count: 5 };
+ // [Tactical] Building & Digging State
         
-        // If injected base is localhost but we're NOT on localhost, use the current hostname
-        const API_BASE = (INJECTED_BASE && !INJECTED_BASE.includes('localhost')) 
-            ? INJECTED_BASE 
-            : (window.location.hostname !== 'localhost' ? DEFAULT_BASE : (INJECTED_BASE || DEFAULT_BASE));
-            
         console.log(`[Homeworld] Connectivity Bridge initialized: ${API_BASE}`);
         const API_OPTIONS = { credentials: 'include' };
 
@@ -429,7 +655,7 @@
         const mouse = new THREE.Vector2();
         let targetObject = null;
 
-        const keys = { 'KeyW': false, 'KeyA': false, 'KeyS': false, 'KeyD': false, 'ShiftLeft': false, 'KeyG': false, 'Space': false };
+        const keys = { KeyW:false, KeyA:false, KeyS:false, KeyD:false, Space:false, KeyG:false, KeyI:false, KeyM:false };
         const playerRadius = 0.6;
         let isRaining = false;
         let rainIntensity = 0.0;
@@ -481,21 +707,31 @@
 
             const loader = new GLTFLoader();
             const texLoader = new THREE.TextureLoader();
-            barkDetail = texLoader.load('/static/static/textures/bark_detail.png');
-            foliageDetail = texLoader.load('/static/static/textures/foliage_detail.png');
-            stoneDetail = texLoader.load('/static/static/textures/stone_detail.png');
+            barkDetail = texLoader.load(API_BASE + '/static/textures/bark_detail.png');
+            foliageDetail = texLoader.load(API_BASE + '/static/textures/foliage_detail.png');
+            stoneDetail = texLoader.load(API_BASE + '/static/textures/stone_detail.png');
             [barkDetail, foliageDetail, stoneDetail].forEach(t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; });
 
-            const charPath = '/models/Characters/glTF/';
+            const charPath = API_BASE + '/models/Characters/glTF/';
             for (const id of AVATARS) {
-                const gltf = await loader.loadAsync(`${charPath}${id}.gltf`);
-                gltf.scene.visible = false;
-                gltf.scene.traverse(c => { if(c.isMesh) { c.castShadow = true; c.receiveShadow = true; }});
-                models[id] = gltf;
-                scene.add(gltf.scene);
+                try {
+                    const gltf = await loader.loadAsync(`${charPath}${id}.gltf`);
+                    gltf.scene.visible = false;
+                    gltf.scene.traverse(c => { if(c.isMesh) { c.castShadow = true; c.receiveShadow = true; }});
+                    models[id] = gltf;
+                    scene.add(gltf.scene);
+                } catch (e) {
+                    console.error(`[Init] Failed to load avatar ${id}:`, e);
+                    // Create a simple box placeholder if we really have no models at all later
+                }
             }
 
-            await checkAuth();
+            try {
+                await checkAuth();
+            } catch (e) {
+                console.error("[Init] Auth check failed:", e);
+                // We'll proceed anyway, checkAuth handles redirection if needed
+            }
 
             selectAvatar(selectedAvatarId);
             
@@ -505,55 +741,69 @@
             setInterval(syncWeather, 1000); 
             syncWeather();
             
-            window.addEventListener('keydown', e => { 
-                if (e.code === 'KeyG') {
-                    performDig();
-                }
-                if (e.code === 'KeyM') {
-                    toggleBigMap();
-                }
-                if (e.code === 'KeyT') {
-                    const input = document.getElementById('chat-input');
+            animate();
+        }
+
+        // --- GLOBAL FUNCTION EXPOSURE (Ensures listeners can find them immediately) ---
+        window.onMouseMove = onMouseMove;
+        window.onMouseClick = onMouseClick;
+        window.onWindowResize = onWindowResize;
+        window.toggleBigMap = toggleBigMap;
+        window.toggleInventory = toggleInventory;
+
+        // --- GLOBAL EVENT LISTENERS (Moved out of init for immediate responsiveness) ---
+        window.addEventListener('keydown', e => { 
+            if (e.code === 'KeyG') {
+                if (isBuildMode) performDig();
+                else console.log("[Mode] Activate Build Mode to dig.");
+            }
+            if (e.code === 'KeyM') {
+                toggleBigMap();
+            }
+            if (e.code === 'KeyT') {
+                const input = document.getElementById('chat-input');
+                input.style.display = 'block';
+                input.focus();
+            }
+            if (e.code === 'KeyI') {
+                toggleInventory();
+            }
+            if (e.code === 'Enter') {
+                const input = document.getElementById('chat-input');
+                if (document.activeElement === input) {
+                    sendChat();
+                } else {
                     input.style.display = 'block';
                     input.focus();
                 }
-                if (e.code === 'Enter') {
-                    const input = document.getElementById('chat-input');
-                    if (document.activeElement === input) {
-                        sendChat();
-                    } else {
-                        input.style.display = 'block';
-                        input.focus();
-                    }
-                }
-                if (e.code === 'Escape') {
-                    const input = document.getElementById('chat-input');
-                    input.style.display = 'none';
-                    input.blur();
-                    if (isBigMapOpen) toggleBigMap();
-                    if (isPanelOpen) closePanel();
-                }
-                if (e.code in keys) {
-                    keys[e.code] = true;
-                }
-            });
-            window.addEventListener('keyup', e => { 
-                if (e.code in keys) {
-                    keys[e.code] = false; 
-                }
-            });
+            }
+            if (e.code === 'Escape') {
+                const input = document.getElementById('chat-input');
+                input.style.display = 'none';
+                input.blur();
+                if (isBigMapOpen) toggleBigMap();
+                if (isInventoryOpen) toggleInventory();
+            }
+            if (keys && e.code in keys) {
+                keys[e.code] = true;
+            }
+        });
+
+        window.addEventListener('keyup', e => { 
+            if (keys && e.code in keys) {
+                keys[e.code] = false; 
+            }
+        });
+
         window.addEventListener('mousedown', e => { if(e.button === 2) isOrbiting = true; });
-            window.addEventListener('mouseup', e => { if(e.button === 2) isOrbiting = false; });
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('click', onMouseClick);
-            window.addEventListener('contextmenu', e => e.preventDefault());
-            window.addEventListener('wheel', e => {
-                orbit_distance = Math.max(2, Math.min(20, orbit_distance + e.deltaY * 0.005));
-            });
-            window.addEventListener('resize', onWindowResize);
-            
-            animate();
-        }
+        window.addEventListener('mouseup', e => { if(e.button === 2) isOrbiting = false; });
+        window.addEventListener('mousemove', (e) => { if(window.onMouseMove) window.onMouseMove(e); });
+        window.addEventListener('click', (e) => { if(window.onMouseClick) window.onMouseClick(e); });
+        window.addEventListener('contextmenu', e => e.preventDefault());
+        window.addEventListener('wheel', e => {
+            orbit_distance = Math.max(2, Math.min(20, orbit_distance + e.deltaY * 0.005));
+        });
+        window.addEventListener('resize', () => { if(window.onWindowResize) window.onWindowResize(); });
 
         async function checkAuth() {
             const res = await fetch(`${API_BASE}/api/auth/status`, API_OPTIONS);
@@ -582,78 +832,105 @@
         };
 
         window.enterWorld = async () => {
-             // HARD RESET ALL STATES
-             if (window.playerPhysics) {
-                 window.playerPhysics.velocityY = 0;
-                 window.playerPhysics.isJumping = false;
-             }
-             Object.keys(keys).forEach(k => keys[k] = false);
+            if (!selectedAvatarId) return;
+            const loginOverlay = document.getElementById('login-overlay');
+            if (loginOverlay) loginOverlay.style.display = 'none';
 
-             state = 'LOADING';
-             document.getElementById('selectionUI').style.display = 'none';
-             document.getElementById('loading').style.display = 'flex';
-             document.getElementById('loading-text').textContent = 'Generating World Matrix...';
+            // Loading player state from DB
+            try {
+                const res = await fetch(`${API_BASE}/api/game/state`, API_OPTIONS);
+                const data = await res.json();
+                if (data.inventory && Array.isArray(data.inventory) && data.inventory.length > 0) {
+                    inventory.length = 0;
+                    data.inventory.forEach(i => inventory.push(i));
+                    while (inventory.length < 20) inventory.push(null);
+                } else if (data.inventory && Array.isArray(data.inventory)) {
+                   // It's a valid empty array from DB, we ensure it's 20 slots
+                   // but we keep the current inventory (with starters) if it's the first time
+                   while (inventory.length < 20) inventory.push(null);
+                }
+                if (data.equipment) {
+                    Object.keys(data.equipment).forEach(k => equipment[k] = data.equipment[k]);
+                }
+                if (data.pos) {
+                    playerBaseGroup.position.set(data.pos.x, data.pos.y, data.pos.z);
+                }
+            } catch (e) {
+                console.warn("[Game] Failed to load persistent state, using defaults.");
+            }
 
-             try {
-                 const [tilesRes, objsRes] = await Promise.all([
-                     fetch(`${API_BASE}/api/game/world/tiles`, API_OPTIONS),
-                     fetch(`${API_BASE}/api/game/world/objects`, API_OPTIONS)
-                 ]);
-                 const tiles = await tilesRes.json();
-                 const worldObjs = await objsRes.json();
-                 
-                 await buildWorld(tiles, worldObjs);
-                 
-                 window.allTiles = tiles;
-                 
-                 setupLeaves(worldObjs);
-                 setupExplorer();
+            // Syncing now handled inside updateExplorer (render loop) for maximum consistency
+            // Removed redundant setInterval
+            state = 'EXPLORING';
+            document.getElementById('selectionUI').style.display = 'none';
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('loading-text').textContent = 'Generating World Matrix...';
 
-                 document.getElementById('loading').style.display = 'none';
-                 const hud = document.getElementById('hudTop');
-                 if(hud) hud.style.display = 'flex';
+            try {
+                const [tilesRes, objsRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/game/world/tiles`, API_OPTIONS),
+                    fetch(`${API_BASE}/api/game/world/objects`, API_OPTIONS)
+                ]);
+                const tiles = await tilesRes.json();
+                const worldObjs = await objsRes.json();
+                
+                await buildWorld(tiles, worldObjs);
+                
+                window.allTiles = tiles;
+                
+                setupLeaves(worldObjs);
+                setupExplorer();
+
+                document.getElementById('loading').style.display = 'none';
+                const hud = document.getElementById('hudTop');
+                if(hud) hud.style.display = 'flex';
             
-                 const mini = document.getElementById('minimap-wrapper');
-                 const coord = document.getElementById('coord-panel');
-                 if(mini) mini.style.display = 'block';
-                 if(coord) coord.style.display = 'block';
+                const mini = document.getElementById('minimap-wrapper');
+                const coord = document.getElementById('coord-panel');
+                if(mini) mini.style.display = 'block';
+                if(coord) coord.style.display = 'block';
 
-                 document.getElementById('controlsHint').style.display = 'block';
-                 document.getElementById('weatherHUD').style.display = 'block';
-                 state = 'EXPLORING';
-                 
-                 // POSITION PERSISTENCE: Recall last position/rotation from database
-                 try {
-                     const snapRes = await fetch(`${API_BASE}/api/game/state`, API_OPTIONS);
-                     const snapshot = await snapRes.json();
-                     if (snapshot && snapshot.pos) {
-                         playerBaseGroup.position.set(snapshot.pos.x, snapshot.pos.y, snapshot.pos.z);
-                         player.rotation.y = snapshot.rot_y || 0;
-                         console.log("[Persistence] Recalled Position:", snapshot.pos);
-                     }
-                 } catch(pe) { console.warn("[Persistence] Failed to recall position.", pe); }
-                 
-                 // EXPOSE FOR DEBUGGING
-                 window.playerExposed = playerBaseGroup;
-                 window.heightMapExposed = terrainHeightMap;
-                 window.keysExposed = keys;
+                const toolbar = document.getElementById('toolbar');
+                if(toolbar) toolbar.style.display = 'flex';
+                document.getElementById('weatherHUD').style.display = 'block';
+                
+                // Initial Visuals for Local Player
+                Object.keys(equipment).forEach(slotId => {
+                    const item = equipment[slotId];
+                    if (item) updateCharacterVisuals(player, slotId, item);
+                });
+                
+                // Auto-save every 30 seconds
+                setInterval(savePlayerState, 30000);
+                
+                // EXPOSE FOR DEBUGGING
+                window.playerExposed = playerBaseGroup;
+                window.heightMapExposed = terrainHeightMap;
+                window.keysExposed = keys;
 
-                 window.addEventListener('keydown', e => {
-                     if (e.key.toLowerCase() === 'g') performDig();
-                 });
-                 
-             } catch (e) {
-                 console.error(e);
-                 alert("Failed to materialize world.");
-             }
-         };
+                window.toggleBuildMode = () => {
+                    isBuildMode = !isBuildMode;
+                    const btn = document.getElementById('btn-build');
+                    if (isBuildMode) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                    console.log("[Mode] Build Mode:", isBuildMode ? "ACTIVE" : "INACTIVE");
+                };
+                
+            } catch (e) {
+                console.error(e);
+                alert("Failed to materialize world.");
+            }
+        };
+
+        
+
 
         async function buildWorld(tiles, worldObjs) {
             const TILE_DEPTH = 10;
             const boxGeo = new THREE.BoxGeometry(TILE_SCALE, TILE_DEPTH, TILE_SCALE);
             
             const loader = new THREE.TextureLoader();
-            const texPath = './static/static/textures/';
+            const texPath = API_BASE + '/static/textures/';
             
             const loadTex = (name) => {
                 const t = loader.load(`${texPath}${name}`);
@@ -841,7 +1118,7 @@
             };
 
             const envLoader = new GLTFLoader();
-            const envPath = '/models/Environment/glTF/';
+            const envPath = API_BASE + '/models/Environment/glTF/';
             const uniqueModels = [...new Set(worldObjs.map(o => o.m))];
             
             // Wind Global State
@@ -1090,6 +1367,9 @@
 
             mixer = new THREE.AnimationMixer(player);
             playAnimation('Idle');
+
+            // [Tactical] Demonstration: Equip a stone sword to the right hand
+            equipTool(player, API_BASE + '/models/Tools/glTF/Sword_Stone.gltf', 'Fist.R');
         }
 
         async function syncWeather() {
@@ -1246,14 +1526,18 @@
             }
         }
 
-        function playAction(name, duration = 1000) {
+        window.playAction = (name, duration = 1000) => {
             if (isActionPlaying) return;
             playAnimation(name);
             isActionPlaying = true;
+            window.lastActionStartTime = Date.now(); 
+            // [Sync] One-Shot Event: Ensures each jump triggers exactly once on other screens
+            window.pendingAction = `${name}:${window.lastActionStartTime}`;
             setTimeout(() => {
                 isActionPlaying = false;
+                playAnimation('Idle');
             }, duration);
-        }
+        };
 
         function onMouseMove(e) {
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -1269,6 +1553,7 @@
         }
 
         function onMouseClick() {
+            if (isInventoryOpen) return;
             if (targetObject) {
                 // Distance Check (e.g. 10 meters / 5 tiles)
                 const dist = playerBaseGroup.position.distanceTo(targetObject.position);
@@ -1287,16 +1572,80 @@
             const panel = document.getElementById('interaction-panel');
             document.getElementById('panelObjectName').textContent = name;
             panel.style.display = 'block';
+            isPanelOpen = true;
         };
 
         window.closePanel = () => {
             document.getElementById('interaction-panel').style.display = 'none';
+            isPanelOpen = false;
         }
 
         // --- MAPPING LOGIC ---
-        let lastSyncTime = 0;
+        let lastSaveTime = 0;
+        let lastMapSyncTime = 0;
         let lastRemoteSync = 0;
         const remotePlayers = new Map();
+
+        async function syncMultiplayer() {
+            if (state !== 'EXPLORING') return;
+            const now = Date.now();
+            try {
+                // [Tactical] Use relative pathing if on same origin for maximum reliability
+                const fetchUrl = API_BASE ? `${API_BASE}/api/game/player/all` : "/api/game/player/all";
+                const res = await fetch(fetchUrl, API_OPTIONS);
+                const playersData = await res.json();
+                
+                const activeUsernames = new Set();
+                playersData.forEach(pd => {
+                    // Skip self or invalid entries
+                    if (pd.username === username || !pd.username) return; 
+                    activeUsernames.add(pd.username);
+                    
+                    let p = remotePlayers.get(pd.username);
+                    if (!p) {
+                        p = new RemotePlayer(pd.username, pd.avatar_id);
+                        remotePlayers.set(pd.username, p);
+                    }
+                    
+                    // Update movement/rotation
+                    p.update(pd);
+                    
+                    // Sync Equipment Visuals
+                    if (pd.equipment) {
+                        if (!p.lastEquipment) p.lastEquipment = {};
+                        Object.keys(pd.equipment).forEach(slotId => {
+                            const item = pd.equipment[slotId];
+                            const lastItemString = JSON.stringify(p.lastEquipment[slotId]);
+                            const currentItemString = JSON.stringify(item);
+                            
+                            if (currentItemString !== lastItemString) {
+                                updateCharacterVisuals(p.group, slotId, item);
+                                p.lastEquipment[slotId] = item ? JSON.parse(currentItemString) : null;
+                            }
+                        });
+                    }
+                });
+
+                // Cleanup disconnected players
+                for (let [uname, p] of remotePlayers) {
+                    if (!activeUsernames.has(uname)) {
+                        p.dispose();
+                        remotePlayers.delete(uname);
+                    }
+                }
+                const indicator = document.getElementById('syncIndicator');
+                if (indicator) {
+                    window.lastReceiveTime = now;
+                }
+            } catch (e) {
+                console.error("[Multiplayer] Sync Error:", e);
+                const indicator = document.getElementById('syncIndicator');
+                if (indicator) {
+                    indicator.textContent = 'Lost';
+                    indicator.className = 'text-rose-400';
+                }
+            }
+        }
 
         class RemotePlayer {
             constructor(username, avatarId) {
@@ -1351,19 +1700,41 @@
                 scene.add(this.group);
             }
 
-            update(data, delta) {
-                this.targetPos.set(data.x, data.y, data.z);
-                this.targetRot = data.rot_y;
-                
-                if(this.currentStatus !== data.status && this.actions[data.status]) {
-                    const oldAction = this.actions[this.currentStatus];
-                    const newAction = this.actions[data.status];
-                    if(oldAction) oldAction.fadeOut(0.3);
-                    newAction.reset().fadeIn(0.3).play();
-                    this.currentStatus = data.status;
+            update(data) {
+                if (!data || typeof data.x !== 'number') {
+                    console.warn(`[Multiplayer] Invalid data for ${this.username}:`, data);
+                    return;
                 }
+                this.targetPos.set(data.x, data.y, data.z);
+                this.targetRot = data.rot_y || 0;
                 
-                this.mixer.update(delta);
+                const now = Date.now();
+                if(data.status && this.actions) {
+                    // [Optimization] Debounce status changes to prevent network jitter flickering
+                    // Jumps are allowed to override immediately to feel responsive
+                    // [Sync Fix] Parse timestamped actions: "Jump:1712345678"
+                    const statusParts = data.status.split(':');
+                    const statusName = statusParts[0];
+                    const statusTimestamp = parseInt(statusParts[1]) || 0;
+                    
+                    if (this.currentStatus !== data.status && this.actions[statusName]) {
+                        if (now - (this.lastStatusTime || 0) > 200 || statusName.indexOf('Jump') !== -1) {
+                            // Only trigger animation if the specific ACTION ID (timestamp) is newer
+                            if (statusTimestamp > (this.lastActionTimestamp || 0) || statusName !== this.currentStatusName) {
+                                const oldAction = this.actions[this.currentStatusName || 'Idle'];
+                                const newAction = this.actions[statusName];
+                                
+                                if (oldAction) oldAction.fadeOut(0.3);
+                                newAction.reset().fadeIn(0.3).play();
+                                
+                                this.currentStatus = data.status; // Keep full string for the 'isDifferent' check
+                                this.currentStatusName = statusName;
+                                this.lastActionTimestamp = statusTimestamp;
+                                this.lastStatusTime = now;
+                            }
+                        }
+                    }
+                }
             }
 
             lerp(deltaFactor) {
@@ -1377,6 +1748,7 @@
             }
         }
         let isBigMapOpen = false;
+        let isPanelOpen = false;
 
         function getTileColor(b, e) {
             let h, s, l;
@@ -1397,7 +1769,10 @@
         }
 
         function updateMaps(delta, deltaFactor) {
-            if (state !== 'EXPLORING') return;
+            if (state !== 'EXPLORING' || !playerBaseGroup) return;
+            let now = Date.now();
+            if (now - lastMapSyncTime < 2000) return;
+            lastMapSyncTime = now;
 
             const tx = Math.round(playerBaseGroup.position.x / TILE_SCALE);
             const ty = Math.round(playerBaseGroup.position.z / TILE_SCALE);
@@ -1427,13 +1802,15 @@
             if(compass) compass.style.transform = `rotate(${orbit_angle_horizontal}rad)`;
 
             // Draw nearby tiles
-            for(let x = tx - R; x <= tx + R; x++) {
-                for(let y = ty - R; y <= ty + R; y++) {
-                    const tile = window.allTiles.find(t => t.x === x && t.y === y);
-                    if(tile) {
+            if (window.allTiles) {
+                for(let x = tx - R; x <= tx + R; x++) {
+                    for(let y = ty - R; y <= ty + R; y++) {
+                        const tile = window.allTiles.find(t => t.x === x && t.y === y);
+                        if(tile) {
                         mctx.fillStyle = getTileColor(tile.b, tile.e);
                         // Using slight overlap (T + 0.5) to remove "block borders" artifacts
                         mctx.fillRect((x - tx) * T - 0.5, (y - ty) * T - 0.5, T + 0.5, T + 0.5);
+                        }
                     }
                 }
             }
@@ -1491,18 +1868,9 @@
                 bctx.stroke();
             }
 
-            // 4. Heartbeat (Every 100ms for real-time fidelity)
-            const now = Date.now();
-            if(now - lastSyncTime > 100) { 
-                lastSyncTime = now;
-                savePlayerState();
-            }
-            
-            if (now - lastRemoteSync > 150) {
-                updateRemotePlayers();
-                updateChatLog();
-                lastRemoteSync = now;
-            }
+            // [Networking Moved] savePlayerState, syncMultiplayer, and updateChatLog 
+            // have been moved to a global background setInterval below to ensure 
+            // you stay online even if the tab is minimized or inactive.
 
             // --- PROXIMITY CULLING & ANIMATION ---
             const distLimit = 50 * TILE_SCALE;
@@ -1560,66 +1928,45 @@
             } catch(e) { console.error("[Chat] Send failed", e); }
         }
 
-        async function updateRemotePlayers() {
-            try {
-                // [Tactical] Use relative pathing if on same origin for maximum reliability
-                const fetchUrl = API_BASE ? `${API_BASE}/api/game/player/all` : "/api/game/player/all";
-                const res = await fetch(fetchUrl, API_OPTIONS);
-                const players = await res.json();
-                const activeNames = new Set();
-                
-                players.forEach(p => {
-                    if (p.username === username || !p.username) return; // Skip self/invalid entries
-                    activeNames.add(p.username);
-                    
-                    if (!remotePlayers.has(p.username)) {
-                        remotePlayers.set(p.username, new RemotePlayer(p.username, p.avatar_id));
-                    }
-                    
-                    const rp = remotePlayers.get(p.username);
-                    rp.update(p, 1.5); // Delta doesn't matter much for initial catch
-                });
-                
-                // Cleanup disconnected players
-                for (let [name, rp] of remotePlayers) {
-                    if (!activeNames.has(name)) {
-                        rp.dispose();
-                        remotePlayers.delete(name);
-                    }
-                }
-            } catch(e) { 
-                console.warn("[Multiplayer] Sync failed", e); 
-            }
-        }
 
         function toggleBigMap() {
             isBigMapOpen = !isBigMapOpen;
             const overlay = document.getElementById('big-map-overlay');
-            overlay.style.display = isBigMapOpen ? 'flex' : 'none';
+            if (overlay) overlay.style.display = isBigMapOpen ? 'flex' : 'none';
         }
+        window.toggleBigMap = toggleBigMap;
 
         let lastSentState = { x: 0, y: 0, z: 0, rot_y: 0, status: '' };
-        async function savePlayerState() {
+        let isInventoryDirty = false;
+        window.savePlayerState = async function() {
+            if (state !== 'EXPLORING' || !player || !playerBaseGroup) return;
             const pos = playerBaseGroup.position;
             const rot = player.rotation.y;
-            // Derive Status
-            let status = currentAnimation;
-            if(isActionPlaying) {
-                if(currentAnimation.startsWith('Jump')) status = 'Jump';
-                if(currentAnimation.includes('Dig')) status = 'Dig'; 
-                if(currentAnimation.includes('Punch') || currentAnimation.includes('Attack')) status = 'Punch';
+            const status = currentAnimation;
+            
+            // [Sync] Strict Status Lock: Force actions (Jump, Dig) to have 100% precedence
+            let actionStatus = null;
+            if (window.pendingAction) {
+                actionStatus = window.pendingAction;
+                window.pendingAction = null; // Broadcast Once!
             }
 
             // [Tactical] Optimize: Only send if something has changed significantly
-            // This prevents the server from being flooded by static players
             const changedPos = Math.abs(pos.x - lastSentState.x) > 0.05 || Math.abs(pos.z - lastSentState.z) > 0.05 || Math.abs(pos.y - lastSentState.y) > 0.05;
             const changedRot = Math.abs(rot - lastSentState.rot_y) > 0.1;
             const changedStatus = status !== lastSentState.status;
 
-            if (!changedPos && !changedRot && !changedStatus && (Date.now() - lastSyncTime < 5000)) {
-                return; // Standing still, avoid spam but keep heartbeat every 5s
+            // Heartbeat: forced pulse every 5 seconds
+            const timeSinceLastSave = Date.now() - (lastSaveTime || 0);
+
+            if (!actionStatus && !changedPos && !changedRot && !changedStatus && !isInventoryDirty && (timeSinceLastSave < 5000)) {
+                return; 
             }
 
+            lastSaveTime = Date.now();
+            
+            // Only update "State Memory" for continuous animations (Idle/Walk), not one-shot actions. 
+            // This prevents the "Flicker Back to Idle" from re-triggering logic.
             lastSentState = { x: pos.x, y: pos.y, z: pos.z, rot_y: rot, status: status };
 
             try {
@@ -1630,19 +1977,49 @@
                     body: JSON.stringify({
                         pos: { x: pos.x, y: pos.y, z: pos.z },
                         rot_y: rot,
-                        status: status,
-                        avatar_id: selectedAvatarId
+                        status: actionStatus || status, // Use the One-Shot action if available, else standard state
+                        avatar_id: selectedAvatarId,
+                        inventory: isInventoryDirty ? inventory : undefined,
+                        equipment: isInventoryDirty ? equipment : undefined
                     })
                 });
+                
+            const now = Date.now();
+                window.lastAckTime = now; // [Sync] Upload Acknowledged!
+                const indicator = document.getElementById('syncIndicator');
+                if (indicator) {
+                    // [Honest Connection HUD] Check if BOTH download AND upload were successful recently
+                    const isHealthy = (now - (window.lastAckTime || 0) < 10000) && (now - (window.lastReceiveTime || 0) < 10000);
+                    if (isHealthy) {
+                       indicator.textContent = 'Stable';
+                       indicator.className = 'text-emerald-400';
+                    } else if (now - (window.lastAckTime || 0) >= 10000) {
+                       indicator.textContent = 'Losing Signal';
+                       indicator.className = 'text-amber-400';
+                    } else {
+                       indicator.textContent = 'Sync Delay';
+                       indicator.className = 'text-amber-400';
+                    }
+                }
+                if (isInventoryDirty) isInventoryDirty = false;
             } catch (e) {
                 console.warn("[Map] Heartbeat failed:", e);
+                const indicator = document.getElementById('syncIndicator');
+                if (indicator) {
+                    indicator.textContent = 'Lost';
+                    indicator.className = 'text-rose-400';
+                }
             }
         }
 
 
         function updateExplorer(delta) {
+
             try {
                 if(state !== 'EXPLORING') return;
+                
+                if (!window.playerPhysics) window.playerPhysics = { velocityY: 0, isJumping: false };
+                if (window.debugFrames === undefined) window.debugFrames = 0;
                 
                 const phys = window.playerPhysics;
                 const tx = Math.round(playerBaseGroup.position.x / TILE_SCALE);
@@ -1660,12 +2037,9 @@
                 }
 
             // --- Jump Physics State ---
-            if (!phys) {
-                window.playerPhysics = { velocityY: 0, isJumping: false };
-            }
             const deltaFactor = delta * 60; 
             const gravity = 0.015 * deltaFactor;
-            const jumpStrength = 0.38 * deltaFactor;
+            const jumpStrength = 0.19 * deltaFactor;
 
             // Handle Jump Input (Space) - ONE SHOT
             if (keys.Space === true && !phys.isJumping) {
@@ -2046,9 +2420,259 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
+        async function equipTool(parentModel, toolPath, boneName) {
+            // [Compatibility] Prepend API_BASE for absolute paths from DB
+            if (toolPath.startsWith('/models/') && API_BASE && !toolPath.startsWith(API_BASE)) {
+                toolPath = API_BASE + toolPath;
+            }
+
+            const loader = new GLTFLoader();
+            try {
+                const gltf = await loader.loadAsync(toolPath);
+                const tool = gltf.scene;
+                
+                let bone = null;
+                const foundNames = [];
+                parentModel.traverse(child => {
+                    foundNames.push(child.name);
+                    const normalizedName = child.name.replace(/[._]/g, '').toLowerCase();
+                    const targetNormalized = boneName.replace(/[._]/g, '').toLowerCase();
+                    
+                    if (child.name === boneName || normalizedName === targetNormalized || child.name.includes(boneName)) {
+                        bone = child;
+                    }
+                });
+
+                if (bone) {
+                    bone.add(tool);
+                    // Standardize orientation for this asset pack
+                    if (toolPath.includes('Tool') || toolPath.includes('Sword')) {
+                        tool.position.set(0, 0, 0);
+                        tool.rotation.set(Math.PI / 2, 0, 0);
+                        tool.scale.set(0.5, 0.5, 0.5);
+                    }
+                    console.log(`[Equipment] ${toolPath} attached to ${bone.name}`);
+                } else {
+                    console.error(`[Equipment] Bone ${boneName} not found. Available nodes:`, foundNames);
+                }
+            } catch (e) {
+                console.error(`[Equipment] Failed to load tool ${toolPath}`, e);
+            }
+        }
+
+        function toggleInventory() {
+            isInventoryOpen = !isInventoryOpen;
+            const overlay = document.getElementById('inventory-overlay');
+            if (overlay) overlay.style.display = isInventoryOpen ? 'flex' : 'none';
+            if (isInventoryOpen) renderInventory();
+        }
+        window.toggleInventory = toggleInventory;
+
+        function renderInventory() {
+            const grid = document.getElementById('inventory-grid');
+            const equip = document.getElementById('equipment-slots');
+            if (!grid || !equip) return;
+            
+            // Safety: Ensure inventory has 20 slots
+            while (inventory.length < 20) inventory.push(null);
+            if (inventory.length > 20) inventory.length = 20;
+
+            grid.innerHTML = '';
+            inventory.forEach((item, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'inv-slot';
+                slot.dataset.index = index;
+                slot.dataset.type = 'INV';
+                
+                if (selectedSlot && selectedSlot.type === 'INV' && selectedSlot.id === index) {
+                    slot.classList.add('selected');
+                }
+
+                if (item) {
+                    const content = document.createElement('div');
+                    content.className = 'inv-item-content';
+                    content.innerHTML = item.icon || '⚔️'; 
+                    slot.appendChild(content);
+                    if (item.stackable) {
+                        const count = document.createElement('div');
+                        count.className = 'inv-stack-size';
+                        count.innerText = item.count;
+                        slot.appendChild(count);
+                    }
+                }
+                
+                slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('INV', index); };
+                grid.appendChild(slot);
+            });
+
+            const slots = [
+                { id: 'head', label: 'Head', class: 'slot-head' },
+                { id: 'neck', label: 'Neck', class: 'slot-neck' },
+                { id: 'torso', label: 'Chest', class: 'slot-torso' },
+                { id: 'hips', label: 'Hips', class: 'slot-hips' },
+                { id: 'shoulderL', label: 'Shoulder L', class: 'slot-shoulder-l' },
+                { id: 'shoulderR', label: 'Shoulder R', class: 'slot-shoulder-r' },
+                { id: 'fistL', label: 'Off Hand', class: 'slot-fist-l' },
+                { id: 'fistR', label: 'Main Hand', class: 'slot-fist-r' },
+                { id: 'ring1', label: 'Ring 1', class: 'slot-ring-1' },
+                { id: 'ring2', label: 'Ring 2', class: 'slot-ring-2' },
+                { id: 'footL', label: 'Foot L', class: 'slot-foot-l' },
+                { id: 'footR', label: 'Foot R', class: 'slot-foot-r' },
+                { id: 'bag1', label: 'Bag 1', class: 'slot-bag-1' },
+                { id: 'bag2', label: 'Bag 2', class: 'slot-bag-2' }
+            ];
+
+            equip.innerHTML = '';
+            slots.forEach(s => {
+                const slot = document.createElement('div');
+                slot.className = `inv-slot ${s.class}`;
+                if (equipment[s.id]) slot.classList.add('equipped');
+                if (selectedSlot && selectedSlot.type === 'EQUIP' && selectedSlot.id === s.id) {
+                    slot.classList.add('selected');
+                }
+                
+                const label = document.createElement('div');
+                label.className = 'slot-label';
+                label.innerText = s.label;
+                slot.appendChild(label);
+
+                const item = equipment[s.id];
+                if (item) {
+                    const content = document.createElement('div');
+                    content.className = 'inv-item-content';
+                    content.innerHTML = item.icon || '⚔️';
+                    slot.appendChild(content);
+                }
+
+                slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('EQUIP', s.id); };
+                equip.appendChild(slot);
+            });
+        }
+
+        function onSlotClick(type, id) {
+            const item = (type === 'INV') ? inventory[id] : equipment[id];
+
+            if (!selectedSlot) {
+                if (item) {
+                    selectedSlot = { type, id };
+                    console.log("[Inventory] Selected", item.name);
+                }
+            } else {
+                handleMove(selectedSlot, { type, id });
+                selectedSlot = null;
+            }
+            renderInventory();
+        }
+
+        function handleMove(source, target) {
+            const sourceItem = (source.type === 'INV') ? inventory[source.id] : equipment[source.id];
+            const targetItem = (target.type === 'INV') ? inventory[target.id] : equipment[target.id];
+
+            // Validation
+            if (target.type === 'EQUIP' && !canEquip(sourceItem, target.id)) {
+                console.warn("[Inventory] Cannot equip this item here.");
+                return;
+            }
+            if (source.type === 'EQUIP' && targetItem && !canEquip(targetItem, source.id)) {
+                console.warn("[Inventory] Cannot swap, item incompatible.");
+                return;
+            }
+
+            // Perform Swap
+            if (source.type === 'INV') inventory[source.id] = targetItem;
+            else {
+                equipment[source.id] = targetItem;
+                updateCharacterVisuals(player, source.id, targetItem);
+            }
+
+            if (target.type === 'INV') inventory[target.id] = sourceItem;
+            else {
+                equipment[target.id] = sourceItem;
+                updateCharacterVisuals(player, target.id, sourceItem);
+            }
+            
+            isInventoryDirty = true;
+            savePlayerState(); // [Persistent]
+        }
+
+        function canEquip(item, slotId) {
+            if (!item) return true;
+            const type = item.type;
+            if (slotId === 'fistR' || slotId === 'fistL') return type === 'WEAPON' || type === 'TOOL';
+            if (slotId === 'head') return type === 'HEAD';
+            if (slotId === 'neck') return type === 'NECK';
+            if (slotId === 'ring1' || slotId === 'ring2') return type === 'RING';
+            if (slotId === 'bag1' || slotId === 'bag2') return type === 'BAG';
+            if (slotId === 'footL' || slotId === 'footR') return type === 'FOOT';
+            if (slotId === 'shoulderL' || slotId === 'shoulderR') return type === 'SHOULDER';
+            if (slotId === 'torso') return type === 'CHEST';
+            return false;
+        }
+
+        function updateCharacterVisuals(targetPlayer, slotId, item) {
+            if (!targetPlayer) return;
+            
+            // Map UI slot names to Bone Names
+            const slotToBone = {
+                'head': 'Head',
+                'fistR': 'Fist.R',
+                'fistL': 'Fist.L',
+                'footL': 'Foot.L',
+                'footR': 'Foot.R',
+                'shoulderL': 'Shoulder.L',
+                'shoulderR': 'Shoulder.R',
+                'torso': 'Torso'
+            };
+
+            const boneName = slotToBone[slotId];
+            if (!boneName) return;
+
+            // Remove existing item from bone
+            const bone = findBone(targetPlayer, boneName);
+            if (bone) {
+                // Clear children with isEquipped flag
+                const itemsToRemove = bone.children.filter(c => c.userData.isEquipped);
+                itemsToRemove.forEach(c => bone.remove(c));
+            }
+
+            if (item && item.model) {
+                equipTool(targetPlayer, item.model, boneName).then(() => {
+                    // Tag the loaded scene so we can remove it later
+                    const bone = findBone(targetPlayer, boneName);
+                    if (bone && bone.children.length > 0) {
+                        const lastChild = bone.children[bone.children.length - 1];
+                        lastChild.userData.isEquipped = true;
+                    }
+                });
+            }
+        }
+
+        function findBone(parent, name) {
+            let bone = null;
+            parent.traverse(child => {
+                const normalizedName = child.name.replace(/[._]/g, '').toLowerCase();
+                const targetNormalized = name.replace(/[._]/g, '').toLowerCase();
+                if (child.name === name || normalizedName === targetNormalized) {
+                    bone = child;
+                }
+            });
+            return bone;
+        }
+
         window.logout = () => { window.location.href = '/login'; };
 
         init();
+
+        // [Networking Engine] Background Sync & Heartbeat
+        // Moving these calls out of the requestAnimationFrame (animate) loop 
+        // ensures that your character stays online even if the tab is inactive or minimized.
+        setInterval(() => {
+            if (state === 'EXPLORING') {
+                savePlayerState();
+                syncMultiplayer();
+                updateChatLog();
+            }
+        }, 150);
     </script>
 </body>
 </html>

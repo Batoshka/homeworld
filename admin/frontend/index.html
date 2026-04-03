@@ -200,6 +200,9 @@
         const ctx = canvas.getContext('2d');
         const TILE_SIZE = 5;
 
+        // Robust path handling for sub-folder deployments
+        const ADMIN_API_BASE = (window.location.origin + window.location.pathname).replace(/\/$/, "");
+
         function getTileColor(b, e) {
             let h, s, l;
             switch(b) {
@@ -220,7 +223,7 @@
 
         async function fetchStatus() {
             try {
-                const res = await fetch('/api/admin/world/status');
+                const res = await fetch(`${ADMIN_API_BASE}/api/admin/world/status`);
                 const data = await res.json();
                 document.getElementById('statObjects').textContent = data.objects.toLocaleString();
                 drawMap();
@@ -230,8 +233,8 @@
         async function drawMap() {
             try {
                 const [tilesRes, objsRes] = await Promise.all([
-                    fetch('/api/admin/world/tiles'),
-                    fetch('/api/admin/world/objects')
+                    fetch(`${ADMIN_API_BASE}/api/admin/world/tiles`),
+                    fetch(`${ADMIN_API_BASE}/api/admin/world/objects`)
                 ]);
                 const tiles = await tilesRes.json();
                 const objects = await objsRes.json();
@@ -253,7 +256,7 @@
 
                 // 4. Render Players
                 try {
-                    const pRes = await fetch('/api/admin/world/players');
+                    const pRes = await fetch(`${ADMIN_API_BASE}/api/admin/world/players`);
                     const players = await pRes.json();
                     
                     players.forEach(p => {
@@ -293,7 +296,7 @@
             text.textContent = 'RECONSTRUCTING...';
 
             try {
-                await fetch('/api/admin/world/generate', { method: 'POST' });
+                await fetch(`${ADMIN_API_BASE}/api/admin/world/generate`, { method: 'POST' });
                 await fetchStatus();
             } catch (e) {
                 alert("Neural Link Interrupted");
@@ -311,7 +314,7 @@
             btn.disabled = true;
 
             try {
-                const res = await fetch('/api/admin/weather', {
+                const res = await fetch(`${ADMIN_API_BASE}/api/admin/weather`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ is_raining: isRaining })
@@ -346,7 +349,7 @@
 
         async function checkServerStatus() {
             try {
-                const res = await fetch('/api/admin/server/status');
+                const res = await fetch(`${ADMIN_API_BASE}/api/admin/server/status`);
                 const data = await res.json();
                 const dot = document.getElementById('statusDot');
                 const text = document.getElementById('statusText');
@@ -365,7 +368,7 @@
 
         async function controlServer(cmd) {
             try {
-                await fetch('/api/admin/server/command', {
+                await fetch(`${ADMIN_API_BASE}/api/admin/server/command`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ command: cmd })

@@ -54,7 +54,8 @@ class PlayerState(Base):
     pos_z = Column(Float, default=0.0)
     rot_y = Column(Float, default=0.0)
     status = Column(String(20), default="Idle")
-    inventory = Column(JSONB, default={})
+    inventory = Column(JSONB, default=[]) # list of 20 slots
+    equipment = Column(JSONB, default={}) # dict of named slots
     stats = Column(JSONB, default={"health": 100, "level": 1})
     last_saved = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
@@ -74,6 +75,16 @@ class WorldObject(Base):
     model_id = Column(String(50))
     rotation_y = Column(Float, default=0.0)
     scale = Column(Float, default=1.0)
+
+class Item(Base):
+    __tablename__ = "items"
+    id = Column(String(50), primary_key=True)
+    name = Column(String(100))
+    type = Column(String(20)) # WEAPON, TOOL, MATERIAL, etc.
+    icon = Column(String(100)) # Emoji or path
+    model = Column(String(255), nullable=True) # GLTF path
+    stackable = Column(Boolean, default=False)
+    max_stack = Column(Integer, default=100)
 
 def get_auth_db():
     db = AuthSessionLocal()
