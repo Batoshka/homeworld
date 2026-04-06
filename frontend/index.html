@@ -847,7 +847,11 @@
         const mouse = new THREE.Vector2();
         let targetObject = null;
 
-        const keys = { KeyW:false, KeyA:false, KeyS:false, KeyD:false, Space:false, KeyG:false, KeyI:false, KeyM:false };
+        const keys = { 
+            KeyW:false, KeyA:false, KeyS:false, KeyD:false, 
+            Space:false, ShiftLeft: false, ShiftRight: false, KeyC: false,
+            KeyG:false, KeyI:false, KeyM:false 
+        };
         const playerRadius = 0.6;
         let isRaining = false;
         let rainIntensity = 0.0;
@@ -990,6 +994,7 @@
 
         // --- GLOBAL EVENT LISTENERS (Moved out of init for immediate responsiveness) ---
         window.addEventListener('keydown', e => { 
+            if (e.repeat) return; // [Fix] Prevent repetitive input logic
             if (e.code === 'KeyG') {
                 if (isBuildMode) performDig();
                 else console.log("[Mode] Activate Build Mode to dig.");
@@ -2092,8 +2097,12 @@
                 const nameMap = {
                     'Idle': 'Idle_Loop',
                     'Walk': 'Walk_Loop',
-                    'Run': 'Sprint_Loop',
-                    'Jump': 'Jump_Start'
+                    'Jog': 'Jog_Fwd_Loop',
+                    'Jump_Start': 'Jump_Start',
+                    'Jump_Loop': 'Jump_Loop',
+                    'Jump_Land': 'Jump_Land',
+                    'Crouch_Idle': 'Crouch_Idle_Loop',
+                    'Crouch_Walk': 'Crouch_Fwd_Loop'
                 };
                 const clipName = nameMap[name] || name;
                 const clip = animationLibrary[clipName];
@@ -2105,10 +2114,10 @@
                         const oldClip = animationLibrary[oldClipName];
                         if (oldClip) {
                             const oldAction = mixer.clipAction(oldClip);
-                            oldAction.fadeOut(0.2);
+                            oldAction.fadeOut(0.15); // [Tactical] Sharper crossfade for movement
                         }
                     }
-                    newAction.reset().fadeIn(0.2).play();
+                    newAction.reset().fadeIn(0.15).play();
                     currentAnimation = name;
                 } else {
                     if (name !== 'Idle') playAnimation('Idle');
@@ -2738,7 +2747,7 @@
                 phys.velocityY = jumpStrength;
                 phys.isJumping = true;
                 keys.Space = false; // Prevent repeat jump while holding
-                playAction('Jump', 500); // FIXED NAME: Jump (formerly Jump_Start)
+                playAction('Jump_Start', 500); // FIXED NAME: Jump_Start (Stage 1)
                 console.log(`[Jump] At: ${playerBaseGroup.position.y.toFixed(2)}, Floor: ${terrainY.toFixed(2)}`);
             }
 
@@ -2758,8 +2767,13 @@
             if(keys.KeyA) moveX -= 1;
             if(keys.KeyD) moveX += 1;
 
-            const speed = keys.ShiftLeft ? 0.35 : 0.15;
+            const isCrouching = keys.KeyC;
+            const isJogging = keys.ShiftLeft || keys.ShiftRight;
             const isMoving = (moveX !== 0 || moveZ !== 0);
+
+            let speed = 0.040; // Walk
+            if (isCrouching) speed = 0.02;
+            else if (isJogging) speed = 0.100; 
 
             if(isMoving) {
                 const camRotY = orbit_angle_horizontal;
@@ -2810,21 +2824,24 @@
                 player.rotation.y = THREE.MathUtils.lerp(player.rotation.y, targetRotation, delta * 15);
             }
 
-            // Handle Jump Logic
+            // 1. Animation Logic
             if (phys.isJumping) {
-                // If we are airborne and the launch animation (Jump) is finished, switch to Jump_Idle
-                if (!isActionPlaying && currentAnimation !== 'Jump_Idle') {
-                    playAnimation('Jump_Idle');
+                // If we are airborne and the launch animation (Jump_Start) is finished, switch to Jump_Loop (Stage 2)
+                if (!isActionPlaying && currentAnimation !== 'Jump_Loop') {
+                    playAnimation('Jump_Loop');
                 }
             } else if (isMoving) {
                 // Moving on ground
                 if (!isActionPlaying) {
-                    playAnimation(keys.ShiftLeft ? 'Run' : 'Walk');
+                    if (isCrouching) playAnimation('Crouch_Walk');
+                    else if (isJogging) playAnimation('Jog');
+                    else playAnimation('Walk');
                 }
             } else {
                 // Idle on ground
                 if (!isActionPlaying) {
-                    playAnimation('Idle');
+                    if (isCrouching) playAnimation('Crouch_Idle');
+                    else playAnimation('Idle');
                 }
             }
 
