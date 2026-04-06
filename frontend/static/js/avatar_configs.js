@@ -35,3 +35,17 @@ export const ANIMATION_MAP = [
     "Sword_Attack", "Sword_Attack_RM", "Sword_Idle", "Walk_Formal_Loop", 
     "Walk_Loop"
 ];
+
+export const HAIR_MAP = {
+    'Buns': 'Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Buns.gltf',
+    'Buzzed': 'Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Buzzed.gltf',
+    'BuzzedFemale': 'Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_BuzzedFemale.gltf',
+    'Long': 'Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Long.gltf',
+    'SimpleParted': 'Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_SimpleParted.gltf',
+    'Beard': 'Hairstyles/Rigged to Head Bone/glTF (Godot -Unreal)/Hair_Beard.gltf'
+};
+
+export const HAIR_TEXTURE_MAP = {
+    'Style1': { base: 'T_Hair_1_BaseColor.png', normal: 'T_Hair_1_Normal.png' },
+    'Style2': { base: 'T_Hair_2_BaseColor.png', normal: 'T_Hair_2_Normal.png' }
+};

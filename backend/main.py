@@ -71,11 +71,15 @@ CONFIG = {
 chat_history = [] # [Tactical] Global Chat Registry
 
 @app.get("/")
-async def read_root(request: Request, user: User = Depends(get_current_user)):
+async def read_root(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_game_db)):
     if not user:
         return RedirectResponse(url="/login")
     
     try:
+        # Fetch existing player state (avatar choice)
+        player_state = db.query(PlayerState).filter(PlayerState.user_id == user.id).first()
+        avatar_id = player_state.avatar_id if player_state else None
+
         with open("../frontend/index.html", "r") as f:
             content = f.read()
         
@@ -83,13 +87,17 @@ async def read_root(request: Request, user: User = Depends(get_current_user)):
         host = request.base_url.hostname
         api_base = os.getenv("HOMEWORLD_API_BASE")
         if not api_base:
-            # If port 3003 is NOT in the URL, assume we are behind a proxy path /homeworld
             if ":3003" not in str(request.url):
                 api_base = "/homeworld"
             else:
                 api_base = f"http://{host}:3003"
             
-        config = {"API_BASE": api_base, "username": user.username}
+        config = {
+            "API_BASE": api_base, 
+            "username": user.username,
+            "avatar_id": avatar_id, # [Identity] Inject selection for AUTO-JOIN
+            "visuals": player_state.visuals if player_state else None
+        }
         config_script = f"<script>window.CONFIG = {json.dumps(config)};</script>"
         content = content.replace("<head>", f"<head>{config_script}")
         
@@ -203,6 +211,7 @@ def get_game_state(
         "pos": {"x": state.pos_x, "y": state.pos_y, "z": state.pos_z},
         "rot_y": state.rot_y,
         "avatar_id": state.avatar_id,
+        "visuals": state.visuals,
         "inventory": state.inventory,
         "equipment": state.equipment,
         "stats": state.stats,
@@ -231,7 +240,21 @@ async def save_game_state(
         if "z" in data["pos"]: state.pos_z = data["pos"]["z"]
     if "rot_y" in data: state.rot_y = data["rot_y"]
     if "status" in data: state.status = data["status"]
-    if "avatar_id" in data: state.avatar_id = data["avatar_id"]
+    if "avatar_id" in data:
+        # [Migration] Handle old composite IDs e.g. "Identity|H1|Eyes"
+        avatar_val = str(data["avatar_id"])
+        if "|" in avatar_val:
+            parts = avatar_val.split("|")
+            state.avatar_id = parts[0]
+            # If visuals not in data, migrate the parts
+            if "visuals" not in data:
+                if not state.visuals: state.visuals = {}
+                if len(parts) > 1: state.visuals["hair"] = int(parts[1].replace('H', '')) if 'H' in parts[1] else 0
+                if len(parts) > 2: state.visuals["eyes"] = parts[2]
+        else:
+            state.avatar_id = avatar_val
+
+    if "visuals" in data: state.visuals = data["visuals"]
     if "inventory" in data: state.inventory = data["inventory"]
     if "equipment" in data: state.equipment = data["equipment"]
     

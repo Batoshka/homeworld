@@ -624,6 +624,46 @@
                     <div class="uppercase tracking-widest">Identity B</div>
                 </div>
             </div>
+            
+            <!-- Modular Selection Sections -->
+            <div id="hairSelection" class="mt-4 mb-2 flex flex-col items-center">
+                <span class="text-[9px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hairstyle</span>
+                <div class="flex gap-4 px-4 py-2 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                    <!-- Universal None -->
+                    <div class="hair-dot w-6 h-6 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair(null)" title="None"></div>
+                    
+                    <!-- Female Only -->
+                    <div class="hair-dot female-only w-6 h-6 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buns')" data-id="Buns" title="Buns"></div>
+                    <div class="hair-dot female-only w-6 h-6 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Long')" data-id="Long" title="Long"></div>
+                    <div class="hair-dot female-only w-6 h-6 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('BuzzedFemale')" data-id="BuzzedFemale" title="Buzzed Female"></div>
+                    
+                    <!-- Male Only -->
+                    <div class="hair-dot male-only w-6 h-6 rounded-full bg-[#1A1A1A] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buzzed')" data-id="Buzzed" title="Buzzed"></div>
+                    <div class="hair-dot male-only w-6 h-6 rounded-full bg-[#4A3728] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('SimpleParted')" data-id="SimpleParted" title="Simple Parted"></div>
+                </div>
+            </div>
+
+            <div id="beardSelection" class="mt-2 mb-2 flex flex-col items-center" style="display: none;">
+                <span class="text-[9px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Facial Hair</span>
+                <div class="flex gap-4 px-4 py-2 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                    <div class="beard-dot w-6 h-6 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard(null)" title="None"></div>
+                    <div class="beard-dot w-6 h-6 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard('Beard')" data-id="Beard" title="Full Beard"></div>
+                </div>
+            </div>
+
+            <div id="colorSelection" class="mt-2 mb-4 flex flex-col items-center">
+                <span class="text-[9px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hair Color</span>
+                <div class="flex gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#E6BE8A] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#E6BE8A')" data-hex="#E6BE8A" title="Blonde"></div>
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#59392D] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#59392D')" data-hex="#59392D" title="Brown"></div>
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#2A1B14] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#2A1B14')" data-hex="#2A1B14" title="Dark Brown"></div>
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#0F0F0F] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#0F0F0F')" data-hex="#0F0F0F" title="Black"></div>
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#8D2D1B] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#8D2D1B')" data-hex="#8D2D1B" title="Red"></div>
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#A0A0A0] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#A0A0A0')" data-hex="#A0A0A0" title="Grey"></div>
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#3B82F6] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#3B82F6')" data-hex="#3B82F6" title="Blue"></div>
+                    <div class="color-dot w-5 h-5 rounded-full bg-[#EC4899] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#EC4899')" data-hex="#EC4899" title="Pink"></div>
+                </div>
+            </div>
 
             <!-- Removed appearance-panel as per request -->
 
@@ -637,6 +677,35 @@
             <div id="btn-inventory" onclick="toggleInventory()" class="toolbar-btn" title="Inventory (I)">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
             </div>
+
+        <!-- Rendering Debug Panel (Hidden) -->
+        <div id="renderDebug" class="fixed top-4 right-4 glass p-4 text-[10px] space-y-2 z-50 shadow-2xl" style="display: none !important;">
+            <div class="font-bold border-b border-white/10 pb-1 mb-2 text-indigo-400">Avatar Fine-Tuning</div>
+            <div class="flex justify-between gap-4">
+                <span>Hair Y</span>
+                <input type="range" id="dbg-hairY" min="-0.2" max="0.2" step="0.005" value="0.05" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+            </div>
+            <div class="flex justify-between gap-4">
+                <span>Hair Z</span>
+                <input type="range" id="dbg-hairZ" min="-0.2" max="0.2" step="0.005" value="-0.03" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+            </div>
+            <div class="flex justify-between gap-4">
+                <span>Norm X</span>
+                <input type="range" id="dbg-normX" min="-2.0" max="2.0" step="0.1" value="0.5" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+            </div>
+            <div class="flex justify-between gap-4">
+                <span>Norm Y</span>
+                <input type="range" id="dbg-normY" min="-2.0" max="2.0" step="0.1" value="-0.5" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+            </div>
+            <div class="flex justify-between gap-4">
+                <span>Rough</span>
+                <input type="range" id="dbg-rough" min="0" max="1.0" step="0.05" value="0.8" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+            </div>
+            <div class="flex justify-between gap-4">
+                <span>FlipY</span>
+                <input type="checkbox" id="dbg-flipY">
+            </div>
+        </div>
             <div id="btn-map" onclick="toggleBigMap()" class="toolbar-btn" title="Toggle Map">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
             </div>
@@ -683,7 +752,7 @@
         const charPath = API_BASE + '/models/Characters/Avatars/';
 
         // --- DYNAMIC CONFIG LOAD (404 Robustness) ---
-        const { WEARING_MAP, ANIMATION_MAP } = await import(`${API_BASE}/static/js/avatar_configs.js`);
+        const { WEARING_MAP, ANIMATION_MAP, HAIR_MAP, HAIR_TEXTURE_MAP } = await import(`${API_BASE}/static/js/avatar_configs.js`);
 
         // --- CONSTANTS ---
         const GRID_SIZE = 100;
@@ -743,6 +812,10 @@
 
         let worldData = null;
         let selectedAvatarId = window.selectedAvatarId = 'Superhero_Female_FullBody';
+        let selectedHairId = window.selectedHairId = null; 
+        let selectedBeardId = window.selectedBeardId = null; 
+        let selectedHairColor = window.selectedHairColor = '#ffffff';
+        // [Modular] Hair is now managed locally within each avatar's scene tree
         
         let orbit_angle_horizontal = Math.PI;
         let orbit_angle_vertical = 0.5;
@@ -863,7 +936,15 @@
                         const match = AVATARS.find(a => a.endsWith(selectedAvatarId));
                         if (match) selectedAvatarId = match;
                     }
-                    selectAvatar(selectedAvatarId);
+                // Restore appearance
+                if (config.visuals) {
+                    window.selectedHairId = config.visuals.hairId || null;
+                    window.selectedBeardId = config.visuals.beardId || null;
+                    window.selectedHairColor = config.visuals.hairColor || '#ffffff';
+                    console.log(`[Init] Restored appearance: Hair=${window.selectedHairId}, Beard=${window.selectedBeardId}, Color=${window.selectedHairColor}`);
+                }
+                
+                selectAvatar(selectedAvatarId);
                 } else {
                     selectAvatar(AVATARS[0]); // Default to first available
                 }
@@ -960,6 +1041,17 @@
                 return;
             }
 
+            // [Sync] Find character skeleton for hair binding
+            let characterSkeleton = null;
+            let characterMesh = null;
+            root.traverse(obj => {
+                if (obj.isSkinnedMesh && !obj.name.toLowerCase().includes('hair')) {
+                    characterSkeleton = obj.skeleton;
+                    characterMesh = obj;
+                }
+            });
+            console.log(`[Avatar] Base Skeleton Found: ${characterSkeleton ? 'YES' : 'NO'}`);
+
             const texLoader = new THREE.TextureLoader();
             const isFemale = avatarId.toLowerCase().includes('female');
             
@@ -1051,11 +1143,168 @@
                     }
                 }
             });
+
+            // --- Modular Attachment System ---
+            const slots = [
+                { id: window.selectedHairId, groupName: 'Avatar_Modular_Hair' },
+                { id: window.selectedBeardId, groupName: 'Avatar_Modular_Beard' }
+            ];
+
+            slots.forEach(slot => {
+                const hairPath = HAIR_MAP[slot.id];
+                
+                // Cleanup previous item for this slot
+                const oldItem = root.getObjectByName(slot.groupName);
+                if (oldItem) {
+                    root.remove(oldItem);
+                    console.log(`[Avatar] Cleaning up previous ${slot.groupName}`);
+                }
+
+                if (slot.id && hairPath) {
+                    const fullHairPath = window.CONFIG?.API_BASE + '/models/Characters/Avatars/' + hairPath;
+                    console.log(`[Avatar] Loading Modular Item: ${slot.id} for slot ${slot.groupName}`);
+
+                    new GLTFLoader().load(fullHairPath, (gltf) => {
+                        const hairScene = gltf.scene;
+                        
+                        // Apply hair textures
+                        const style = HAIR_TEXTURE_MAP['Style1']; // Defaulting for now
+                        const texPath = window.CONFIG?.API_BASE + '/models/Characters/Avatars/Hairstyles/Textures/';
+                        const hBase = texLoader.load(`${texPath}${style.base}`);
+                        const hNorm = texLoader.load(`${texPath}${style.normal}`);
+                        hBase.colorSpace = 'srgb';
+                        hNorm.flipY = false;
+                        hBase.flipY = false;
+
+                        const hairMat = new THREE.MeshStandardMaterial({
+                            map: hBase,
+                            normalMap: hNorm,
+                            color: new THREE.Color(window.selectedHairColor || '#ffffff'),
+                            roughness: 0.9,
+                            transparent: true,
+                            alphaTest: 0.1, 
+                            side: THREE.DoubleSide,
+                            depthWrite: true,
+                            depthTest: true
+                        });
+
+                        const meshes = [];
+                        hairScene.traverse(obj => {
+                            if (obj.isMesh || obj.isSkinnedMesh) {
+                                obj.material = hairMat;
+                                obj.castShadow = true;
+                                obj.receiveShadow = true;
+                                meshes.push(obj);
+                            }
+                        });
+
+                        if (characterSkeleton && meshes.length > 0) {
+                            const modGroup = new THREE.Group();
+                            modGroup.name = slot.groupName;
+                            root.add(modGroup);
+                            
+                            meshes.forEach(m => {
+                                if (m.isSkinnedMesh) {
+                                    m.bind(characterSkeleton, characterMesh.bindMatrix);
+                                }
+                                modGroup.add(m);
+                            });
+                            console.log(`[Avatar] Attached modular item to slot ${slot.groupName}`);
+                        }
+                    });
+                }
+            });
         }
         window.applyAvatarConfig = applyAvatarConfig;
 
+        window.selectHair = async (hairId) => {
+            window.selectedHairId = hairId;
+            console.log(`[Avatar] Selecting Hairstyle: ${hairId}`);
+            
+            // Apply visually
+            const avatarId = window.selectedAvatarId;
+            if (avatarId && models[avatarId]) {
+                applyAvatarConfig(models[avatarId].scene, avatarId);
+            }
+            
+            saveVisuals();
+
+            // Update active state in UI
+            document.querySelectorAll('.hair-dot').forEach(dot => {
+                dot.style.boxShadow = (dot.dataset.id === hairId) ? '0 0 0 2px white' : 'none';
+            });
+        };
+
+        window.selectBeard = async (beardId) => {
+            window.selectedBeardId = beardId;
+            console.log(`[Avatar] Selecting Facial Hair: ${beardId}`);
+            
+            // Apply visually
+            const avatarId = window.selectedAvatarId;
+            if (avatarId && models[avatarId]) {
+                applyAvatarConfig(models[avatarId].scene, avatarId);
+            }
+            
+            saveVisuals();
+
+            // Update active state in UI
+            document.querySelectorAll('.beard-dot').forEach(dot => {
+                dot.style.boxShadow = (dot.dataset.id === beardId) ? '0 0 0 2px white' : 'none';
+            });
+        };
+
+        window.selectHairColor = async (hex) => {
+            window.selectedHairColor = hex;
+            console.log(`[Avatar] Selecting Hair Color: ${hex}`);
+
+            // Apply visually to existing meshes immediately (Real-time update)
+            const avatarId = window.selectedAvatarId;
+            if (avatarId && models[avatarId]) {
+                models[avatarId].scene.traverse(obj => {
+                    if (obj.isMesh && (obj.parent?.name.includes('Avatar_Modular_Hair') || obj.parent?.name.includes('Avatar_Modular_Beard'))) {
+                        if (obj.material) {
+                            obj.material.color.set(hex);
+                            obj.material.needsUpdate = true;
+                        }
+                    }
+                });
+            }
+
+            saveVisuals();
+
+            // Update UI
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.style.boxShadow = (dot.dataset.hex === hex) ? '0 0 0 2px white' : 'none';
+            });
+        };
+
+        async function saveVisuals() {
+            try {
+                const visuals = window.CONFIG?.visuals || {};
+                visuals.hairId = window.selectedHairId;
+                visuals.beardId = window.selectedBeardId;
+                visuals.hairColor = window.selectedHairColor;
+                
+                await fetch(`${window.CONFIG?.API_BASE}/api/game/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ visuals })
+                });
+            } catch (err) {
+                console.error("[Avatar] Failed to save visuals:", err);
+            }
+        }
+
         window.selectAvatar = (id) => {
-            selectedAvatarId = id;
+            selectedAvatarId = window.selectedAvatarId = id;
+            console.log(`[Avatar] Selected Active Avatar: ${id}`);
+            
+            // Update gender-specific UI
+            const isFemale = id.toLowerCase().includes('female');
+            document.querySelectorAll('.female-only').forEach(el => el.style.display = isFemale ? 'block' : 'none');
+            document.querySelectorAll('.male-only').forEach(el => el.style.display = isFemale ? 'none' : 'block');
+            document.getElementById('beardSelection').style.display = isFemale ? 'none' : 'flex';
+
             AVATARS.forEach(cid => {
                 if (models[cid]) models[cid].scene.visible = (cid === id);
             });

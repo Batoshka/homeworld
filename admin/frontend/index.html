@@ -201,7 +201,7 @@
         const TILE_SIZE = 5;
 
         // Robust path handling for sub-folder deployments
-        const ADMIN_API_BASE = (window.location.origin + window.location.pathname).replace(/\/$/, "");
+        const ADMIN_API_BASE = (window.location.origin + window.location.pathname).replace(/\/$/, "") || (window.location.origin + "/homeworld/admin");
 
         function getTileColor(b, e) {
             let h, s, l;

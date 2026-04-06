@@ -119,7 +119,7 @@
         // Port Synchronization: Target the definitive API_BASE or fallback to 3003
         // [Tactical] Dynamic API Resolution System
         const INJECTED_BASE = window.CONFIG?.API_BASE;
-        const DEFAULT_BASE = `http://${window.location.hostname}:3003`;
+        const DEFAULT_BASE = `${window.location.origin}/homeworld`;
         
         // If injected base is localhost but we're NOT on localhost, use the current hostname
         const API_BASE = (INJECTED_BASE && !INJECTED_BASE.includes('localhost')) 

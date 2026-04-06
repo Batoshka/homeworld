@@ -57,6 +57,7 @@ class PlayerState(Base):
     inventory = Column(JSONB, default=[]) # list of 20 slots
     equipment = Column(JSONB, default={}) # dict of named slots
     stats = Column(JSONB, default={"health": 100, "level": 1})
+    visuals = Column(JSONB, default={"hair": 0, "eyes": "brown", "skin": "light"})
     last_saved = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
 class WorldTile(Base):
