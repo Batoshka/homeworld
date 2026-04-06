@@ -476,74 +476,95 @@
         }
 
 
-        /* Avatar Selection Refinement (Compact Horizontal Bar) */
+        /* Avatar Selection (Two-Row Layout) */
         .selection-frame {
             position: fixed;
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            width: fit-content;
-            padding: 20px 30px;
+            width: 760px; /* Wider for side-by-side elements */
+            padding: 20px 24px;
             display: flex;
-            align-items: center;
-            gap: 24px;
-            border-radius: 20px;
+            flex-direction: column;
+            gap: 16px;
+            border-radius: 28px;
+            background: rgba(10, 10, 15, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1000;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            pointer-events: auto;
         }
-        .appearance-panel {
+
+        .selection-row {
             display: flex;
             align-items: center;
-            gap: 32px;
-            padding: 0 32px;
-            border-left: 1px solid rgba(255,255,255,0.1);
-            border-right: 1px solid rgba(255,255,255,0.1);
+            justify-content: space-between;
+            width: 100%;
         }
+
+        .customization-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            width: 100%;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
         .avatar-grid {
             display: flex;
             gap: 12px;
         }
+
         .avatar-card {
-            padding: 8px 16px;
-            min-width: 100px;
-            height: 48px;
-            border-radius: 12px;
-        }
-        .avatar-card div:first-child { font-size: 10px; margin-bottom: 2px; }
-        .avatar-card div:last-child { font-size: 7px; opacity: 0.5; }
-        
-        .customize-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .cust-label {
-            font-size: 8px;
-            color: rgba(255,255,255,0.3);
-            width: auto;
-            margin-right: 4px;
-        }
-        .cust-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            font-size: 9px;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            min-width: 120px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .avatar-card.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: #6366f1;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-confirm {
+            padding: 16px 36px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border-radius: 20px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
             white-space: nowrap;
         }
-        .btn-confirm {
-            background: var(--accent-indigo);
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: bold;
-            color: white;
-            transition: all 0.2s;
-            letter-spacing: 2px;
+
+        .btn-confirm:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
+            filter: brightness(1.1);
         }
-        .btn-confirm:hover { background: #5a5ce6; }
     </style>
 </head>
 <body>
@@ -612,64 +633,62 @@
             </div>
         </header>
 
-        <!-- SELECTION OVERLAY (Compact Ribbon) -->
+        <!-- SELECTION OVERLAY (Two-Row Ribbon) -->
         <div id="selectionUI" class="selection-frame glass interactive animate-fade-in">
-            <div class="avatar-grid">
-                <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Female_FullBody')" id="card-Superhero_Female_FullBody">
-                    <div class="text-indigo-400 font-bold uppercase">Female-01</div>
-                    <div class="uppercase tracking-widest">Identity A</div>
+            <!-- Row 1: Identity & Confirm -->
+            <div class="selection-row">
+                <div class="avatar-grid">
+                    <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Female_FullBody')" id="card-Superhero_Female_FullBody">
+                        <div class="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Identity A</div>
+                        <div class="text-indigo-400 font-bold uppercase text-xs">Female-01</div>
+                    </div>
+                    <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Male_FullBody')" id="card-Superhero_Male_FullBody">
+                        <div class="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Identity B</div>
+                        <div class="text-indigo-400 font-bold uppercase text-xs">Male-01</div>
+                    </div>
                 </div>
-                <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Male_FullBody')" id="card-Superhero_Male_FullBody">
-                    <div class="text-indigo-400 font-bold uppercase">Male-01</div>
-                    <div class="uppercase tracking-widest">Identity B</div>
-                </div>
+                
+                <button onclick="enterWorld()" id="confirmBtn" class="btn-confirm uppercase tracking-[3px]">
+                    Establish Link
+                </button>
             </div>
             
-            <!-- Modular Selection Sections -->
-            <div id="hairSelection" class="mt-4 mb-2 flex flex-col items-center">
-                <span class="text-[9px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hairstyle</span>
-                <div class="flex gap-4 px-4 py-2 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
-                    <!-- Universal None -->
-                    <div class="hair-dot w-6 h-6 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair(null)" title="None"></div>
-                    
-                    <!-- Female Only -->
-                    <div class="hair-dot female-only w-6 h-6 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buns')" data-id="Buns" title="Buns"></div>
-                    <div class="hair-dot female-only w-6 h-6 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Long')" data-id="Long" title="Long"></div>
-                    <div class="hair-dot female-only w-6 h-6 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('BuzzedFemale')" data-id="BuzzedFemale" title="Buzzed Female"></div>
-                    
-                    <!-- Male Only -->
-                    <div class="hair-dot male-only w-6 h-6 rounded-full bg-[#1A1A1A] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buzzed')" data-id="Buzzed" title="Buzzed"></div>
-                    <div class="hair-dot male-only w-6 h-6 rounded-full bg-[#4A3728] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('SimpleParted')" data-id="SimpleParted" title="Simple Parted"></div>
+            <!-- Row 2: Customization Ribbon -->
+            <div class="customization-row">
+                <div id="hairSelection" class="flex flex-col items-center">
+                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hairstyle</span>
+                    <div class="flex gap-3 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                        <div class="hair-dot w-5 h-5 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair(null)" title="None"></div>
+                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buns')" data-id="Buns" title="Buns"></div>
+                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Long')" data-id="Long" title="Long"></div>
+                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('BuzzedFemale')" data-id="BuzzedFemale" title="Buzzed Female"></div>
+                        <div class="hair-dot male-only w-5 h-5 rounded-full bg-[#1A1A1A] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buzzed')" data-id="Buzzed" title="Buzzed"></div>
+                        <div class="hair-dot male-only w-5 h-5 rounded-full bg-[#4A3728] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('SimpleParted')" data-id="SimpleParted" title="Simple Parted"></div>
+                    </div>
+                </div>
+
+                <div id="beardSelection" class="flex flex-col items-center" style="display: none;">
+                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Facial Hair</span>
+                    <div class="flex gap-3 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                        <div class="beard-dot w-5 h-5 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard(null)" title="None"></div>
+                        <div class="beard-dot w-5 h-5 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard('Beard')" data-id="Beard" title="Full Beard"></div>
+                    </div>
+                </div>
+
+                <div id="colorSelection" class="flex flex-col items-center text-center">
+                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hair Color</span>
+                    <div class="flex gap-2.5 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#E6BE8A] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#E6BE8A')" data-hex="#E6BE8A" title="Blonde"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#59392D] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#59392D')" data-hex="#59392D" title="Brown"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#2A1B14] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#2A1B14')" data-hex="#2A1B14" title="Dark Brown"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#0F0F0F] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#0F0F0F')" data-hex="#0F0F0F" title="Black"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#8D2D1B] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#8D2D1B')" data-hex="#8D2D1B" title="Red"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#A0A0A0] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#A0A0A0')" data-hex="#A0A0A0" title="Grey"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#3B82F6] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#3B82F6')" data-hex="#3B82F6" title="Blue"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#EC4899] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#EC4899')" data-hex="#EC4899" title="Pink"></div>
+                    </div>
                 </div>
             </div>
-
-            <div id="beardSelection" class="mt-2 mb-2 flex flex-col items-center" style="display: none;">
-                <span class="text-[9px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Facial Hair</span>
-                <div class="flex gap-4 px-4 py-2 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
-                    <div class="beard-dot w-6 h-6 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard(null)" title="None"></div>
-                    <div class="beard-dot w-6 h-6 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard('Beard')" data-id="Beard" title="Full Beard"></div>
-                </div>
-            </div>
-
-            <div id="colorSelection" class="mt-2 mb-4 flex flex-col items-center">
-                <span class="text-[9px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hair Color</span>
-                <div class="flex gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#E6BE8A] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#E6BE8A')" data-hex="#E6BE8A" title="Blonde"></div>
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#59392D] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#59392D')" data-hex="#59392D" title="Brown"></div>
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#2A1B14] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#2A1B14')" data-hex="#2A1B14" title="Dark Brown"></div>
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#0F0F0F] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#0F0F0F')" data-hex="#0F0F0F" title="Black"></div>
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#8D2D1B] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#8D2D1B')" data-hex="#8D2D1B" title="Red"></div>
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#A0A0A0] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#A0A0A0')" data-hex="#A0A0A0" title="Grey"></div>
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#3B82F6] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#3B82F6')" data-hex="#3B82F6" title="Blue"></div>
-                    <div class="color-dot w-5 h-5 rounded-full bg-[#EC4899] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#EC4899')" data-hex="#EC4899" title="Pink"></div>
-                </div>
-            </div>
-
-            <!-- Removed appearance-panel as per request -->
-
-            <button onclick="enterWorld()" id="confirmBtn" class="btn-confirm uppercase tracking-[3px]">
-                Establish Link
-            </button>
         </div>
 
         <!-- ACTION TOOLBAR -->
@@ -1288,7 +1307,10 @@
                 await fetch(`${window.CONFIG?.API_BASE}/api/game/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ visuals })
+                    body: JSON.stringify({ 
+                        avatar_id: window.selectedAvatarId,
+                        visuals 
+                    })
                 });
             } catch (err) {
                 console.error("[Avatar] Failed to save visuals:", err);
@@ -1313,6 +1335,7 @@
             if (!gltf) return;
             
             applyAvatarConfig(gltf.scene, id);
+            updateModularUI(); // Ensure dots are highlighted on startup/switch
 
             if(mixer) mixer.stopAllAction();
             mixer = new THREE.AnimationMixer(gltf.scene);
@@ -1327,7 +1350,26 @@
             document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('active'));
             const card = document.getElementById(`card-${id}`);
             if (card) card.classList.add('active');
+
+            saveVisuals(); // [Fix] Persist identity swap to DB
         };
+
+        // [Sync] Helper to highlight modular dots based on global state (useful for startup)
+        function updateModularUI() {
+            const hId = window.selectedHairId;
+            const bId = window.selectedBeardId;
+            const hex = window.selectedHairColor;
+
+            document.querySelectorAll('.hair-dot').forEach(dot => {
+                dot.style.boxShadow = (dot.dataset.id === hId) ? '0 0 0 2px white' : 'none';
+            });
+            document.querySelectorAll('.beard-dot').forEach(dot => {
+                dot.style.boxShadow = (dot.dataset.id === bId) ? '0 0 0 2px white' : 'none';
+            });
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.style.boxShadow = (dot.dataset.hex === hex) ? '0 0 0 2px white' : 'none';
+            });
+        }
 
         window.enterWorld = async () => {
             if (!selectedAvatarId) return;
@@ -1337,43 +1379,65 @@
             const selectionUI = document.getElementById('selectionUI');
             if (selectionUI) selectionUI.style.display = 'none';
 
-            // Loading player state from DB
+            // Loading player state from DB FIRST
             try {
-                // Ensure the server stores our choice
-                await fetch(`${API_BASE}/api/game/save`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    ...API_OPTIONS,
-                    body: JSON.stringify({ 
-                        avatar_id: selectedAvatarId,
-                        pos: playerBaseGroup.position.x === 0 ? {x: 100, y: 0, z: 100} : undefined // Use current if exists, else spawn
-                    })
-                });
-
                 const res = await fetch(`${API_BASE}/api/game/state`, API_OPTIONS);
                 const data = await res.json();
+                
+                // [Sync] Restore visuals and identity from DB
+                if (data.avatar_id) {
+                    selectedAvatarId = window.selectedAvatarId = data.avatar_id;
+                    selectAvatar(selectedAvatarId);
+                }
+
+                if (data.visuals) {
+                    window.selectedHairId = data.visuals.hairId || null;
+                    window.selectedBeardId = data.visuals.beardId || null;
+                    window.selectedHairColor = data.visuals.hairColor || '#ffffff';
+                    console.log(`[World] Restored Visuals: Hair=${window.selectedHairId}, Color=${window.selectedHairColor}`);
+                    
+                    // Re-apply to global scene character
+                    const gltf = models[selectedAvatarId];
+                    if (gltf) applyAvatarConfig(gltf.scene, selectedAvatarId);
+                    updateModularUI();
+                }
+
                 if (data.inventory && Array.isArray(data.inventory) && data.inventory.length > 0) {
                     inventory.length = 0;
                     data.inventory.forEach(i => inventory.push(i));
                     while (inventory.length < 20) inventory.push(null);
                 } else if (data.inventory && Array.isArray(data.inventory)) {
-                   // It's a valid empty array from DB, we ensure it's 20 slots
-                   // but we keep the current inventory (with starters) if it's the first time
-                   while (inventory.length < 20) inventory.push(null);
+                    while (inventory.length < 20) inventory.push(null);
                 }
+                
                 if (data.equipment) {
                     Object.keys(data.equipment).forEach(k => equipment[k] = data.equipment[k]);
                 }
-                if (data.pos) {
+
+                if (data.pos && (data.pos.x !== 0 || data.pos.z !== 0)) {
+                    console.log(`[World] Restoring Position: ${data.pos.x}, ${data.pos.z}`);
                     playerBaseGroup.position.set(data.pos.x, data.pos.y, data.pos.z);
+                } else {
+                    // Start at a default spawn if new
+                    console.log("[World] New character detected, using default spawn.");
+                    playerBaseGroup.position.set(100 * TILE_SCALE, 0, 100 * TILE_SCALE);
+                    
+                    // Immediately save this new spawn
+                    await fetch(`${API_BASE}/api/game/save`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        ...API_OPTIONS,
+                        body: JSON.stringify({ 
+                            avatar_id: selectedAvatarId,
+                            pos: {x: 100, y: 0, z: 100}
+                        })
+                    });
                 }
             } catch (e) {
-                console.warn("[Game] Failed to load persistent state, using defaults.");
+                console.warn("[Game] Failed to load persistent state, using defaults.", e);
             }
 
-            // Syncing now handled inside updateExplorer (render loop) for maximum consistency
-            // Removed redundant setInterval
-            state = 'EXPLORING';
+            // SELECTION transition
             document.getElementById('selectionUI').style.display = 'none';
             document.getElementById('loading').style.display = 'flex';
             document.getElementById('loading-text').textContent = 'Generating World Matrix...';
@@ -1392,6 +1456,18 @@
                 
                 setupLeaves(worldObjs);
                 setupExplorer();
+
+                // [Fix] Initialize heartbeat memory with the restored state to prevent immediate reset
+                lastSentState = { 
+                    x: playerBaseGroup.position.x, 
+                    y: playerBaseGroup.position.y, 
+                    z: playerBaseGroup.position.z, 
+                    rot_y: player.rotation.y, 
+                    status: 'Idle' 
+                };
+
+                // [Fix] ONLY now do we activate the game loop and heartbeat saves
+                state = 'EXPLORING';
 
                 document.getElementById('loading').style.display = 'none';
                 const hud = document.getElementById('hudTop');
@@ -1866,25 +1942,18 @@
             playerBaseGroup.add(player);
             scene.add(playerBaseGroup);
 
-            // Calculate starting height correctly
-            const startTX = 50;
-            const startTY = 50;
-            const startElev = terrainHeightMap[`${startTX},${startTY}`] || 0;
-            const startY = startElev;
-            
-            playerBaseGroup.position.set(startTX * TILE_SCALE, startY, startTY * TILE_SCALE);
-            
-            // RESET PHYSICS FOR SPAWN
+            // Re-Apply modular visuals for the explorer instance
+            applyAvatarConfig(player, selectedAvatarId);
+
+            // RESET PHYSICS
             if (!window.playerPhysics) window.playerPhysics = { velocityY: 0, isJumping: false };
             window.playerPhysics.velocityY = 0;
             window.playerPhysics.isJumping = false;
             Object.keys(keys).forEach(k => keys[k] = false);
-            window.debugFrames = 0; // Start diagnostic timer
 
             mixer = new THREE.AnimationMixer(player);
             playAnimation('Idle');
 
-            // [Tactical] Demonstration: Equip a stone sword to the right hand
             equipTool(player, API_BASE + '/models/Tools/glTF/Sword_Stone.gltf', 'Fist.R');
         }
 
@@ -2595,9 +2664,13 @@
                     body: JSON.stringify({
                         pos: { x: pos.x, y: pos.y, z: pos.z },
                         rot_y: rot,
-                        status: actionStatus || status, // Use the One-Shot action if available, else standard state
+                        status: actionStatus || status, 
                         avatar_id: selectedAvatarId,
-                        visuals: currentCustoms,
+                        visuals: {
+                            hairId: window.selectedHairId,
+                            beardId: window.selectedBeardId,
+                            hairColor: window.selectedHairColor
+                        },
                         inventory: isInventoryDirty ? inventory : undefined,
                         equipment: isInventoryDirty ? equipment : undefined
                     })
