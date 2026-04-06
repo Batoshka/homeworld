@@ -77,15 +77,28 @@ class WorldObject(Base):
     rotation_y = Column(Float, default=0.0)
     scale = Column(Float, default=1.0)
 
-class Item(Base):
+class BaseItem(Base):
+    __tablename__ = "base_items"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    slot = Column(String(20), nullable=False) # HEAD, BODY, ARMS, LEGS, FEET, ACC
+    model_path = Column(String(255), nullable=False)
+    icon = Column(String(255), nullable=True) # Icon asset path
+    gender = Column(String(10), default='neutral')
+    base_armor = Column(Float, default=0.0)
+
+class GearItem(Base):
     __tablename__ = "items"
-    id = Column(String(50), primary_key=True)
-    name = Column(String(100))
-    type = Column(String(20)) # WEAPON, TOOL, MATERIAL, etc.
-    icon = Column(String(100)) # Emoji or path
-    model = Column(String(255), nullable=True) # GLTF path
-    stackable = Column(Boolean, default=False)
-    max_stack = Column(Integer, default=100)
+    id = Column(String(50), primary_key=True) # Instance UUID
+    base_item_id = Column(Integer, ForeignKey("base_items.id"))
+    instance_name = Column(String(150), nullable=False)
+    prefix = Column(String(50), nullable=True)
+    suffix = Column(String(50), nullable=True)
+    level = Column(Integer, default=1)
+    rarity = Column(String(20), default='Common')
+    stats = Column(JSONB, default={}) # armor, life_regen, health_bonus
+    is_stackable = Column(Boolean, default=False)
+    max_stack = Column(Integer, default=1)
 
 def get_auth_db():
     db = AuthSessionLocal()

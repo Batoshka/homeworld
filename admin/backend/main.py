@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import os
-from models import get_auth_db, get_game_db, WorldTile, WorldObject
+from models import get_auth_db, get_game_db, WorldTile, WorldObject, PlayerState, BaseItem, GearItem
 from auth import get_current_admin
 from generation import generate_world_logic
 import httpx
@@ -11,6 +11,8 @@ import subprocess
 import socket
 import time
 import json
+import random
+import uuid
 
 app = FastAPI(title="Homeworld Admin Dashboard")
 
@@ -95,13 +97,92 @@ async def admin_get_players(admin=Depends(get_current_admin)):
     async with httpx.AsyncClient() as client:
         try:
             # Fetch from the Game Backend (Port 3003)
+            # Use /api/game/player/all (Public endpoint for local proxy sync)
             res = await client.get("http://localhost:3003/api/game/player/all", timeout=2.0)
             if res.status_code != 200:
+                print(f"[Admin Proxy Error] Game server returned {res.status_code}")
                 return []
+            
+            # The game backend now returns user_id, x, y, z which satisfies both 
+            # the map markers and the oversight registry.
             return res.json()
-        except (httpx.ConnectError, httpx.RequestError, ValueError, json.JSONDecodeError):
-            # Graceful fallback: return empty list if backend is offline or returns invalid data
+        except (httpx.ConnectError, httpx.RequestError, ValueError, json.JSONDecodeError) as e:
+            print(f"[Admin Proxy Error] {str(e)}")
             return []
+
+@app.post("/api/admin/world/players/{uid}/add-item")
+async def admin_add_loot(uid: int, db: Session = Depends(get_game_db), admin=Depends(get_current_admin)):
+    """
+    Directly inject a random GearItem into a player's inventory via the admin database connection.
+    Bypasses proxy auth issues by logic duplication.
+    """
+    try:
+        # 1. Find target player
+        player_state = db.query(PlayerState).filter(PlayerState.user_id == uid).first()
+        if not player_state:
+            raise HTTPException(status_code=404, detail="Pilot not found in telemetry.")
+
+        # 2. Pick a random base item
+        base_templates = db.query(BaseItem).all()
+        if not base_templates:
+            raise HTTPException(status_code=404, detail="No base gear templates discovered.")
+        
+        template = random.choice(base_templates)
+        
+        # 3. Simple in-line generation logic (Match item_gen.py behavior)
+        rarities = {
+            "Common": {"weight": 60, "affixes": 0},
+            "Uncommon": {"weight": 25, "affixes": 1},
+            "Rare": {"weight": 10, "affixes": 2},
+            "Epic": {"weight": 4, "affixes": 2, "extra_mult": 1.2},
+            "Legendary": {"weight": 1, "affixes": 2, "extra_mult": 1.5}
+        }
+        r_keys = list(rarities.keys())
+        r_weights = [rarities[r]["weight"] for r in r_keys]
+        rarity_name = random.choices(r_keys, weights=r_weights, k=1)[0]
+        
+        item_id = str(uuid.uuid4())[:18].replace("-","")
+        new_item = GearItem(
+            id=item_id,
+            base_item_id=template.id,
+            instance_name=f"[Admin] {template.name}",
+            level=player_state.stats.get("level", 1) if player_state.stats else 1,
+            rarity=rarity_name,
+            stats={"armor": template.base_armor * 1.5} # Simple admin gift logic
+        )
+        db.add(new_item)
+        
+        # 4. Update Inventory
+        inv = list(player_state.inventory) if player_state.inventory else []
+        while len(inv) < 20: inv.append(None)
+        
+        inserted = False
+        for i in range(len(inv)):
+            if inv[i] is None:
+                inv[i] = item_id
+                inserted = True
+                break
+        
+        if not inserted:
+            raise HTTPException(status_code=400, detail="Pilot inventory is completely theoretical (Full).")
+
+        player_state.inventory = inv
+        db.commit()
+        # [Sync Lock] Ensure session is fully flushed and object is persistent
+        db.refresh(player_state)
+        db.refresh(new_item)
+        
+        return {
+            "status": "success", 
+            "item_name": new_item.instance_name,
+            "rarity": rarity_name,
+            "pilot": player_state.user_id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database sync failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

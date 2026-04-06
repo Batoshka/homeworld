@@ -439,20 +439,60 @@
         }
         
         /* Specific Slot Layout */
+        .slot-bag-1 { grid-area: 1 / 1 / 2 / 2; }
         .slot-head { grid-area: 1 / 2 / 2 / 3; }
+        .slot-bag-2 { grid-area: 1 / 3 / 2 / 4; }
+        
+        .slot-back { grid-area: 2 / 1 / 3 / 2; }
         .slot-neck { grid-area: 2 / 2 / 3 / 3; }
-        .slot-torso { grid-area: 3 / 2 / 4 / 3; }
-        .slot-hips { grid-area: 4 / 2 / 5 / 3; }
+        .slot-shoulder { grid-area: 2 / 3 / 3 / 4; }
         
-        .slot-shoulder-l { grid-area: 2 / 1 / 3 / 2; }
-        .slot-fist-l { grid-area: 3 / 1 / 4 / 2; }
-        .slot-ring-1 { grid-area: 4 / 1 / 5 / 2; }
-        .slot-foot-l { grid-area: 5 / 1 / 6 / 2; }
+        .slot-offhand { grid-area: 3 / 1 / 4 / 2; }
+        .slot-chest { grid-area: 3 / 2 / 4 / 3; }
+        .slot-mainhand { grid-area: 3 / 3 / 4 / 4; }
         
-        .slot-shoulder-r { grid-area: 2 / 3 / 3 / 4; }
-        .slot-fist-r { grid-area: 3 / 3 / 4 / 4; }
-        .slot-ring-2 { grid-area: 4 / 3 / 5 / 4; }
-        .slot-foot-r { grid-area: 5 / 3 / 6 / 4; }
+        .slot-ring1 { grid-area: 4 / 1 / 5 / 2; }
+        .slot-legs { grid-area: 4 / 2 / 5 / 3; }
+        .slot-ring2 { grid-area: 4 / 3 / 5 / 4; }
+        
+        .slot-foot { grid-area: 5 / 2 / 6 / 3; }
+        
+        #item-tooltip {
+            position: fixed;
+            z-index: 3000;
+            pointer-events: none;
+            background: rgba(15, 15, 25, 0.9);
+            border: 1px solid #D4AF37;
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: none;
+            min-width: 180px;
+            backdrop-filter: blur(4px);
+        }
+        .tooltip-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+        }
+        .tooltip-name { font-weight: bold; color: #fff; }
+        .tooltip-rarity { font-size: 10px; text-transform: uppercase; }
+        .tooltip-stat { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+        .rarity-common { color: #fff; }
+        .rarity-uncommon { color: #1eff00; }
+        .rarity-rare { color: #0070dd; }
+        .rarity-epic { color: #a335ee; }
+        .rarity-legendary { color: #ff8000; }
+
+        .inv-item-icon {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+        }
 
         .slot-bag-1 { grid-area: 5 / 2 / 6 / 3; }
         .slot-bag-2 { grid-area: 5 / 3 / 6 / 4; } /* Overlaps foot-r if not careful, adjust */
@@ -750,6 +790,14 @@
                 </div>
             </div>
         </div>
+
+        <div id="item-tooltip">
+            <div class="tooltip-header">
+                <span id="tt-name" class="tooltip-name">---</span>
+                <span id="tt-rarity" class="tooltip-rarity">COMMON</span>
+            </div>
+            <div id="tt-stats"></div>
+        </div>
         <input type="text" id="inv-drag-bridge" style="display:none">
 
         <!-- WEATHER STATUS HUD -->
@@ -807,11 +855,12 @@
         // Inventory State
         const inventory = Array(20).fill(null);
         const equipment = {
-            head: null, neck: null, shoulderL: null, shoulderR: null,
-            fistL: null, fistR: null, torso: null, hips: null,
-            ring1: null, ring2: null, footL: null, footR: null,
+            head: null, neck: null, shoulder: null, back: null,
+            offhand: null, chest: null, mainhand: null,
+            ring1: null, ring2: null, legs: null, foot: null,
             bag1: null, bag2: null
         };
+        const itemCache = {}; // Cache for detailed GearItem objects
 
         // Item Metadata
         const ITEMS = {
@@ -820,9 +869,9 @@
             'stone': { id: 'stone', name: 'Rough Stone', type: 'MATERIAL', icon: '🪨', stackable: true, maxStack: 100 }
         };
 
-        // Initial items
-        inventory[0] = { ...ITEMS.stone_sword };
-        inventory[1] = { ...ITEMS.wood, count: 12 };
+        // Initial items (Transitioning to IDs)
+        inventory[0] = 'stone_sword';
+        inventory[1] = { ...ITEMS.wood, count: 12 }; // Static materials remain as objects for now
         inventory[2] = { ...ITEMS.stone, count: 5 };
  // [Tactical] Building & Digging State
         
@@ -1412,11 +1461,16 @@
                     data.inventory.forEach(i => inventory.push(i));
                     while (inventory.length < 20) inventory.push(null);
                 } else if (data.inventory && Array.isArray(data.inventory)) {
+                    inventory.length = 0;
                     while (inventory.length < 20) inventory.push(null);
                 }
                 
                 if (data.equipment) {
-                    Object.keys(data.equipment).forEach(k => equipment[k] = data.equipment[k]);
+                    Object.keys(data.equipment).forEach(k => {
+                        equipment[k] = data.equipment[k];
+                        // [Sync] Initial visual pass if data is already cached
+                        updateCharacterVisuals(player, k, equipment[k]);
+                    });
                 }
 
                 if (data.pos && (data.pos.x !== 0 || data.pos.z !== 0)) {
@@ -3187,7 +3241,7 @@
             if (inventory.length > 20) inventory.length = 20;
 
             grid.innerHTML = '';
-            inventory.forEach((item, index) => {
+            inventory.forEach((item_id, index) => {
                 const slot = document.createElement('div');
                 slot.className = 'inv-slot';
                 slot.dataset.index = index;
@@ -3197,38 +3251,62 @@
                     slot.classList.add('selected');
                 }
 
-                if (item) {
-                    const content = document.createElement('div');
-                    content.className = 'inv-item-content';
-                    content.innerHTML = item.icon || '⚔️'; 
-                    slot.appendChild(content);
-                    if (item.stackable) {
-                        const count = document.createElement('div');
-                        count.className = 'inv-stack-size';
-                        count.innerText = item.count;
-                        slot.appendChild(count);
+                    const item = resolveItem(item_id);
+                    if (item) {
+                        const content = document.createElement('div');
+                        content.className = 'inv-item-content';
+                        
+                        // [Compatibility] Resolve Icon URL
+                        let iconUrl = item.icon;
+                        if (iconUrl && iconUrl.startsWith('/static/') && API_BASE && !iconUrl.startsWith(API_BASE)) {
+                            iconUrl = API_BASE + iconUrl;
+                        }
+
+                        if (iconUrl) {
+                            content.innerHTML = `<img src="${iconUrl}" class="inv-item-icon">`;
+                        } else if (item.character) {
+                            content.innerHTML = item.character;
+                        } else {
+                            content.innerHTML = '🛡️';
+                        }
+                        slot.appendChild(content);
+                        
+                        if (item.stackable) {
+                            const count = document.createElement('div');
+                            count.className = 'inv-stack-size';
+                            count.innerText = item.count;
+                            slot.appendChild(count);
+                        }
                     }
-                }
+                    
+                    slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('INV', index); };
                 
-                slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('INV', index); };
+                // [Tooltip] Tactical Hover
+                slot.onmousemove = (e) => updateTooltip(e, item);
+                slot.onmouseenter = () => { if(item) document.getElementById('item-tooltip').style.display = 'block'; };
+                slot.onmouseleave = () => { document.getElementById('item-tooltip').style.display = 'none'; };
+
                 grid.appendChild(slot);
             });
 
             const slots = [
-                { id: 'head', label: 'Head', class: 'slot-head' },
-                { id: 'neck', label: 'Neck', class: 'slot-neck' },
-                { id: 'torso', label: 'Chest', class: 'slot-torso' },
-                { id: 'hips', label: 'Hips', class: 'slot-hips' },
-                { id: 'shoulderL', label: 'Shoulder L', class: 'slot-shoulder-l' },
-                { id: 'shoulderR', label: 'Shoulder R', class: 'slot-shoulder-r' },
-                { id: 'fistL', label: 'Off Hand', class: 'slot-fist-l' },
-                { id: 'fistR', label: 'Main Hand', class: 'slot-fist-r' },
-                { id: 'ring1', label: 'Ring 1', class: 'slot-ring-1' },
-                { id: 'ring2', label: 'Ring 2', class: 'slot-ring-2' },
-                { id: 'footL', label: 'Foot L', class: 'slot-foot-l' },
-                { id: 'footR', label: 'Foot R', class: 'slot-foot-r' },
                 { id: 'bag1', label: 'Bag 1', class: 'slot-bag-1' },
-                { id: 'bag2', label: 'Bag 2', class: 'slot-bag-2' }
+                { id: 'head', label: 'Head', class: 'slot-head' },
+                { id: 'bag2', label: 'Bag 2', class: 'slot-bag-2' },
+                
+                { id: 'back', label: 'Back', class: 'slot-back' },
+                { id: 'neck', label: 'Neck', class: 'slot-neck' },
+                { id: 'shoulder', label: 'Shoulder', class: 'slot-shoulder' },
+                
+                { id: 'offhand', label: 'Off-hand', class: 'slot-offhand' },
+                { id: 'chest', label: 'Chest', class: 'slot-chest' },
+                { id: 'mainhand', label: 'Main-hand', class: 'slot-mainhand' },
+                
+                { id: 'ring1', label: 'Ring 1', class: 'slot-ring1' },
+                { id: 'legs', label: 'Legs', class: 'slot-legs' },
+                { id: 'ring2', label: 'Ring 2', class: 'slot-ring2' },
+                
+                { id: 'foot', label: 'Foot', class: 'slot-foot' }
             ];
 
             equip.innerHTML = '';
@@ -3245,17 +3323,131 @@
                 label.innerText = s.label;
                 slot.appendChild(label);
 
-                const item = equipment[s.id];
+                const item = resolveItem(equipment[s.id]);
                 if (item) {
                     const content = document.createElement('div');
                     content.className = 'inv-item-content';
-                    content.innerHTML = item.icon || '⚔️';
+                    
+                    // [Compatibility] Resolve Icon URL
+                    let iconUrl = item.icon;
+                    if (iconUrl && iconUrl.startsWith('/static/') && API_BASE && !iconUrl.startsWith(API_BASE)) {
+                        iconUrl = API_BASE + iconUrl;
+                    }
+
+                    if (iconUrl) {
+                        content.innerHTML = `<img src="${iconUrl}" class="inv-item-icon">`;
+                    } else {
+                        content.innerHTML = item.character || '⚔️';
+                    }
                     slot.appendChild(content);
                 }
 
                 slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('EQUIP', s.id); };
+                
+                // [Tooltip] Tactical Hover
+                slot.onmousemove = (e) => updateTooltip(e, item);
+                slot.onmouseenter = () => { if(item) document.getElementById('item-tooltip').style.display = 'block'; };
+                slot.onmouseleave = () => { document.getElementById('item-tooltip').style.display = 'none'; };
+
                 equip.appendChild(slot);
             });
+
+            // Trigger data fetch for missing items
+            fetchMissingItemDetails();
+        }
+
+        function resolveItem(idOrObj) {
+            if (!idOrObj) return null;
+            if (typeof idOrObj === 'object' && idOrObj.name) return idOrObj;
+            const rid = String(idOrObj);
+            const cached = itemCache[rid];
+            
+            if (cached) {
+                // Ensure model paths are also normalized for 3D equipment
+                if (cached.model && cached.model.startsWith('/models/') && API_BASE && !cached.model.startsWith(API_BASE)) {
+                    cached.model = API_BASE + cached.model;
+                }
+                return cached;
+            }
+            
+            return { name: 'Identifying...', loading: true };
+        }
+
+        async function fetchMissingItemDetails() {
+            const missing = [];
+            [...inventory, ...Object.values(equipment)].forEach(v => {
+                if (v && typeof v !== 'object') {
+                    if (!itemCache[v]) missing.push(v);
+                }
+            });
+
+            if (missing.length === 0) return;
+
+            try {
+                const fetchUrl = API_BASE ? `${API_BASE}/api/game/items/details` : "/api/game/items/details";
+                const res = await fetch(fetchUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item_ids: missing })
+                });
+                const data = await res.json();
+                Object.assign(itemCache, data);
+                renderInventory();
+                
+                // [Sync] Secondary visual pass now that we have models
+                Object.keys(equipment).forEach(slotId => {
+                    if (equipment[slotId] && data[equipment[slotId]]) {
+                        updateCharacterVisuals(player, slotId, equipment[slotId]);
+                    }
+                });
+            } catch (e) {
+                console.error("[Inventory] Detail Sync Failure:", e);
+            }
+        }
+
+        function updateTooltip(e, item) {
+            const tt = document.getElementById('item-tooltip');
+            if (!item || item.loading) {
+                tt.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('tt-name').innerText = item.name || 'Unknown Item';
+            const rarity = (item.rarity || 'Common').toUpperCase();
+            const rarityEl = document.getElementById('tt-rarity');
+            rarityEl.innerText = rarity;
+            rarityEl.className = `tooltip-rarity rarity-${rarity.toLowerCase()}`;
+
+            const statsEl = document.getElementById('tt-stats');
+            statsEl.innerHTML = '';
+            let hasStats = false;
+            if (item.stats) {
+                for (const [key, val] of Object.entries(item.stats)) {
+                    if (val === 0 || val === "0") continue;
+                    const row = document.createElement('div');
+                    row.className = 'tooltip-stat';
+                    row.innerText = `${key}: ${val}`;
+                    statsEl.appendChild(row);
+                    hasStats = true;
+                }
+            }
+            if (!hasStats && !item.loading) {
+                const row = document.createElement('div');
+                row.className = 'tooltip-stat opacity-40';
+                row.innerText = 'No additional attributes';
+                statsEl.appendChild(row);
+            }
+            if (item.slot) {
+                const row = document.createElement('div');
+                row.className = 'tooltip-stat';
+                row.style.marginTop = '8px';
+                row.style.fontStyle = 'italic';
+                row.innerText = `Slot: ${item.slot}`;
+                statsEl.appendChild(row);
+            }
+
+            tt.style.left = (e.clientX + 15) + 'px';
+            tt.style.top = (e.clientY + 15) + 'px';
         }
 
         function onSlotClick(type, id) {
@@ -3274,30 +3466,33 @@
         }
 
         function handleMove(source, target) {
-            const sourceItem = (source.type === 'INV') ? inventory[source.id] : equipment[source.id];
-            const targetItem = (target.type === 'INV') ? inventory[target.id] : equipment[target.id];
+            const sourceId = (source.type === 'INV') ? inventory[source.id] : equipment[source.id];
+            const targetId = (target.type === 'INV') ? inventory[target.id] : equipment[target.id];
+
+            const resolvedSource = resolveItem(sourceId);
+            const resolvedTarget = resolveItem(targetId);
 
             // Validation
-            if (target.type === 'EQUIP' && !canEquip(sourceItem, target.id)) {
+            if (target.type === 'EQUIP' && !canEquip(resolvedSource, target.id)) {
                 console.warn("[Inventory] Cannot equip this item here.");
                 return;
             }
-            if (source.type === 'EQUIP' && targetItem && !canEquip(targetItem, source.id)) {
+            if (source.type === 'EQUIP' && resolvedTarget && !canEquip(resolvedTarget, source.id)) {
                 console.warn("[Inventory] Cannot swap, item incompatible.");
                 return;
             }
 
             // Perform Swap
-            if (source.type === 'INV') inventory[source.id] = targetItem;
+            if (source.type === 'INV') inventory[source.id] = targetId;
             else {
-                equipment[source.id] = targetItem;
-                updateCharacterVisuals(player, source.id, targetItem);
+                equipment[source.id] = targetId;
+                updateCharacterVisuals(player, source.id, targetId);
             }
 
-            if (target.type === 'INV') inventory[target.id] = sourceItem;
+            if (target.type === 'INV') inventory[target.id] = sourceId;
             else {
-                equipment[target.id] = sourceItem;
-                updateCharacterVisuals(player, target.id, sourceItem);
+                equipment[target.id] = sourceId;
+                updateCharacterVisuals(player, target.id, sourceId);
             }
             
             isInventoryDirty = true;
@@ -3305,55 +3500,56 @@
         }
 
         function canEquip(item, slotId) {
-            if (!item) return true;
-            const type = item.type;
-            if (slotId === 'fistR' || slotId === 'fistL') return type === 'WEAPON' || type === 'TOOL';
-            if (slotId === 'head') return type === 'HEAD';
-            if (slotId === 'neck') return type === 'NECK';
-            if (slotId === 'ring1' || slotId === 'ring2') return type === 'RING';
-            if (slotId === 'bag1' || slotId === 'bag2') return type === 'BAG';
-            if (slotId === 'footL' || slotId === 'footR') return type === 'FOOT';
-            if (slotId === 'shoulderL' || slotId === 'shoulderR') return type === 'SHOULDER';
-            if (slotId === 'torso') return type === 'CHEST';
+            if (!item || item.loading) return true;
+            const slot = (item.slot || item.type || "").toUpperCase();
+            if (slotId === 'mainhand' || slotId === 'offhand') return slot === 'WEAPON' || slot === 'TOOL' || slot === 'ARMS';
+            if (slotId === 'head') return slot === 'HEAD';
+            if (slotId === 'neck') return slot === 'NECK';
+            if (slotId === 'back') return slot === 'BACK' || slot === 'ACC';
+            if (slotId === 'ring1' || slotId === 'ring2') return slot === 'RING';
+            if (slotId === 'bag1' || slotId === 'bag2') return slot === 'BAG';
+            if (slotId === 'foot') return slot === 'FEET' || slot === 'FOOT';
+            if (slotId === 'shoulder') return slot === 'ACC' || slot === 'SHOULDER';
+            if (slotId === 'chest') return slot === 'BODY' || slot === 'CHEST';
+            if (slotId === 'legs') return slot === 'LEGS';
             return false;
         }
 
-        function updateCharacterVisuals(targetPlayer, slotId, item) {
+        function updateCharacterVisuals(targetPlayer, slotId, itemId) {
             if (!targetPlayer) return;
+            const item = resolveItem(itemId);
             
-            // Map UI slot names to Bone Names
-            const slotToBone = {
-                'head': 'Head',
-                'fistR': 'Fist.R',
-                'fistL': 'Fist.L',
-                'footL': 'Foot.L',
-                'footR': 'Foot.R',
-                'shoulderL': 'Shoulder.L',
-                'shoulderR': 'Shoulder.R',
-                'torso': 'Torso'
+            const slotToBones = {
+                "head": ["Head"],
+                "mainhand": ["Fist.R"],
+                "offhand": ["Fist.L"],
+                "foot": ["Foot.L", "Foot.R"],
+                "shoulder": ["Shoulder.L", "Shoulder.R"],
+                "legs": ["Legs"],
+                "chest": ["Torso"],
+                "back": ["Spine2"]
             };
+            
+            const boneNames = slotToBones[slotId];
+            if (!boneNames) return;
 
-            const boneName = slotToBone[slotId];
-            if (!boneName) return;
+            boneNames.forEach(boneName => {
+                const bone = findBone(targetPlayer, boneName);
+                if (bone) {
+                    const itemsToRemove = bone.children.filter(c => c.userData.isEquipped);
+                    itemsToRemove.forEach(c => bone.remove(c));
+                }
 
-            // Remove existing item from bone
-            const bone = findBone(targetPlayer, boneName);
-            if (bone) {
-                // Clear children with isEquipped flag
-                const itemsToRemove = bone.children.filter(c => c.userData.isEquipped);
-                itemsToRemove.forEach(c => bone.remove(c));
-            }
-
-            if (item && item.model) {
-                equipTool(targetPlayer, item.model, boneName).then(() => {
-                    // Tag the loaded scene so we can remove it later
-                    const bone = findBone(targetPlayer, boneName);
-                    if (bone && bone.children.length > 0) {
-                        const lastChild = bone.children[bone.children.length - 1];
-                        lastChild.userData.isEquipped = true;
-                    }
-                });
-            }
+                if (item && item.model) {
+                    equipTool(targetPlayer, item.model, boneName).then(() => {
+                        const bone = findBone(targetPlayer, boneName);
+                        if (bone && bone.children.length > 0) {
+                            const lastChild = bone.children[bone.children.length - 1];
+                            lastChild.userData.isEquipped = true;
+                        }
+                    });
+                }
+            });
         }
 
         function findBone(parent, name) {

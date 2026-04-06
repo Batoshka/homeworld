@@ -63,6 +63,45 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.4); }
+
+        .pilot-row {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .pilot-row:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.03);
+        }
+        .btn-loot {
+            font-size: 8px;
+            font-weight: 800;
+            padding: 4px 10px;
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-loot:hover {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
     </style>
 </head>
     <nav class="w-full glass border-b border-white/5 px-8 py-4 mb-8 sticky top-0 z-50 flex items-center justify-between">
@@ -184,13 +223,31 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-2 glass p-8 rounded-3xl flex flex-col items-center justify-center min-h-[600px]">
-                <h3 class="text-sm font-bold text-white/40 uppercase tracking-widest mb-6 self-start">Territory Topography</h3>
-                <div class="relative group cursor-crosshair">
-                    <canvas id="worldCanvas" width="500" height="500"></canvas>
-                    <div class="absolute inset-0 border border-white/5 rounded-lg pointer-events-none group-hover:border-indigo-500/30 transition-all"></div>
+            <div class="lg:col-span-2 glass p-8 rounded-3xl flex flex-col min-h-[600px]">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-sm font-bold text-white/40 uppercase tracking-widest">Territory Strategic Oversight</h3>
+                    <div id="activeUserCount" class="text-[10px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full border border-indigo-500/20 font-bold uppercase tracking-widest">0 Active Pilots</div>
                 </div>
-                <div id="mapCoordinates" class="mt-4 text-xs text-indigo-400/50 font-mono">X: 0, Y: 0</div>
+                
+                <div class="flex gap-8 flex-1">
+                    <!-- Map Column -->
+                    <div class="flex flex-col items-center flex-1">
+                        <div class="relative group cursor-crosshair">
+                            <canvas id="worldCanvas" width="500" height="500"></canvas>
+                            <div class="absolute inset-0 border border-white/5 rounded-lg pointer-events-none group-hover:border-indigo-500/30 transition-all"></div>
+                        </div>
+                        <div id="mapCoordinates" class="mt-4 text-[10px] text-indigo-400/50 font-mono tracking-widest uppercase">COORD: X0, Y0</div>
+                    </div>
+
+                    <!-- Oversight Sidebar -->
+                    <div class="w-80 flex flex-col border-l border-white/5 pl-8">
+                        <h4 class="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-4">Pilot Command Log</h4>
+                        <div id="oversightUserList" class="flex-1 space-y-3 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
+                            <!-- Dynamic User Rows -->
+                            <div class="text-center py-12 opacity-20 text-[10px] uppercase tracking-widest italic">Scanning Data-Streams...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -200,8 +257,8 @@
         const ctx = canvas.getContext('2d');
         const TILE_SIZE = 5;
 
-        // Robust path handling for sub-folder deployments
-        const ADMIN_API_BASE = (window.location.origin + window.location.pathname).replace(/\/$/, "") || (window.location.origin + "/homeworld/admin");
+        // Intelligent API base resolution
+        const ADMIN_API_BASE = window.location.port === '3002' ? '' : '/homeworld/admin';
 
         function getTileColor(b, e) {
             let h, s, l;
@@ -232,12 +289,14 @@
 
         async function drawMap() {
             try {
-                const [tilesRes, objsRes] = await Promise.all([
+                const [tilesRes, objsRes, pRes] = await Promise.all([
                     fetch(`${ADMIN_API_BASE}/api/admin/world/tiles`),
-                    fetch(`${ADMIN_API_BASE}/api/admin/world/objects`)
+                    fetch(`${ADMIN_API_BASE}/api/admin/world/objects`),
+                    fetch(`${ADMIN_API_BASE}/api/admin/world/players`)
                 ]);
                 const tiles = await tilesRes.json();
                 const objects = await objsRes.json();
+                const players = await pRes.json();
 
                 ctx.fillStyle = '#111';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -254,34 +313,57 @@
                     ctx.fill();
                 });
 
-                // 4. Render Players
-                try {
-                    const pRes = await fetch(`${ADMIN_API_BASE}/api/admin/world/players`);
-                    const players = await pRes.json();
-                    
-                    players.forEach(p => {
-                        const px = p.x * (TILE_SIZE / 2); // TILE_SCALE (2) vs TILE_SIZE (5)
-                        const pz = p.z * (TILE_SIZE / 2);
-                        
-                        // Pulse Glow
-                        ctx.shadowBlur = 15;
-                        ctx.shadowColor = '#6366f1';
-                        ctx.fillStyle = '#6366f1';
-                        ctx.beginPath();
-                        ctx.arc(px, pz, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
-                        
-                        // Label
-                        ctx.fillStyle = 'white';
-                        ctx.font = 'bold 9px Outfit';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(p.username.toUpperCase(), px, pz - 12);
-                    });
-                } catch (e) {
-                    console.warn("[Admin] Player sync skipped:", e);
+                // Render Oversight Sidebar & Active Player Markers
+                const userList = document.getElementById('oversightUserList');
+                document.getElementById('activeUserCount').textContent = `${players.length} Active Pilots`;
+                
+                if (players.length === 0) {
+                    userList.innerHTML = `<div class="text-center py-12 opacity-20 text-[10px] uppercase tracking-widest italic underline decoration-rose-500/50">Zero Pilots Found</div>`;
+                } else {
+                    userList.innerHTML = players.map(p => `
+                        <div class="pilot-row">
+                            <div>
+                                <div class="text-[11px] font-bold text-white tracking-wide">${p.username}</div>
+                                <div class="text-[8px] text-white/30 uppercase tracking-tighter">Level ${p.level} • Sector 01</div>
+                            </div>
+                            <button onclick="injectLoot(${p.user_id}, '${p.username}')" class="btn-loot">Equip</button>
+                        </div>
+                    `).join('');
                 }
+
+                players.forEach(p => {
+                    const px = p.x * (TILE_SIZE / 2);
+                    const pz = p.z * (TILE_SIZE / 2);
+                    
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#6366f1';
+                    ctx.fillStyle = '#6366f1';
+                    ctx.beginPath();
+                    ctx.arc(px, pz, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 9px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.username.toUpperCase(), px, pz - 12);
+                });
             } catch (e) { console.error(e); }
+        }
+
+        async function injectLoot(uid, username) {
+            if (!confirm(`Confirm Priority Loot drop for pilot [${username}]?`)) return;
+            try {
+                const res = await fetch(`${ADMIN_API_BASE}/api/admin/world/players/${uid}/add-item`, { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(`ACCESS GRANTED: [${data.rarity}] ${data.item_name} has been synced to ${username}.`);
+                } else {
+                    alert(`COMMAND ERROR: Sync Failed. Data: ${JSON.stringify(data)}`);
+                }
+            } catch (e) {
+                alert("NEURAL LINK FAILURE: Game server unreachable.");
+            }
         }
 
         async function regenerateWorld() {

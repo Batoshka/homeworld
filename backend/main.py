@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 import datetime
 import os
 import json
-from models import get_auth_db, get_game_db, User, DbSession, PlayerState, WorldTile, WorldObject, Item
+from models import get_auth_db, get_game_db, User, DbSession, PlayerState, WorldTile, WorldObject, BaseItem, GearItem
 from auth import verify_password, generate_session_token, get_current_user
+from item_gen import generate_item_instance
 import random
 
 import threading
@@ -19,6 +20,9 @@ class ChatMessage(BaseModel):
     username: str
     message: str
     timestamp: datetime.datetime = None
+
+class ItemDetailsRequest(BaseModel):
+    item_ids: List[str]
 
 app = FastAPI()
 
@@ -330,6 +334,7 @@ def get_all_players(db: Session = Depends(get_game_db), auth_db: Session = Depen
     
     return [
         {
+            "user_id": s.user_id,
             "username": user_map.get(s.user_id, "Unknown"),
             "x": s.pos_x,
             "z": s.pos_z,
@@ -344,7 +349,67 @@ def get_all_players(db: Session = Depends(get_game_db), auth_db: Session = Depen
 
 @app.get("/api/game/items")
 def get_items(db: Session = Depends(get_game_db)):
-    return db.query(Item).all()
+    return db.query(GearItem).all()
+
+@app.post("/api/game/items/details")
+async def get_item_details(req: ItemDetailsRequest, db: Session = Depends(get_game_db)):
+    """
+    Resolves a list of item IDs (UUIDs or Integer BaseIDs) into full metadata objects.
+    Used by the frontend to populate the inventory UI icons and tooltips.
+    """
+    item_ids = req.item_ids
+    results = {}
+    results = {}
+    
+    # Separate UUIDs (strings with dashes or long) and BaseIDs (numeric strings)
+    gear_ids = []
+    base_ids = []
+    
+    for rid in item_ids:
+        if not rid: continue
+        if rid.isdigit():
+            base_ids.append(int(rid))
+        else:
+            gear_ids.append(rid)
+            
+    # 1. Fetch Gear Instances
+    if gear_ids:
+        gear_items = db.query(GearItem).filter(GearItem.id.in_(gear_ids)).all()
+        # We also need the base item info for these gear items to get the icon/model
+        base_link_ids = [g.base_item_id for g in gear_items]
+        base_templates = {b.id: b for b in db.query(BaseItem).filter(BaseItem.id.in_(base_link_ids)).all()}
+        
+        for g in gear_items:
+            base = base_templates.get(g.base_item_id)
+            results[g.id] = {
+                "id": g.id,
+                "name": g.instance_name,
+                "rarity": g.rarity,
+                "stats": g.stats,
+                "slot": base.slot if base else "UNKNOWN",
+                "icon": base.icon if base else None,
+                "model": base.model_path if base else None
+            }
+            
+    # 2. Fetch Base Items (Direct templates like "Stone Sword" if they were in inventory as IDs)
+    if base_ids:
+        bases = db.query(BaseItem).filter(BaseItem.id.in_(base_ids)).all()
+        for b in bases:
+            results[str(b.id)] = {
+                "id": str(b.id),
+                "name": b.name,
+                "rarity": "Common",
+                "stats": {"armor": b.base_armor},
+                "slot": b.slot,
+                "icon": b.icon,
+                "model": b.model_path
+            }
+            
+    return results
+
+@app.get("/api/game/items")
+def get_items(db: Session = Depends(get_game_db)):
+    return db.query(GearItem).all()
 
 def seed_items():
     db = next(get_game_db())
@@ -361,8 +426,8 @@ def seed_items():
     db.commit()
     print("[INIT] Database Seeded with Items")
 
-# Run seeding in a separate thread to avoid blocking startup
-threading.Thread(target=seed_items, daemon=True).start()
+# [Tactical] Legacy Seeding Deactivated - Using new base_items migration
+# threading.Thread(target=seed_items, daemon=True).start()
 
 # [Tactical] Chat Endpoints
 @app.post("/api/game/chat/send")
@@ -382,6 +447,134 @@ async def get_chat_messages(since: str = None):
     if not since:
         return chat_history
     return [m for m in chat_history if m["timestamp"] > since]
+
+@app.get("/api/game/dev/loot")
+async def generate_dev_loot(user: User = Depends(get_current_user), db: Session = Depends(get_game_db)):
+    """
+    DEBUG: Generate 5 random gear pieces for the player.
+    """
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    # 1. Fetch all available base items
+    base_templates = db.query(BaseItem).all()
+    if not base_templates:
+        raise HTTPException(status_code=404, detail="No base items found in DB. Run migration first.")
+    
+    # 2. Get player level
+    player_state = db.query(PlayerState).filter(PlayerState.user_id == user.id).first()
+    lvl = player_state.stats.get("level", 1) if player_state and player_state.stats else 1
+    
+    # 3. Generate 5 random items
+    new_items = []
+    for _ in range(5):
+        template = random.choice(base_templates)
+        instance = generate_item_instance(template, level=lvl)
+        db.add(instance)
+        new_items.append({
+            "id": instance.id,
+            "name": instance.instance_name,
+            "rarity": instance.rarity,
+            "stats": instance.stats,
+            "slot": template.slot
+        })
+    
+    db.commit()
+    return {
+        "status": "success",
+        "message": f"Generated 5 items for level {lvl}",
+        "items": new_items
+    }
+
+# --- ADMIN DASHBOARD ENDPOINTS ---
+
+@app.get("/api/admin/players")
+async def get_admin_players(
+    user: User = Depends(get_current_user), 
+    game_db: Session = Depends(get_game_db),
+    auth_db: Session = Depends(get_auth_db)
+):
+    """
+    Admin only: List all players with their resolved usernames.
+    """
+    if not user or not user.is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden: Admin only")
+    
+    # 1. Get all player states
+    states = game_db.query(PlayerState).all()
+    user_ids = [s.user_id for s in states]
+    
+    # 2. Resolve usernames from auth database
+    users = auth_db.query(User).filter(User.id.in_(user_ids)).all()
+    user_map = {u.id: u.username for u in users}
+    
+    results = []
+    for s in states:
+        results.append({
+            "user_id": s.user_id,
+            "username": user_map.get(s.user_id, f"User_{s.user_id}"),
+            "x": s.pos_x,
+            "y": s.pos_y,
+            "z": s.pos_z,
+            "level": s.stats.get("level", 1) if s.stats else 1,
+            "last_activity": s.last_saved.isoformat() if s.last_saved else None,
+            "is_exploring": s.status != "Idle"
+        })
+    
+    return results
+
+@app.post("/api/admin/players/{uid}/add-item")
+async def admin_add_item(
+    uid: int,
+    user: User = Depends(get_current_user),
+    game_db: Session = Depends(get_game_db)
+):
+    """
+    Admin only: Force-inject a random item into a player's inventory.
+    """
+    if not user or not user.is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden: Admin only")
+    
+    # 1. Find target player
+    player_state = game_db.query(PlayerState).filter(PlayerState.user_id == uid).first()
+    if not player_state:
+        raise HTTPException(status_code=404, detail="Player not found")
+    
+    # 2. Generate Item
+    base_templates = game_db.query(BaseItem).all()
+    if not base_templates:
+        raise HTTPException(status_code=404, detail="No base items found")
+    
+    template = random.choice(base_templates)
+    lvl = player_state.stats.get("level", 1) if player_state and player_state.stats else 1
+    instance = generate_item_instance(template, level=lvl)
+    
+    # 3. Save Item
+    game_db.add(instance)
+    
+    # 4. Inject into inventory (find first null)
+    inv = list(player_state.inventory) if player_state.inventory else []
+    while len(inv) < 20: inv.append(None)
+    
+    inserted = False
+    for i in range(len(inv)):
+        if inv[i] is None:
+            inv[i] = instance.id
+            inserted = True
+            break
+            
+    if not inserted:
+        # Fallback if full: overwrite last slot or fail? Let's just append for now if it was somehow less than 20
+        inv[19] = instance.id
+    
+    player_state.inventory = inv
+    game_db.commit()
+    
+    return {
+        "status": "success",
+        "item_name": instance.instance_name,
+        "rarity": instance.rarity
+    }
 
 if __name__ == "__main__":
     import uvicorn
