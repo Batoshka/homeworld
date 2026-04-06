@@ -68,6 +68,39 @@
             transition: all 0.5s ease;
         }
 
+        #debug-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            padding: 20px;
+            z-index: 100;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
+            pointer-events: auto;
+        }
+
+        .debug-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #debug-panel input[type="range"] {
+            flex-grow: 1;
+        }
+
+        .debug-val {
+            width: 40px;
+            text-align: right;
+            font-family: monospace;
+        }
+
         .avatar-card {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -442,9 +475,75 @@
             text-transform: uppercase;
         }
 
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+
+        /* Avatar Selection Refinement (Compact Horizontal Bar) */
+        .selection-frame {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: fit-content;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            border-radius: 20px;
+            z-index: 1000;
         }
+        .appearance-panel {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            padding: 0 32px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .avatar-grid {
+            display: flex;
+            gap: 12px;
+        }
+        .avatar-card {
+            padding: 8px 16px;
+            min-width: 100px;
+            height: 48px;
+            border-radius: 12px;
+        }
+        .avatar-card div:first-child { font-size: 10px; margin-bottom: 2px; }
+        .avatar-card div:last-child { font-size: 7px; opacity: 0.5; }
+        
+        .customize-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cust-label {
+            font-size: 8px;
+            color: rgba(255,255,255,0.3);
+            width: auto;
+            margin-right: 4px;
+        }
+        .cust-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 9px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-confirm {
+            background: var(--accent-indigo);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+            letter-spacing: 2px;
+        }
+        .btn-confirm:hover { background: #5a5ce6; }
     </style>
 </head>
 <body>
@@ -513,32 +612,23 @@
             </div>
         </header>
 
-        <!-- SELECTION OVERLAY -->
-        <div id="selectionUI" class="selection-frame glass interactive animate-fade-in flex flex-col gap-6">
-            <div class="flex items-center justify-between px-4">
-                <h3 class="text-xl font-bold text-white tracking-tight">Identity Matrix</h3>
-                <p class="text-xs text-white/40 uppercase tracking-widest">Choose Your Avatar</p>
-            </div>
-            <div class="grid grid-cols-4 gap-4">
-                <div class="avatar-card" onclick="selectAvatar('Character_Female_1')" id="card-Character_Female_1">
-                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Explorer</div>
-                    <div class="text-[9px] text-white/30 uppercase">Nova</div>
+        <!-- SELECTION OVERLAY (Compact Ribbon) -->
+        <div id="selectionUI" class="selection-frame glass interactive animate-fade-in">
+            <div class="avatar-grid">
+                <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Female_FullBody')" id="card-Superhero_Female_FullBody">
+                    <div class="text-indigo-400 font-bold uppercase">Female-01</div>
+                    <div class="uppercase tracking-widest">Identity A</div>
                 </div>
-                <div class="avatar-card" onclick="selectAvatar('Character_Female_2')" id="card-Character_Female_2">
-                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Scientist</div>
-                    <div class="text-[9px] text-white/30 uppercase">Astra</div>
-                </div>
-                <div class="avatar-card" onclick="selectAvatar('Character_Male_1')" id="card-Character_Male_1">
-                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Scout</div>
-                    <div class="text-[9px] text-white/30 uppercase">Orion</div>
-                </div>
-                <div class="avatar-card" onclick="selectAvatar('Character_Male_2')" id="card-Character_Male_2">
-                    <div class="text-indigo-400 font-bold text-sm mb-1 truncate">Engineer</div>
-                    <div class="text-[9px] text-white/30 uppercase">Atlas</div>
+                <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Male_FullBody')" id="card-Superhero_Male_FullBody">
+                    <div class="text-indigo-400 font-bold uppercase">Male-01</div>
+                    <div class="uppercase tracking-widest">Identity B</div>
                 </div>
             </div>
-            <button onclick="enterWorld()" id="confirmBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-indigo-600/20 uppercase tracking-widest">
-                ENTER WORLD
+
+            <!-- Removed appearance-panel as per request -->
+
+            <button onclick="enterWorld()" id="confirmBtn" class="btn-confirm uppercase tracking-[3px]">
+                Establish Link
             </button>
         </div>
 
@@ -586,18 +676,31 @@
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
+        // --- PATHING PREAMBLE ---
+        const INJECTED_BASE = window.CONFIG?.API_BASE;
+        const DEFAULT_BASE = `${window.location.origin}/homeworld`;
+        const API_BASE = INJECTED_BASE || DEFAULT_BASE;
+        const charPath = API_BASE + '/models/Characters/Avatars/';
+
+        // --- DYNAMIC CONFIG LOAD (404 Robustness) ---
+        const { WEARING_MAP, ANIMATION_MAP } = await import(`${API_BASE}/static/js/avatar_configs.js`);
+
         // --- CONSTANTS ---
         const GRID_SIZE = 100;
         const TILE_SCALE = 2; 
-        const AVATARS = ['Character_Female_1', 'Character_Female_2', 'Character_Male_1', 'Character_Male_2'];
+        const AVATARS = ['Superhero_Male_FullBody', 'Superhero_Female_FullBody'];
         
         // --- GLOBALS ---
         let scene, camera, renderer, clock;
         let player, mixer, currentAnimation;
+        let animationLibrary = {}; // [Sync] Shared high-fidelity animation source
         let playerBaseGroup = new THREE.Group();
         let moveSpeed = 0.1;
         let rotationSpeed = 5;
         let isSprinting = false;
+        
+        // [Identity] Default Customization (Simplified)
+        let currentCustoms = {}; 
         let isActionPlaying = false; 
         window.lastActionStartTime = 0;
         window.lastActionName = "";
@@ -607,10 +710,7 @@
         window.pendingAction = null;
         
         let state = 'SELECTION';
-        let models = {};                // [Tactical] Asset Registry Restored
-        const INJECTED_BASE = window.CONFIG?.API_BASE;
-        const DEFAULT_BASE = `http://${window.location.hostname}:3003`;
-        const API_BASE = INJECTED_BASE || (window.location.origin + window.location.pathname).replace(/\/$/, "");
+        let models = window.models = {};                // [Tactical] Asset Registry Restored
         let username = ""; // [Tactical] Identity Registry Restored
         let isBuildMode = false;
         let isInventoryOpen = false;
@@ -642,7 +742,7 @@
         const API_OPTIONS = { credentials: 'include' };
 
         let worldData = null;
-        let selectedAvatarId = 'Character_Female_1';
+        let selectedAvatarId = window.selectedAvatarId = 'Superhero_Female_FullBody';
         
         let orbit_angle_horizontal = Math.PI;
         let orbit_angle_vertical = 0.5;
@@ -675,9 +775,9 @@
         let lightningTimer = 0;
 
         async function init() {
-            scene = new THREE.Scene();
+            scene = window.scene = new THREE.Scene();
             scene.background = new THREE.Color(0x0a0a12);
-            scene.fog = new THREE.FogExp2(0x0a0a12, 0.04);
+            scene.fog = new THREE.FogExp2(0x0a0a12, 0.01);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -688,11 +788,14 @@
 
             clock = new THREE.Clock();
 
-            const ambient = new THREE.AmbientLight(0x404040, 2);
+            const ambient = window.ambient = new THREE.AmbientLight(0xffffff, 0.3);
             scene.add(ambient);
 
-            const sun = new THREE.DirectionalLight(0xffffff, 1.5);
-            sun.position.set(20, 40, 20); 
+            const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+            scene.add(hemi);
+
+            const sun = window.sun = new THREE.DirectionalLight(0xffffff, 2.5);
+            sun.position.set(20, 60, 20); 
             sun.castShadow = true;
             sun.shadow.camera.left = -20;
             sun.shadow.camera.right = 20;
@@ -702,6 +805,7 @@
             sun.shadow.camera.far = 100;
             sun.shadow.mapSize.width = 2048;
             sun.shadow.mapSize.height = 2048;
+            sun.shadow.bias = 0.0005; // [Fix] Positive bias to eliminate Shadow Acne (striped artifacts)
             scene.add(sun);
             scene.sun = sun; 
 
@@ -712,31 +816,64 @@
             stoneDetail = texLoader.load(API_BASE + '/static/textures/stone_detail.png');
             [barkDetail, foliageDetail, stoneDetail].forEach(t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; });
 
-            const charPath = API_BASE + '/models/Characters/glTF/';
             for (const id of AVATARS) {
                 try {
                     const gltf = await loader.loadAsync(`${charPath}${id}.gltf`);
                     gltf.scene.visible = false;
                     gltf.scene.traverse(c => { if(c.isMesh) { c.castShadow = true; c.receiveShadow = true; }});
+                    
+                    // [Animation] Extract embedded animations from the avatar model itself
+                    if (gltf.animations && gltf.animations.length > 0) {
+                        gltf.animations.forEach(clip => {
+                            if (!animationLibrary[clip.name]) animationLibrary[clip.name] = clip;
+                        });
+                        console.log(`[Init] Extracted ${gltf.animations.length} animations from ${id}.`);
+                    }
+
+                    gltf.scene.name = id;
                     models[id] = gltf;
                     scene.add(gltf.scene);
                 } catch (e) {
                     console.error(`[Init] Failed to load avatar ${id}:`, e);
-                    // Create a simple box placeholder if we really have no models at all later
                 }
             }
 
+            // [Sync] Load shared animation library from /Animation/
             try {
-                await checkAuth();
+                const animGltf = await loader.loadAsync(API_BASE + '/models/Characters/Animation/UAL1_Standard.glb');
+                animGltf.animations.forEach(clip => {
+                    // Animation library takes precedence for high-fidelity clips
+                    animationLibrary[clip.name] = clip;
+                });
+                console.log(`[Init] Animation Library Loaded: ${animGltf.animations.length} clips.`);
             } catch (e) {
-                console.error("[Init] Auth check failed:", e);
-                // We'll proceed anyway, checkAuth handles redirection if needed
+                console.error("[Init] Failed to load animation library:", e);
             }
 
-            selectAvatar(selectedAvatarId);
+            try {
+                const configId = window.CONFIG ? window.CONFIG.avatar_id : null;
+                await checkAuth();
+                
+                // [Identity] Auto-Login Selection from injected CONFIG
+                const config = window.CONFIG;
+                if (config && config.avatar_id) {
+                    selectedAvatarId = config.avatar_id;
+                    // [Migration] Handle old IDs missing the gender folder prefix
+                    if (selectedAvatarId && !selectedAvatarId.includes('/')) {
+                        const match = AVATARS.find(a => a.endsWith(selectedAvatarId));
+                        if (match) selectedAvatarId = match;
+                    }
+                    selectAvatar(selectedAvatarId);
+                } else {
+                    selectAvatar(AVATARS[0]); // Default to first available
+                }
+            } catch (e) {
+                console.error("[Init] Auth/Persistence check failed:", e);
+            }
             
-            document.getElementById('loading').style.display = 'none';
-            
+            // Hide the loading overlay so the identity matrix becomes visible
+            const loadingOverlay = document.getElementById('loading');
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
             setupRain();
             setInterval(syncWeather, 1000); 
             syncWeather();
@@ -813,31 +950,157 @@
             document.getElementById('userName').textContent = (data.full_name || data.username).toUpperCase();
         }
 
+        // [Identity] Removed legacy customizeAppearance as per request
+
+        function applyAvatarConfig(root, avatarId) {
+            if (!root || !avatarId) return;
+            const config = WEARING_MAP[avatarId];
+            if (!config) {
+                console.warn(`[Avatar] No config found for ${avatarId}`);
+                return;
+            }
+
+            const texLoader = new THREE.TextureLoader();
+            const isFemale = avatarId.toLowerCase().includes('female');
+            
+            // Texture Library (Cached once per call)
+            const charPath = window.CONFIG?.API_BASE + '/models/Characters/Avatars/';
+            const baseFile = isFemale ? "T_Superhero_Female_Dark_BaseColor.png" : "T_Superhero_Male_Dark.png";
+            const normalFile = isFemale ? "T_Superhero_Female_Normal.png" : "T_Superhero_Male_Normal.png";
+            const roughnessFile = isFemale ? "T_Superhero_Female_Roughness.png" : "T_Superhero_Male_Roughness.png";
+
+            // Prefetch main body textures
+            const bodyMap = texLoader.load(`${charPath}${baseFile}`);
+            bodyMap.colorSpace = 'srgb';
+            const bodyNormal = texLoader.load(`${charPath}${normalFile}`);
+            bodyNormal.colorSpace = ''; 
+            const bodyRoughness = texLoader.load(`${charPath}${roughnessFile}`);
+            bodyRoughness.colorSpace = '';
+
+            root.traverse(obj => {
+                if (obj.isMesh) {
+                    const meshName = obj.name;
+                    let shouldBeVisible = false;
+                    let slotAssignment = null;
+
+                    for (const slot in config) {
+                        if (config[slot].some(target => target.toLowerCase() === meshName.toLowerCase())) {
+                            shouldBeVisible = true;
+                            slotAssignment = slot;
+                            break;
+                        }
+                    }
+
+                    obj.visible = shouldBeVisible;
+
+                    if (shouldBeVisible) {
+                        obj.castShadow = true;
+                        obj.receiveShadow = true;
+
+                        if (slotAssignment === 'body') {
+                            // [Trace] Log exactly what we are loading
+                            console.log(`[Avatar] Loading Base: ${baseFile}`);
+                            console.log(`[Avatar] Loading Normal: ${normalFile}`);
+                            console.log(`[Avatar] Loading Roughness: ${roughnessFile}`);
+
+                            // [Debug] Initial values from panel
+                            const nx = parseFloat(document.getElementById('dbg-normX')?.value || 0.5);
+                            const ny = parseFloat(document.getElementById('dbg-normY')?.value || -0.5);
+                            const r = parseFloat(document.getElementById('dbg-rough')?.value || 0.8);
+
+                            const newMat = new THREE.MeshStandardMaterial({
+                                map: bodyMap,
+                                normalMap: bodyNormal,
+                                roughnessMap: bodyRoughness,
+                                roughness: r,
+                                metalness: 0.0,
+                                side: THREE.DoubleSide,
+                                shadowSide: THREE.FrontSide
+                            });
+                            
+                            newMat.map.wrapS = newMat.map.wrapT = THREE.RepeatWrapping;
+                            newMat.normalMap.wrapS = newMat.normalMap.wrapT = THREE.RepeatWrapping;
+                            newMat.roughnessMap.wrapS = newMat.roughnessMap.wrapT = THREE.RepeatWrapping;
+
+                            // [Fix] GLTF assets expect flipY = false
+                            const fy = document.getElementById('dbg-flipY')?.checked || false;
+                            newMat.map.flipY = fy;
+                            newMat.normalMap.flipY = fy;
+                            newMat.roughnessMap.flipY = fy;
+
+                            newMat.normalScale.set(nx, ny);
+                            obj.material = newMat;
+                        } 
+                        else if (meshName.toLowerCase().includes('eye')) {
+                            // Base material check
+                            if (obj.material) {
+                                obj.material = obj.material.clone();
+                                const variant = 'T_Eye_Brown.png'; 
+                                const eyeMap = texLoader.load(`${charPath}${variant}`);
+                                eyeMap.colorSpace = 'srgb';
+                                obj.material.map = eyeMap;
+                                obj.material.needsUpdate = true;
+                            }
+                        }
+                        else if (meshName.toLowerCase().includes('eyebrow')) {
+                            if (obj.material) {
+                                obj.material = obj.material.clone();
+                                // Eyebrows usually use standard head textures but small offsets, keeping original for stability
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        window.applyAvatarConfig = applyAvatarConfig;
+
         window.selectAvatar = (id) => {
             selectedAvatarId = id;
-            AVATARS.forEach(cid => models[cid].scene.visible = (cid === id));
+            AVATARS.forEach(cid => {
+                if (models[cid]) models[cid].scene.visible = (cid === id);
+            });
             
             const gltf = models[id];
+            if (!gltf) return;
+            
+            applyAvatarConfig(gltf.scene, id);
+
             if(mixer) mixer.stopAllAction();
             mixer = new THREE.AnimationMixer(gltf.scene);
 
-            const idle = THREE.AnimationClip.findByName(gltf.animations, 'Idle');
-            if(idle) mixer.clipAction(idle).play();
+            // [Sync] Fetch animation from external library
+            const idleClip = animationLibrary['Idle_Loop'];
+            if(idleClip) mixer.clipAction(idleClip).play();
 
             camera.position.set(0, 1.5, 4);
             camera.lookAt(0, 1, 0);
 
             document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('active'));
-            document.getElementById(`card-${id}`).classList.add('active');
+            const card = document.getElementById(`card-${id}`);
+            if (card) card.classList.add('active');
         };
 
         window.enterWorld = async () => {
             if (!selectedAvatarId) return;
-            const loginOverlay = document.getElementById('login-overlay');
-            if (loginOverlay) loginOverlay.style.display = 'none';
+            
+            console.log(`[Identity] Establishing Link with Avatar: ${selectedAvatarId}`);
+
+            const selectionUI = document.getElementById('selectionUI');
+            if (selectionUI) selectionUI.style.display = 'none';
 
             // Loading player state from DB
             try {
+                // Ensure the server stores our choice
+                await fetch(`${API_BASE}/api/game/save`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    ...API_OPTIONS,
+                    body: JSON.stringify({ 
+                        avatar_id: selectedAvatarId,
+                        pos: playerBaseGroup.position.x === 0 ? {x: 100, y: 0, z: 100} : undefined // Use current if exists, else spawn
+                    })
+                });
+
                 const res = await fetch(`${API_BASE}/api/game/state`, API_OPTIONS);
                 const data = await res.json();
                 if (data.inventory && Array.isArray(data.inventory) && data.inventory.length > 0) {
@@ -1134,7 +1397,11 @@
                 const isRock = nameUpper.includes('ROCK') || nameUpper.includes('STONE');
                 const isVeg = isTree || isRock || ['GRASS', 'FLOWER', 'REED', 'SEAWEED', 'BUSH', 'PLANT', 'MUSHROOM', 'LILY', 'STUMP', 'LOG', 'TRUNK', 'BRANCH', 'DEAD'].some(v => nameUpper.includes(v));
                 
-                if (!isVeg || m.userData.isVegPatched) return;
+                // [Optimization] Never patch avatar materials with environment shaders
+                if (!isVeg || m.userData.isVegPatched || m.userData.isPlayer || nameUpper.includes('SUPERHERO')) {
+                    if (m.userData.isPlayer) console.log(`[Shader] Exempting Player Material: ${m.name}`);
+                    return;
+                }
                 m.userData.isVegPatched = true;
 
                 m.onBeforeCompile = (shader) => {
@@ -1502,13 +1769,22 @@
         function playAnimation(name) {
             try {
                 if(currentAnimation === name) return;
-                const animations = models[selectedAvatarId].animations;
-                const clip = THREE.AnimationClip.findByName(animations, name);
                 
-                if(clip) {
+                // [Sync] Map logical names to library names
+                const nameMap = {
+                    'Idle': 'Idle_Loop',
+                    'Walk': 'Walk_Loop',
+                    'Run': 'Sprint_Loop',
+                    'Jump': 'Jump_Start'
+                };
+                const clipName = nameMap[name] || name;
+                const clip = animationLibrary[clipName];
+                
+                if(clip && mixer) {
                     const newAction = mixer.clipAction(clip);
                     if(currentAnimation) {
-                        const oldClip = THREE.AnimationClip.findByName(animations, currentAnimation);
+                        const oldClipName = nameMap[currentAnimation] || currentAnimation;
+                        const oldClip = animationLibrary[oldClipName];
                         if (oldClip) {
                             const oldAction = mixer.clipAction(oldClip);
                             oldAction.fadeOut(0.2);
@@ -1517,8 +1793,6 @@
                     newAction.reset().fadeIn(0.2).play();
                     currentAnimation = name;
                 } else {
-                    console.warn(`Animation not found: ${name}`);
-                    // Fallback to Idle if Walk/Run are missing
                     if (name !== 'Idle') playAnimation('Idle');
                 }
             } catch (e) {
@@ -1603,7 +1877,7 @@
                     
                     let p = remotePlayers.get(pd.username);
                     if (!p) {
-                        p = new RemotePlayer(pd.username, pd.avatar_id);
+                        p = new RemotePlayer(pd.username, pd.avatar_id, pd.visuals);
                         remotePlayers.set(pd.username, p);
                     }
                     
@@ -1648,18 +1922,90 @@
         }
 
         class RemotePlayer {
-            constructor(username, avatarId) {
+            constructor(username, avatarId, visuals) {
                 this.username = username;
-                this.avatarId = avatarId;
-                // [Tactical] Add safety guard for missing avatar IDs or unloaded models
-                const model = models[avatarId] || models['Character_Female_1'];
+                
+                let id = avatarId;
+                if (id && !id.includes('/')) {
+                    const match = AVATARS.find(a => a.endsWith(id));
+                    if (match) id = match;
+                }
+                this.avatarId = id || 'female/Superhero_Female_FullBody';
+                const customs = visuals || { hair: 0, eyes: 'brown', skin: 'light' };
+
+                const model = models[this.avatarId] || models['female/Superhero_Female_FullBody'];
                 if (!model || !model.scene) {
-                    console.warn(`[Multiplayer] Model for ${avatarId} not loaded yet or invalid. Using empty group placeholder.`, username);
                     this.group = new THREE.Group();
                 } else {
-                    // [Tactical] Use SkeletonUtils for animated models to ensure bone hierarchy clones correctly
                     this.group = SkeletonUtils.clone(model.scene);
-                    this.group.traverse(o => { if(o.isMesh) o.visible = true; });
+                    
+                    const isFemale = (this.avatarId || "").toLowerCase().includes('female');
+                    const genderFolder = isFemale ? 'female' : 'male';
+                    const texLoader = new THREE.TextureLoader();
+                    
+                    this.group.traverse(obj => {
+                        if (obj.isMesh && obj.material) {
+                            const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                            materials.forEach(mat => {
+                                const matName = (mat.name || "").toLowerCase();
+                                const objName = (obj.name || "").toLowerCase();
+
+                                const charFolder = `${charPath}${genderFolder}/`;
+                                
+                                const isHead = matName.includes('hair') || objName.includes('face') || objName.includes('eyebrow');
+                                const isEye = matName.includes('eye');
+                                const isBody = matName.includes('superhero');
+
+                                if (isHead) {
+                                    const variant = customs.hair === 1 ? 'T_Hair_2' : 'T_Hair_1';
+                                    const m2 = mat.clone();
+                                    m2.map = texLoader.load(`${charFolder}${variant}_BaseColor.png`);
+                                    m2.normalMap = texLoader.load(`${charFolder}${variant}_Normal.png`);
+                                    m2.needsUpdate = true;
+                                    if (Array.isArray(obj.material)) {
+                                        materials[materials.indexOf(mat)] = m2; 
+                                        obj.material = [...materials];
+                                    } else {
+                                        obj.material = m2;
+                                    }
+                                }
+                                if (isEye) {
+                                    const variant = customs.eyes === 'blue' ? 'T_Eye_Normal' : 'T_Eye_Brown';
+                                    const m2 = mat.clone();
+                                    m2.map = texLoader.load(`${charFolder}${variant}.png`);
+                                    m2.needsUpdate = true;
+                                    if (Array.isArray(obj.material)) {
+                                        materials[materials.indexOf(mat)] = m2; 
+                                        obj.material = [...materials];
+                                    } else {
+                                        obj.material = m2;
+                                    }
+                                }
+                                if (isBody) {
+                                    const baseTex = isFemale ? "T_Superhero_Female_Dark_BaseColor.png" : "T_Superhero_Male_Dark.png";
+                                    const normalTex = isFemale ? "T_Superhero_Female_Normal.png" : "T_Superhero_Male_Normal.png";
+                                    const roughnessTex = isFemale ? "T_Superhero_Female_Roughness.png" : "T_Superhero_Male_Roughness.png";
+                                    const charFolder = `${charPath}${genderFolder}/`;
+
+                                    // [Isolation] Clone material
+                                    const m2 = mat.clone();
+                                    m2.userData.isPlayer = true;
+                                    m2.map = texLoader.load(`${charFolder}${baseTex}`);
+                                    m2.map.colorSpace = 'srgb';
+                                    m2.normalMap = texLoader.load(`${charFolder}${normalTex}`);
+                                    m2.roughnessMap = texLoader.load(`${charFolder}${roughnessTex}`);
+                                    m2.needsUpdate = true;
+                                    
+                                    if (Array.isArray(obj.material)) {
+                                        materials[materials.indexOf(mat)] = m2; 
+                                        obj.material = [...materials];
+                                    } else {
+                                        obj.material = m2;
+                                    }
+                                }
+                            });
+                        }
+                    });
                 }
                 this.group.visible = true;
                 
@@ -1667,7 +2013,7 @@
                 const canvas = document.createElement('canvas');
                 canvas.width = 256; canvas.height = 64;
                 const ctx = canvas.getContext('2d');
-                ctx.font = 'bold 32px "Pirata One"';
+                ctx.font = 'bold 36px "Pirata One"';
                 ctx.fillStyle = '#D4AF37'; // Gold
                 ctx.textAlign = 'center';
                 ctx.strokeStyle = 'black';
@@ -1678,73 +2024,96 @@
                 const tex = new THREE.CanvasTexture(canvas);
                 const spriteMat = new THREE.SpriteMaterial({ map: tex });
                 this.nameTag = new THREE.Sprite(spriteMat);
-                this.nameTag.position.y = 2.2;
-                this.nameTag.scale.set(4, 1, 1);
+                this.nameTag.position.y = 2.4; 
+                this.nameTag.scale.set(3, 0.75, 1);
                 this.group.add(this.nameTag);
-
-                // Animation Mixer
-                this.mixer = new THREE.AnimationMixer(this.group);
-                this.actions = {};
-                if (model && model.animations) {
-                    model.animations.forEach(clip => {
-                        this.actions[clip.name] = this.mixer.clipAction(clip);
-                    });
-                }
                 
-                this.currentStatus = 'Idle';
-                if(this.actions['Idle']) this.actions['Idle'].play();
-
                 this.targetPos = new THREE.Vector3();
                 this.targetRot = 0;
                 
                 scene.add(this.group);
+                this.mixer = new THREE.AnimationMixer(this.group);
+                this.currentStatusStr = "";
+                this.currentAction = null;
+                this.currentVisuals = customs;
             }
 
-            update(data) {
-                if (!data || typeof data.x !== 'number') {
-                    console.warn(`[Multiplayer] Invalid data for ${this.username}:`, data);
-                    return;
-                }
-                this.targetPos.set(data.x, data.y, data.z);
-                this.targetRot = data.rot_y || 0;
+            update(pd) {
+                if (!pd || typeof pd.x !== 'number') return;
+                this.targetPos.set(pd.x, pd.y, pd.z);
+                this.targetRot = pd.rot_y || 0;
                 
-                const now = Date.now();
-                if(data.status && this.actions) {
-                    // [Optimization] Debounce status changes to prevent network jitter flickering
-                    // Jumps are allowed to override immediately to feel responsive
-                    // [Sync Fix] Parse timestamped actions: "Jump:1712345678"
-                    const statusParts = data.status.split(':');
-                    const statusName = statusParts[0];
-                    const statusTimestamp = parseInt(statusParts[1]) || 0;
+                // Animation Mapping
+                const nameMap = {
+                    'Idle': 'Idle_Loop',
+                    'Walk': 'Walk_Loop',
+                    'Run': 'Sprint_Loop',
+                    'Jump': 'Jump_Start'
+                };
+
+                if (this.currentStatusStr !== pd.status) {
+                    const statusParts = (pd.status || "Idle").split(':');
+                    const animName = statusParts[0];
+                    const clipName = nameMap[animName] || animName;
+                    const clip = animationLibrary[clipName];
                     
-                    if (this.currentStatus !== data.status && this.actions[statusName]) {
-                        if (now - (this.lastStatusTime || 0) > 200 || statusName.indexOf('Jump') !== -1) {
-                            // Only trigger animation if the specific ACTION ID (timestamp) is newer
-                            if (statusTimestamp > (this.lastActionTimestamp || 0) || statusName !== this.currentStatusName) {
-                                const oldAction = this.actions[this.currentStatusName || 'Idle'];
-                                const newAction = this.actions[statusName];
-                                
-                                if (oldAction) oldAction.fadeOut(0.3);
-                                newAction.reset().fadeIn(0.3).play();
-                                
-                                this.currentStatus = data.status; // Keep full string for the 'isDifferent' check
-                                this.currentStatusName = statusName;
-                                this.lastActionTimestamp = statusTimestamp;
-                                this.lastStatusTime = now;
-                            }
+                    if (clip) {
+                        const action = this.mixer.clipAction(clip);
+                        if (this.currentAction) this.currentAction.fadeOut(0.2);
+                        
+                        if (animName === 'Jump') {
+                            action.reset().fadeIn(0.1).setLoop(THREE.LoopOnce).play();
+                        } else {
+                            action.reset().fadeIn(0.2).play();
                         }
+                        this.currentAction = action;
+                        this.currentStatusStr = pd.status;
                     }
+                }
+
+                // [Identity] Update Visuals if they changed
+                if (pd.visuals && JSON.stringify(pd.visuals) !== JSON.stringify(this.currentVisuals)) {
+                    this.currentVisuals = { ...pd.visuals };
+                    const texLoader = new THREE.TextureLoader();
+                    const texPath = API_BASE + '/models/Characters/Textures/';
+                    this.group.traverse(obj => {
+                        if (obj.isMesh && obj.material) {
+                            const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                            materials.forEach(mat => {
+                                const matName = (mat.name || "").toLowerCase();
+                                const objName = (obj.name || "").toLowerCase();
+                                if (matName.includes('hair') || objName.includes('eyebrow')) {
+                                    const variant = pd.visuals.hair === 1 ? 'T_Hair_2' : 'T_Hair_1';
+                                    mat.map = texLoader.load(`${texPath}${variant}_BaseColor.png`);
+                                    mat.needsUpdate = true;
+                                }
+                                if (matName.includes('eye')) {
+                                    const variant = pd.visuals.eyes === 'blue' ? 'T_Eye_Normal' : 'T_Eye_Brown';
+                                    mat.map = texLoader.load(`${texPath}${variant}.png`);
+                                    mat.needsUpdate = true;
+                                }
+                                if (matName.includes('mi_superhero_female') || matName.includes('mi_superhero_male')) {
+                                    const isFemale = matName.includes('female');
+                                    const variant = pd.visuals.skin === 'dark' ? 'Dark' : (isFemale ? 'Light' : 'Ligh');
+                                    const texName = isFemale ? `T_Superhero_Female_${variant}_BaseColor.png` : `T_Superhero_Male_${variant}.png`;
+                                    mat.map = texLoader.load(`${texPath}${texName}`);
+                                    mat.needsUpdate = true;
+                                }
+                            });
+                        }
+                    });
                 }
             }
 
             lerp(deltaFactor) {
-                this.group.position.lerp(this.targetPos, 0.1 * deltaFactor);
-                this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, this.targetRot, 0.1 * deltaFactor);
+                this.group.position.lerp(this.targetPos, 0.2 * deltaFactor);
+                this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, this.targetRot, 0.2 * deltaFactor);
+                if (this.mixer) this.mixer.update(0.016 * deltaFactor);
             }
 
             dispose() {
                 scene.remove(this.group);
-                this.mixer.stopAllAction();
+                if (this.mixer) this.mixer.stopAllAction();
             }
         }
         let isBigMapOpen = false;
@@ -1979,6 +2348,7 @@
                         rot_y: rot,
                         status: actionStatus || status, // Use the One-Shot action if available, else standard state
                         avatar_id: selectedAvatarId,
+                        visuals: currentCustoms,
                         inventory: isInventoryDirty ? inventory : undefined,
                         equipment: isInventoryDirty ? equipment : undefined
                     })
@@ -2673,6 +3043,107 @@
                 updateChatLog();
             }
         }, 150);
+    </script>
+
+    <!-- Debug Panel (Temporary - Hidden by default) -->
+    <div id="debug-panel" class="glass interactive" style="display:none !important; position:fixed; top:20px; right:20px; width:300px; padding:20px; z-index:9999; font-size:11px; color:white; border-radius:1rem; pointer-events:auto;">
+        <h3 class="font-bold text-xs uppercase mb-2 text-indigo-400">Rendering Debug</h3>
+        
+        <div class="debug-row">
+            <span>Normal X</span>
+            <input type="range" id="dbg-normX" min="-2" max="2" step="0.1" value="0.5" oninput="updateDebug()">
+            <span class="debug-val" id="val-normX">0.5</span>
+        </div>
+        <div class="debug-row">
+            <span>Normal Y</span>
+            <input type="range" id="dbg-normY" min="-2" max="2" step="0.1" value="-0.5" oninput="updateDebug()">
+            <span class="debug-val" id="val-normY">-0.5</span>
+        </div>
+        <div class="debug-row">
+            <span>Shadow Bias</span>
+            <input type="range" id="dbg-bias" min="-0.01" max="0.01" step="0.0001" value="0.0005" oninput="updateDebug()">
+            <span class="debug-val" id="val-bias">0.0005</span>
+        </div>
+        <div class="debug-row">
+            <span>Normal Bias</span>
+            <input type="range" id="dbg-normBias" min="0" max="0.1" step="0.001" value="0.05" oninput="updateDebug()">
+            <span class="debug-val" id="val-normBias">0.05</span>
+        </div>
+        <div class="debug-row">
+            <span>Roughness</span>
+            <input type="range" id="dbg-rough" min="0" max="1" step="0.05" value="0.8" oninput="updateDebug()">
+            <span class="debug-val" id="val-rough">0.8</span>
+        </div>
+        <div class="debug-row">
+            <span>Ambient</span>
+            <input type="range" id="dbg-amb" min="0" max="10" step="0.1" value="0.3" oninput="updateDebug()">
+            <span class="debug-val" id="val-amb">0.3</span>
+        </div>
+        <div class="debug-row">
+            <span>Flip Y</span>
+            <input type="checkbox" id="dbg-flipY" onchange="updateDebug()">
+        </div>
+        
+        <button onclick="if(models[selectedAvatarId]) applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)" 
+            class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded py-2 text-[10px] uppercase font-bold">
+            Force Re-Apply
+        </button>
+        <p class="text-[9px] opacity-50 mt-1 italic">Traces active in console</p>
+    </div>
+
+    <script>
+        // Debug dynamic update
+        window.updateDebug = () => {
+            const vals = {
+                normX: parseFloat(document.getElementById('dbg-normX').value),
+                normY: parseFloat(document.getElementById('dbg-normY').value),
+                bias: parseFloat(document.getElementById('dbg-bias').value),
+                normBias: parseFloat(document.getElementById('dbg-normBias').value),
+                rough: parseFloat(document.getElementById('dbg-rough').value),
+                amb: parseFloat(document.getElementById('dbg-amb').value),
+                flipY: document.getElementById('dbg-flipY').checked
+            };
+            
+            document.getElementById('val-normX').textContent = vals.normX;
+            document.getElementById('val-normY').textContent = vals.normY;
+            document.getElementById('val-bias').textContent = vals.bias;
+            document.getElementById('val-normBias').textContent = vals.normBias;
+            document.getElementById('val-rough').textContent = vals.rough;
+            document.getElementById('val-amb').textContent = vals.amb;
+
+            if (window.scene && window.scene.sun) {
+                window.scene.sun.shadow.bias = vals.bias;
+                window.scene.sun.shadow.normalBias = vals.normBias;
+            }
+            
+            // Re-apply material settings to body if avatar is selected
+            if (window.selectedAvatarId && window.models[window.selectedAvatarId]) {
+                const root = window.models[window.selectedAvatarId].scene;
+                root.traverse(obj => {
+                    if (obj.isMesh && obj.visible && (!obj.name.toLowerCase().includes('eye'))) {
+                        if (obj.material) {
+                            obj.material.normalScale.set(vals.normX, vals.normY);
+                            obj.material.roughness = vals.rough;
+                            if (obj.material.map) obj.material.map.flipY = vals.flipY;
+                            if (obj.material.normalMap) obj.material.normalMap.flipY = vals.flipY;
+                            if (obj.material.roughnessMap) obj.material.roughnessMap.flipY = vals.flipY;
+                            obj.material.needsUpdate = true;
+                        }
+                    }
+                });
+            }
+            if (window.ambient) window.ambient.intensity = vals.amb;
+            console.log(`[Debug] Updated: normX=${vals.normX}, normY=${vals.normY}, bias=${vals.bias}, nBias=${vals.normBias}, amb=${vals.amb}`);
+        };
+
+        // Show/Hide debug panel - HIDDEN BY DEFAULT
+        setInterval(() => {
+            const debugPanel = document.getElementById('debug-panel');
+            if (debugPanel) {
+                // To show the panel again for quick tuning, change 'none' to 'flex' here
+                debugPanel.style.display = 'none';
+            }
+        }, 500);
     </script>
 </body>
 </html>
