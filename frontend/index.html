@@ -143,7 +143,7 @@
             position: fixed;
             bottom: 24px;
             right: 24px;
-            display: flex;
+            display: none; /* [Fix] Hidden on Selection Screen */
             gap: 12px;
             padding: 10px;
             background: rgba(0, 0, 0, 0.85);
@@ -151,8 +151,6 @@
             border-radius: 12px;
             z-index: 100;
             box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6), 0 10px 30px rgba(0, 0, 0, 0.8);
-            display: none;
-            /* Shown after enterWorld */
         }
 
         .toolbar-btn {
@@ -729,6 +727,164 @@
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6);
             filter: brightness(1.1);
         }
+
+        /* --- NEW HUD & BARS --- */
+        #hud-bottom-wrap {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none; /* [Fix] Hidden on Selection Screen */
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .hud-bar-container {
+            width: 700px; /* Increased from 500px */
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .hud-bar {
+            width: 100%;
+            height: 18px; /* Increased from 8px */
+            background: rgba(0,0,0,0.6);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid rgba(0,0,0,0.3);
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .hud-bar-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .bar-hp { background: linear-gradient(90deg, #ef4444, #22c55e); }
+        .bar-mp { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+        .bar-xp { height: 4px; background: linear-gradient(90deg, #a855f7, #eab308); }
+
+        .bar-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 1px 3px black, 0 0 5px black;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            pointer-events: none;
+        }
+
+        #action-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: auto;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-slot {
+            width: 44px;
+            height: 44px;
+            background: rgba(10,10,20,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            font-size: 10px;
+            color: rgba(255,255,255,0.2);
+            font-weight: bold;
+        }
+
+        .action-slot:hover {
+            border-color: var(--accent-indigo);
+            background: rgba(99,102,241,0.1);
+            transform: scale(1.05);
+        }
+
+        #character-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            z-index: 2500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .character-window {
+            width: 700px;
+            background: rgba(15,15,25,0.95);
+            border: 4px double #CD7F32;
+            outline: 2px solid #D4AF37;
+            border-radius: 16px;
+            padding: 32px;
+            color: white;
+            display: flex;
+            gap: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+
+        .stat-col { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+        
+        .stat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-name { font-weight: bold; font-size: 14px; color: #D4AF37; text-transform: uppercase; }
+        .stat-desc { font-size: 10px; opacity: 0.5; }
+        .stat-val { font-family: 'Pirata One', cursive; font-size: 20px; min-width: 40px; text-align: center; }
+
+        .btn-stat-plus {
+            width: 28px;
+            height: 28px;
+            background: #D4AF37;
+            color: #000;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-stat-plus:hover { transform: scale(1.1); filter: brightness(1.2); }
+        .btn-stat-plus.disabled { opacity: 0.2; pointer-events: none; }
+
+        .derived-stat {
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
     </style>
 </head>
 
@@ -887,6 +1043,12 @@
 
         <!-- ACTION TOOLBAR -->
         <div id="toolbar" class="toolbar interactive glass">
+            <div id="btn-character" onclick="toggleCharacterFrame()" class="toolbar-btn" title="Character (C)">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </div>
             <div id="btn-inventory" onclick="toggleInventory()" class="toolbar-btn" title="Inventory (I)">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -894,40 +1056,8 @@
                 </svg>
             </div>
 
-            <!-- Rendering Debug Panel (Hidden) -->
-            <div id="renderDebug" class="fixed top-4 right-4 glass p-4 text-[10px] space-y-2 z-50 shadow-2xl"
-                style="display: none !important;">
-                <div class="font-bold border-b border-white/10 pb-1 mb-2 text-indigo-400">Avatar Fine-Tuning</div>
-                <div class="flex justify-between gap-4">
-                    <span>Hair Y</span>
-                    <input type="range" id="dbg-hairY" min="-0.2" max="0.2" step="0.005" value="0.05"
-                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-                </div>
-                <div class="flex justify-between gap-4">
-                    <span>Hair Z</span>
-                    <input type="range" id="dbg-hairZ" min="-0.2" max="0.2" step="0.005" value="-0.03"
-                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-                </div>
-                <div class="flex justify-between gap-4">
-                    <span>Norm X</span>
-                    <input type="range" id="dbg-normX" min="-2.0" max="2.0" step="0.1" value="0.5"
-                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-                </div>
-                <div class="flex justify-between gap-4">
-                    <span>Norm Y</span>
-                    <input type="range" id="dbg-normY" min="-2.0" max="2.0" step="0.1" value="-0.5"
-                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-                </div>
-                <div class="flex justify-between gap-4">
-                    <span>Rough</span>
-                    <input type="range" id="dbg-rough" min="0" max="1.0" step="0.05" value="0.8"
-                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-                </div>
-                <div class="flex justify-between gap-4">
-                    <span>FlipY</span>
-                    <input type="checkbox" id="dbg-flipY">
-                </div>
-            </div>
+            <!-- Centralized debug panel at bottom of file handles these settings now -->
+            <div id="selection-debug" style="display:none;"></div>
             <div id="btn-map" onclick="toggleBigMap()" class="toolbar-btn" title="Toggle Map">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -941,6 +1071,68 @@
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
                     </path>
                 </svg>
+            </div>
+        </div>
+
+        <!-- NEW HUD: Bars & Actions -->
+        <div id="hud-bottom-wrap">
+            <div class="hud-bar-container">
+                <div class="flex gap-2 w-full">
+                    <div class="hud-bar flex-1">
+                        <div id="bar-hp-fill" class="hud-bar-fill bar-hp"></div>
+                        <div id="bar-hp-text" class="bar-label">HP: 100/100</div>
+                    </div>
+                    <div class="hud-bar flex-1">
+                        <div id="bar-mp-fill" class="hud-bar-fill bar-mp"></div>
+                        <div id="bar-mp-text" class="bar-label">MP: 100/100</div>
+                    </div>
+                </div>
+                <div class="hud-bar w-full" style="height: 12px;">
+                    <div id="bar-xp-fill" class="hud-bar-fill bar-xp" style="width: 0%"></div>
+                    <div id="bar-xp-text" class="bar-label">LVL 1 - 0/1000 XP</div>
+                </div>
+            </div>
+            
+            <div id="action-bars">
+                <div class="action-row" id="action-row-1">
+                    <!-- 10 Slots -->
+                    <div class="action-slot">1</div><div class="action-slot">2</div><div class="action-slot">3</div>
+                    <div class="action-slot">4</div><div class="action-slot">5</div><div class="action-slot">6</div>
+                    <div class="action-slot">7</div><div class="action-slot">8</div><div class="action-slot">9</div>
+                    <div class="action-slot">0</div>
+                </div>
+                <div class="action-row" id="action-row-2">
+                    <!-- 10 Slots -->
+                    <div class="action-slot"></div><div class="action-slot"></div><div class="action-slot"></div>
+                    <div class="action-slot"></div><div class="action-slot"></div><div class="action-slot"></div>
+                    <div class="action-slot"></div><div class="action-slot"></div><div class="action-slot"></div>
+                    <div class="action-slot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARACTER OVERLAY -->
+        <div id="character-overlay" onmousedown="event.stopPropagation()">
+            <div class="character-window">
+                <div class="stat-col">
+                    <div class="inv-section-title">Attributes</div>
+                    <div id="stat-list">
+                        <!-- Attributes generated via JS -->
+                    </div>
+                    <div class="mt-4 p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                        <div class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mb-1">Available Points</div>
+                        <div id="stat-points-avail" class="text-3xl font-bold text-white">0</div>
+                    </div>
+                </div>
+                <div class="stat-col">
+                    <div class="inv-section-title">Derived Stats</div>
+                    <div id="derived-stats-list" class="flex flex-col gap-2">
+                        <!-- Derived stats generated via JS -->
+                    </div>
+                    <div class="mt-auto pt-6 border-t border-white/5">
+                        <button onclick="toggleCharacterFrame()" class="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -994,6 +1186,7 @@
 
         // --- DYNAMIC CONFIG LOAD (404 Robustness) ---
         const { WEARING_MAP, ANIMATION_MAP, HAIR_MAP, HAIR_TEXTURE_MAP } = await import(`${API_BASE}/static/js/avatar_configs.js`);
+        const { STAT_CONFIGS } = await import(`${API_BASE}/static/js/game_configs.js`);
 
         // --- CONSTANTS ---
         const GRID_SIZE = 100;
@@ -1024,7 +1217,21 @@
         let username = ""; // [Tactical] Identity Registry Restored
         let isBuildMode = false;
         let isInventoryOpen = false;
+        let isCharacterOpen = false;
         let selectedSlot = null; // { type: 'INV'|'EQUIP', id: number|string }
+
+        // --- Character Stats ---
+        let playerStats = {
+            level: 1,
+            xp: 0,
+            xpRequired: STAT_CONFIGS.XP_START,
+            statPoints: 0,
+            str: 10, dex: 10, vit: 10, int: 10, wis: 10,
+            hp: 100, mp: 100,
+            maxHp: 100, maxMp: 100,
+            armor: 0, speedMult: 1.0,
+            hpRegen: 0, mpRegen: 0
+        };
 
         // Inventory State
         const inventory = Array(20).fill(null);
@@ -1073,8 +1280,143 @@
         const keys = {
             KeyW: false, KeyA: false, KeyS: false, KeyD: false,
             Space: false, ShiftLeft: false, ShiftRight: false, KeyC: false,
+            ControlLeft: false, // [Crouch]
             KeyG: false, KeyI: false, KeyM: false
         };
+
+        // --- Character Logic ---
+        function calculateDerivedStats() {
+            const { BASE_HP, BASE_MP, VIT_HP_BONUS, INT_MP_BONUS, STR_ARMOR_BONUS, DEX_SPEED_BONUS, VIT_HP_REGEN, WIS_MP_REGEN } = STAT_CONFIGS;
+            
+            playerStats.maxHp = BASE_HP + (playerStats.vit * VIT_HP_BONUS);
+            playerStats.maxMp = BASE_MP + (playerStats.int * INT_MP_BONUS);
+            playerStats.armor = playerStats.str * STR_ARMOR_BONUS;
+            playerStats.speedMult = 1.0 + (playerStats.dex * DEX_SPEED_BONUS);
+            
+            // Regeneration (per second, handled in animate loop)
+            playerStats.hpRegen = playerStats.maxHp * (playerStats.vit * VIT_HP_REGEN) / 100;
+            playerStats.mpRegen = playerStats.maxMp * (playerStats.wis * WIS_MP_REGEN) / 100;
+
+            // Clamp current HP/MP to new maxes
+            playerStats.hp = Math.min(playerStats.hp, playerStats.maxHp);
+            playerStats.mp = Math.min(playerStats.mp, playerStats.maxMp);
+
+            updateHUD();
+        }
+
+        function addXP(amount) {
+            playerStats.xp += amount;
+            while (playerStats.xp >= playerStats.xpRequired) {
+                playerStats.xp -= playerStats.xpRequired;
+                levelUp();
+            }
+            updateHUD();
+        }
+
+        function levelUp() {
+            playerStats.level++;
+            playerStats.statPoints += STAT_CONFIGS.POINTS_PER_LEVEL;
+            playerStats.xpRequired = Math.floor(playerStats.xpRequired * STAT_CONFIGS.XP_GROWTH);
+            
+            // Visual feedback
+            console.log(`[Level Up] Reached level ${playerStats.level}! Points available: ${playerStats.statPoints}`);
+            // Full heal on level up
+            playerStats.hp = playerStats.maxHp;
+            playerStats.mp = playerStats.maxMp;
+            
+            if (isCharacterOpen) renderStatFrame();
+            savePlayerState();
+        }
+
+        function spendStatPoint(attr) {
+            if (playerStats.statPoints <= 0) return;
+            playerStats[attr]++;
+            playerStats.statPoints--;
+            calculateDerivedStats();
+            renderStatFrame();
+            savePlayerState();
+        }
+
+        function updateHUD() {
+            // Bars
+            const hpFill = document.getElementById('bar-hp-fill');
+            const mpFill = document.getElementById('bar-mp-fill');
+            const xpFill = document.getElementById('bar-xp-fill');
+            
+            if (hpFill) hpFill.style.width = `${(playerStats.hp / playerStats.maxHp) * 100}%`;
+            if (mpFill) mpFill.style.width = `${(playerStats.mp / playerStats.maxMp) * 100}%`;
+            if (xpFill) xpFill.style.width = `${(playerStats.xp / playerStats.xpRequired) * 100}%`;
+
+            // Text
+            const hpText = document.getElementById('bar-hp-text');
+            const mpText = document.getElementById('bar-mp-text');
+            const xpText = document.getElementById('bar-xp-text');
+
+            if (hpText) hpText.innerText = `HP: ${Math.floor(playerStats.hp)} / ${playerStats.maxHp}`;
+            if (mpText) mpText.innerText = `MP: ${Math.floor(playerStats.mp)} / ${playerStats.maxMp}`;
+            if (xpText) xpText.innerText = `LVL ${playerStats.level} - ${Math.floor(playerStats.xp)} / ${playerStats.xpRequired} XP`;
+        }
+
+        function toggleCharacterFrame() {
+            isCharacterOpen = !isCharacterOpen;
+            const overlay = document.getElementById('character-overlay');
+            if (overlay) overlay.style.display = isCharacterOpen ? 'flex' : 'none';
+            if (isCharacterOpen) {
+                renderStatFrame();
+                if (isInventoryOpen) toggleInventory();
+            }
+        }
+
+        function renderStatFrame() {
+            const list = document.getElementById('stat-list');
+            const ptsAvail = document.getElementById('stat-points-avail');
+            if (ptsAvail) ptsAvail.innerText = playerStats.statPoints;
+
+            const attrs = [
+                { id: 'str', name: 'Strength', desc: 'Increases Armor and Attack Power' },
+                { id: 'dex', name: 'Dexterity', desc: 'Increases Speed and Crit Chance' },
+                { id: 'vit', name: 'Vitality', desc: 'Increases HP and Health Regen' },
+                { id: 'int', name: 'Intelligence', desc: 'Increases MP and Spell Power' },
+                { id: 'wis', name: 'Wisdom', desc: 'Increases MP Regen' }
+            ];
+
+            if (list) {
+                list.innerHTML = attrs.map(a => `
+                    <div class="stat-row">
+                        <div class="stat-info">
+                            <span class="stat-name">${a.name}</span>
+                            <span class="stat-desc">${a.desc}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="stat-val text-white">${playerStats[a.id]}</span>
+                            <div class="btn-stat-plus ${playerStats.statPoints > 0 ? '' : 'disabled'}" onclick="spendStatPoint('${a.id}')">+</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const derivedList = document.getElementById('derived-stats-list');
+            if (derivedList) {
+                const derived = [
+                    { name: 'Armor Points', val: playerStats.armor },
+                    { name: 'Attack Power', val: playerStats.str * 10 },
+                    { name: 'Movement Speed', val: `×${playerStats.speedMult.toFixed(2)}` },
+                    { name: 'HP Regen', val: `${playerStats.hpRegen.toFixed(1)} / sec` },
+                    { name: 'MP Regen', val: `${playerStats.mpRegen.toFixed(1)} / sec` }
+                ];
+                derivedList.innerHTML = derived.map(d => `
+                    <div class="derived-stat">
+                        <span class="opacity-50">${d.name}</span>
+                        <span class="font-bold text-indigo-300 uppercase tracking-widest">${d.val}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // --- GLOBAL FUNCTION EXPOSURE ---
+        window.spendStatPoint = spendStatPoint;
+        window.toggleCharacterFrame = toggleCharacterFrame;
+        window.addXP = addXP;
         const playerRadius = 0.6;
         let isRaining = false;
         let rainIntensity = 0.0;
@@ -1244,6 +1586,9 @@
             if (e.code === 'KeyI') {
                 toggleInventory();
             }
+            if (e.code === 'KeyC') {
+                toggleCharacterFrame();
+            }
             if (e.code === 'Enter') {
                 const input = document.getElementById('chat-input');
                 if (document.activeElement === input) {
@@ -1259,6 +1604,7 @@
                 input.blur();
                 if (isBigMapOpen) toggleBigMap();
                 if (isInventoryOpen) toggleInventory();
+                if (isCharacterOpen) toggleCharacterFrame();
             }
             if (keys && e.code in keys) {
                 keys[e.code] = true;
@@ -1384,6 +1730,49 @@
                             newMat.roughnessMap.flipY = fy;
 
                             newMat.normalScale.set(nx, ny);
+
+                            // [Aesthetic Fix] Selective Body Deflation
+                            // This allows armor to be sleek by shrinking the body underneath instead of inflating the armor.
+                            newMat.userData = {
+                                uDeflateChest: { value: 0.03 },
+                                uDeflateLegs: { value: 0.03 },
+                                uDeflateArms: { value: 0.03 },
+                                uDeflateFeet: { value: 0.03 }
+                            };
+
+                            newMat.onBeforeCompile = (shader) => {
+                                shader.uniforms.uDeflateChest = newMat.userData.uDeflateChest;
+                                shader.uniforms.uDeflateLegs = newMat.userData.uDeflateLegs;
+                                shader.uniforms.uDeflateArms = newMat.userData.uDeflateArms;
+                                shader.uniforms.uDeflateFeet = newMat.userData.uDeflateFeet;
+
+                                shader.vertexShader = `
+                                    uniform float uDeflateChest;
+                                    uniform float uDeflateLegs;
+                                    uniform float uDeflateArms;
+                                    uniform float uDeflateFeet;
+                                ` + shader.vertexShader;
+
+                                shader.vertexShader = shader.vertexShader.replace(
+                                    '#include <begin_vertex>',
+                                    `
+                                    #include <begin_vertex>
+                                    float deflate = 0.0;
+                                    // Spatial height zones for Superhero models (approx 1.75 total height)
+                                    // position is in local space
+                                    if (position.y > 1.05 && position.y < 1.55) deflate = uDeflateChest;
+                                    else if (position.y > 0.25 && position.y <= 1.05) deflate = uDeflateLegs;
+                                    else if (position.y <= 0.25) deflate = uDeflateFeet;
+                                    
+                                    // Arms detection (assuming T-pose x-offset)
+                                    if (abs(position.x) > 0.22 && position.y > 0.8) deflate = max(deflate, uDeflateArms);
+
+                                    // Apply deflation along the surface normal
+                                    transformed -= normal * deflate;
+                                    `
+                                );
+                            };
+
                             obj.material = newMat;
                         }
                         else if (meshName.toLowerCase().includes('eye')) {
@@ -1676,6 +2065,13 @@
                     });
                 }
 
+                if (data.stats) {
+                    playerStats = { ...playerStats, ...data.stats };
+                    calculateDerivedStats();
+                } else {
+                    calculateDerivedStats();
+                }
+
                 // [Sync] Trigger data fetch for missing items to ensure visual hydration
                 fetchMissingItemDetails();
 
@@ -1746,6 +2142,10 @@
 
                 const toolbar = document.getElementById('toolbar');
                 if (toolbar) toolbar.style.display = 'flex';
+
+                const hudBottom = document.getElementById('hud-bottom-wrap');
+                if (hudBottom) hudBottom.style.display = 'flex';
+
                 document.getElementById('weatherHUD').style.display = 'block';
 
                 // Initial Visuals for Local Player
@@ -2950,7 +3350,8 @@
                             hairColor: window.selectedHairColor
                         },
                         inventory: isInventoryDirty ? inventory : undefined,
-                        equipment: isInventoryDirty ? equipment : undefined
+                        equipment: isInventoryDirty ? equipment : undefined,
+                        stats: playerStats
                     })
                 });
 
@@ -3036,13 +3437,16 @@
                 if (keys.KeyA) moveX -= 1;
                 if (keys.KeyD) moveX += 1;
 
-                const isCrouching = keys.KeyC;
-                const isJogging = keys.ShiftLeft || keys.ShiftRight;
-                const isMoving = (moveX !== 0 || moveZ !== 0);
+                const isCrouching = keys.ControlLeft;
+                const isJogging = (keys.ShiftLeft || keys.ShiftRight) && !isCrouching;
+                const isMoving = (moveX !== 0 || (moveZ !== 0));
 
                 let speed = 0.040; // Walk
-                if (isCrouching) speed = 0.02;
-                else if (isJogging) speed = 0.100;
+                if (isCrouching) speed = 0.015;
+                else if (isJogging) speed = 0.090;
+
+                // [Derived] Apply Dexterity/Stats speed multiplier
+                if (playerStats) speed *= playerStats.speedMult;
 
                 if (isMoving) {
                     const camRotY = orbit_angle_horizontal;
@@ -3380,6 +3784,19 @@
                 scene.background.g += flashVal;
                 scene.background.b += (flashVal + 0.03);
                 scene.fog.color.copy(scene.background);
+            }
+
+            // --- REGENERATION ---
+            if (state === 'EXPLORING' && playerStats) {
+                const oldHp = playerStats.hp;
+                const oldMp = playerStats.mp;
+                
+                playerStats.hp = Math.min(playerStats.maxHp, playerStats.hp + playerStats.hpRegen * delta);
+                playerStats.mp = Math.min(playerStats.maxMp, playerStats.mp + playerStats.mpRegen * delta);
+                
+                if (Math.floor(oldHp) !== Math.floor(playerStats.hp) || Math.floor(oldMp) !== Math.floor(playerStats.mp)) {
+                    updateHUD();
+                }
             }
 
             if (state === 'EXPLORING') {
@@ -3795,13 +4212,23 @@
                 targetPlayer.add(modRoot);
             }
 
-            // Cleanup existing item in this specific slot group
+            // --- REMOVE PREVIOUS GEAR ---
             const slotGroupName = `Equipment_Slot_${slotId}`;
-            const oldSlotGroup = modRoot.getObjectByName(slotGroupName);
-            if (oldSlotGroup) {
-                modRoot.remove(oldSlotGroup);
-                console.log(`[Equipment] Cleaned up slot: ${slotId}`);
+            const existingGroup = modRoot.getObjectByName(slotGroupName);
+            if (existingGroup) {
+                modRoot.remove(existingGroup);
             }
+
+            // [Aesthetic Fix] Reset Body Deflation when gear is removed
+            targetPlayer.traverse(o => {
+                if (o.isMesh && o.material && o.material.userData && o.material.userData.uDeflateChest) {
+                    const normalizedSlot = slotId.toLowerCase();
+                    if (normalizedSlot === 'chest' || normalizedSlot === 'body') o.material.userData.uDeflateChest.value = 0.0;
+                    if (normalizedSlot === 'legs') o.material.userData.uDeflateLegs.value = 0.0;
+                    if (normalizedSlot === 'arms') o.material.userData.uDeflateArms.value = 0.0;
+                    if (normalizedSlot === 'foot') o.material.userData.uDeflateFeet.value = 0.0;
+                }
+            });
 
             // [Modular Visibility] Toggle base meshes based on WEARING_MAP
             if (avatarId && WEARING_MAP[avatarId] && WEARING_MAP[avatarId][slotId]) {
@@ -3865,36 +4292,51 @@
                     }
 
                     const clonedScene = SkeletonUtils.clone(gltf.scene);
+                    
+                    // [Aesthetic Fix] Minimal armor inflation + Body Deflation
+                    // We shrink the body mesh under the armor to allow for sleek, snug-fitting gear.
+                    // Now using shader-based inflation for real-time debug tuning.
+                    
+                    // Initial values from debug panel (Defaults: Deflate 0.03, Inflate 0.02)
+                    const currentDeflate = parseFloat(document.getElementById('dbg-deflation')?.value || 0.03);
+                    const currentInflate = parseFloat(document.getElementById('dbg-inflation')?.value || 0.02);
+
+                    // Update body shader uniforms based on slot
+                    targetPlayer.traverse(o => {
+                        if (o.isMesh && o.material && o.material.userData && o.material.userData.uDeflateChest) {
+                            if (normalizedSlot === 'chest' || normalizedSlot === 'body') o.material.userData.uDeflateChest.value = currentDeflate;
+                            if (normalizedSlot === 'legs') o.material.userData.uDeflateLegs.value = currentDeflate;
+                            if (normalizedSlot === 'arms') o.material.userData.uDeflateArms.value = currentDeflate;
+                            if (normalizedSlot === 'foot') o.material.userData.uDeflateFeet.value = currentDeflate;
+                        }
+                    });
+
                     clonedScene.traverse(obj => {
                         if (obj.isMesh) {
                             obj.castShadow = true;
                             obj.receiveShadow = true;
                             obj.frustumCulled = false; // [Fix] Prevent disappearing at certain angles
-
-                            // [Fidelity] Gear Inflation - Vertex Normal Offset (True Inflation)
-                            // This offsets vertices along their normals to "thicken" gear, preventing body clipping
-                            // without scaling the character's height or skeletal proportions.
-                            const inflation = 0.033; // [Tune] ~5mm offset is usually enough to clear body
+                            
+                            // [Fidelity] Real-time Gear Inflation (Shader-based)
                             if (obj.material) {
                                 obj.material = obj.material.clone();
-                                // [Fidelity] Ensure textures use correct color space
+                                // Ensure textures use correct color space
                                 if (obj.material.map) obj.material.map.colorSpace = 'srgb';
-
+                                
+                                obj.material.userData.uInflation = { value: currentInflate };
                                 obj.material.onBeforeCompile = (shader) => {
+                                    shader.uniforms.uInflation = obj.material.userData.uInflation;
+                                    shader.vertexShader = `uniform float uInflation;\n` + shader.vertexShader;
                                     shader.vertexShader = shader.vertexShader.replace(
                                         '#include <begin_vertex>',
-                                        `#include <begin_vertex>
-                                         transformed += normal * ${inflation};`
+                                        `#include <begin_vertex>\ntransformed += normal * uInflation;`
                                     );
                                 };
                             }
-
-                            // [Trace] Log binding details
-                            console.log(`[Equipment] Binding Mesh: ${obj.name} with scale ${obj.scale.x}, Inflation: ${inflation}`);
-
-                            if (obj.isSkinnedMesh) {
-                                // [Fix] Robust binding - ensure matrices are up to date before skinning
-                                targetPlayer.updateMatrixWorld(true);
+                            
+                            // Check if skinned mesh
+                            if (obj.isSkinnedMesh && characterSkeleton && characterMesh) {
+                                // [Fix] Restore bindMatrix to properly align gear with the animated skeleton
                                 obj.bind(characterSkeleton, characterMesh.bindMatrix);
                             }
                         }
@@ -3950,7 +4392,7 @@
 
     <!-- Debug Panel (Temporary - Hidden by default) -->
     <div id="debug-panel" class="glass interactive"
-        style="display:none !important; position:fixed; top:20px; right:20px; width:300px; padding:20px; z-index:9999; font-size:11px; color:white; border-radius:1rem; pointer-events:auto;">
+        style="display:none; position:fixed; top:20px; right:20px; width:300px; padding:20px; z-index:9999; font-size:11px; color:white; border-radius:1rem; pointer-events:auto;">
         <h3 class="font-bold text-xs uppercase mb-2 text-indigo-400">Rendering Debug</h3>
 
         <div class="debug-row">
@@ -3989,6 +4431,17 @@
             <input type="checkbox" id="dbg-flipY" onchange="updateDebug()">
         </div>
 
+        <div class="debug-row mt-2 border-t border-white/10 pt-2 text-indigo-300 font-bold">
+            <span>Body Deflate</span>
+            <input type="range" id="dbg-deflation" min="0" max="0.1" step="0.001" value="0.03" oninput="updateDebug()">
+            <span class="debug-val" id="val-deflation">0.03</span>
+        </div>
+        <div class="debug-row">
+            <span>Gear Inflate</span>
+            <input type="range" id="dbg-inflation" min="0" max="0.1" step="0.001" value="0.02" oninput="updateDebug()">
+            <span class="debug-val" id="val-inflation">0.02</span>
+        </div>
+
         <button
             onclick="if(models[selectedAvatarId]) applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)"
             class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded py-2 text-[10px] uppercase font-bold">
@@ -4007,47 +4460,112 @@
                 normBias: parseFloat(document.getElementById('dbg-normBias').value),
                 rough: parseFloat(document.getElementById('dbg-rough').value),
                 amb: parseFloat(document.getElementById('dbg-amb').value),
-                flipY: document.getElementById('dbg-flipY').checked
+                flipY: document.getElementById('dbg-flipY').checked,
+                deflation: parseFloat(document.getElementById('dbg-deflation').value),
+                inflation: parseFloat(document.getElementById('dbg-inflation').value)
             };
+ 
+             document.getElementById('val-normX').textContent = vals.normX;
+             document.getElementById('val-normY').textContent = vals.normY;
+             document.getElementById('val-bias').textContent = vals.bias;
+             document.getElementById('val-normBias').textContent = vals.normBias;
+             document.getElementById('val-rough').textContent = vals.rough;
+             document.getElementById('val-amb').textContent = vals.amb;
+             document.getElementById('val-deflation').textContent = vals.deflation;
+             document.getElementById('val-inflation').textContent = vals.inflation;
+ 
+             if (window.scene && window.scene.sun) {
+                 window.scene.sun.shadow.bias = vals.bias;
+                 window.scene.sun.shadow.normalBias = vals.normBias;
+             }
+ 
+             // [Save Globally] Persist aesthetic settings
+             localStorage.setItem('homeworld_aesthetic_debug', JSON.stringify({
+                 deflation: vals.deflation,
+                 inflation: vals.inflation,
+                 roughness: vals.rough,
+                 ambient: vals.amb
+             }));
+ 
+             // Re-apply real-time material settings to body and gear across all relevant roots
+             const targets = [];
+             // 1. Target the avatar selection screen scene
+             if (window.selectedAvatarId && window.models[window.selectedAvatarId]) targets.push(window.models[window.selectedAvatarId].scene);
+             // 2. Target the local player in the explorer world
+             if (window.playerBaseGroup) targets.push(window.playerBaseGroup);
 
-            document.getElementById('val-normX').textContent = vals.normX;
-            document.getElementById('val-normY').textContent = vals.normY;
-            document.getElementById('val-bias').textContent = vals.bias;
-            document.getElementById('val-normBias').textContent = vals.normBias;
-            document.getElementById('val-rough').textContent = vals.rough;
-            document.getElementById('val-amb').textContent = vals.amb;
+             targets.forEach(root => {
+                 try {
+                     root.traverse(obj => {
+                         if (obj.isMesh && obj.material) {
+                             // Body Deflation uniforms
+                             if (obj.material.userData && obj.material.userData.uDeflateChest) {
+                                 obj.material.userData.uDeflateChest.value = vals.deflation;
+                                 obj.material.userData.uDeflateLegs.value = vals.deflation;
+                                 obj.material.userData.uDeflateArms.value = vals.deflation;
+                                 obj.material.userData.uDeflateFeet.value = vals.deflation;
+                             }
+                             
+                             // Gear Inflation uniforms
+                             if (obj.material.userData && obj.material.userData.uInflation) {
+                                 obj.material.userData.uInflation.value = vals.inflation;
+                             }
 
-            if (window.scene && window.scene.sun) {
-                window.scene.sun.shadow.bias = vals.bias;
-                window.scene.sun.shadow.normalBias = vals.normBias;
-            }
-
-            // Re-apply material settings to body if avatar is selected
-            if (window.selectedAvatarId && window.models[window.selectedAvatarId]) {
-                const root = window.models[window.selectedAvatarId].scene;
-                root.traverse(obj => {
-                    if (obj.isMesh && obj.visible && (!obj.name.toLowerCase().includes('eye'))) {
-                        if (obj.material) {
-                            obj.material.normalScale.set(vals.normX, vals.normY);
-                            obj.material.roughness = vals.rough;
-                            if (obj.material.map) obj.material.map.flipY = vals.flipY;
-                            if (obj.material.normalMap) obj.material.normalMap.flipY = vals.flipY;
-                            if (obj.material.roughnessMap) obj.material.roughnessMap.flipY = vals.flipY;
-                            obj.material.needsUpdate = true;
-                        }
-                    }
-                });
-            }
-            if (window.ambient) window.ambient.intensity = vals.amb;
-            console.log(`[Debug] Updated: normX=${vals.normX}, normY=${vals.normY}, bias=${vals.bias}, nBias=${vals.normBias}, amb=${vals.amb}`);
+                             // Standard shading (Apply to all meshes except eyes)
+                             if (!obj.name.toLowerCase().includes('eye')) {
+                                obj.material.normalScale.set(vals.normX, vals.normY);
+                                obj.material.roughness = vals.rough;
+                                if (obj.material.map) obj.material.map.flipY = vals.flipY;
+                                if (obj.material.normalMap) obj.material.normalMap.flipY = vals.flipY;
+                                if (obj.material.roughnessMap) obj.material.roughnessMap.flipY = vals.flipY;
+                                obj.material.needsUpdate = true;
+                             }
+                         }
+                     });
+                 } catch (e) {
+                     console.error("[Debug] Traversal failed for target:", root, e);
+                 }
+             });
+             if (window.ambient) window.ambient.intensity = vals.amb;
+             console.log(`[Debug] Updated: normX=${vals.normX}, deflation=${vals.deflation}, inflation=${vals.inflation}`);
         };
 
-        // Show/Hide debug panel - HIDDEN BY DEFAULT
+        // [Load Globally] Initialize sliders from localStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('homeworld_aesthetic_debug');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.deflation !== undefined) {
+                        document.getElementById('dbg-deflation').value = data.deflation;
+                        document.getElementById('val-deflation').textContent = data.deflation;
+                    }
+                    if (data.inflation !== undefined) {
+                        document.getElementById('dbg-inflation').value = data.inflation;
+                        document.getElementById('val-inflation').textContent = data.inflation;
+                    }
+                    if (data.roughness !== undefined) {
+                        document.getElementById('dbg-rough').value = data.roughness;
+                        document.getElementById('val-rough').textContent = data.roughness;
+                    }
+                    if (data.ambient !== undefined) {
+                        document.getElementById('dbg-amb').value = data.ambient;
+                        document.getElementById('val-amb').textContent = data.ambient;
+                    }
+                } catch (e) { console.warn("Failed to load debug state", e); }
+            }
+        });
+
+        // Show/Hide debug panel
         setInterval(() => {
             const debugPanel = document.getElementById('debug-panel');
             if (debugPanel) {
-                // To show the panel again for quick tuning, change 'none' to 'flex' here
-                debugPanel.style.display = 'none';
+                // Show debug panel if #debug is in URL
+                if (window.location.hash === '#debug') {
+                    debugPanel.style.display = 'block';
+                } else {
+                    debugPanel.style.display = 'none';
+                }
             }
         }, 500);
     </script>

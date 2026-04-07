@@ -261,6 +261,7 @@ async def save_game_state(
     if "visuals" in data: state.visuals = data["visuals"]
     if "inventory" in data: state.inventory = data["inventory"]
     if "equipment" in data: state.equipment = data["equipment"]
+    if "stats" in data: state.stats = data["stats"]
     
     state.last_saved = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
     db.commit()

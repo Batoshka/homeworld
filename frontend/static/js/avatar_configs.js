@@ -2,22 +2,22 @@ export const WEARING_MAP = {
     "Superhero_Female_FullBody": {
         "head": ["Face", "Eyes", "Eyebrows"],
         "body": ["SuperHero_Female"],
-        "hands": ["SuperHero_Female"], // Defaulting to hide body if gloves/arms overlap
-        "foot": ["SuperHero_Female"],
-        "chest": ["SuperHero_Female"],
+        "hands": [], 
+        "foot": [],
+        "chest": [],
         "shoulder": [],
         "waist": [],
-        "legs": ["SuperHero_Female"]
+        "legs": []
     },
     "Superhero_Male_FullBody": {
         "head": ["Face", "Eyes", "Eyebrows"],
         "body": ["SuperHero_Male"],
-        "hands": ["SuperHero_Male"],
-        "foot": ["SuperHero_Male"],
-        "chest": ["SuperHero_Male"],
+        "hands": [],
+        "foot": [],
+        "chest": [],
         "shoulder": [],
         "waist": [],
-        "legs": ["SuperHero_Male"]
+        "legs": []
     }
 };
 
