@@ -4212,23 +4212,25 @@
                 targetPlayer.add(modRoot);
             }
 
+            // [Aesthetic Fix] Inflate body BEFORE removing gear (prevent gaps during transition)
+            if (itemId === null) {
+                targetPlayer.traverse(o => {
+                    if (o.isMesh && o.material && o.material.userData && o.material.userData.uDeflateChest) {
+                        const normalizedSlot = slotId.toLowerCase();
+                        if (normalizedSlot === 'chest' || normalizedSlot === 'body') o.material.userData.uDeflateChest.value = 0.0;
+                        if (normalizedSlot === 'legs') o.material.userData.uDeflateLegs.value = 0.0;
+                        if (normalizedSlot === 'arms') o.material.userData.uDeflateArms.value = 0.0;
+                        if (normalizedSlot === 'foot') o.material.userData.uDeflateFeet.value = 0.0;
+                    }
+                });
+            }
+
             // --- REMOVE PREVIOUS GEAR ---
             const slotGroupName = `Equipment_Slot_${slotId}`;
             const existingGroup = modRoot.getObjectByName(slotGroupName);
             if (existingGroup) {
                 modRoot.remove(existingGroup);
             }
-
-            // [Aesthetic Fix] Reset Body Deflation when gear is removed
-            targetPlayer.traverse(o => {
-                if (o.isMesh && o.material && o.material.userData && o.material.userData.uDeflateChest) {
-                    const normalizedSlot = slotId.toLowerCase();
-                    if (normalizedSlot === 'chest' || normalizedSlot === 'body') o.material.userData.uDeflateChest.value = 0.0;
-                    if (normalizedSlot === 'legs') o.material.userData.uDeflateLegs.value = 0.0;
-                    if (normalizedSlot === 'arms') o.material.userData.uDeflateArms.value = 0.0;
-                    if (normalizedSlot === 'foot') o.material.userData.uDeflateFeet.value = 0.0;
-                }
-            });
 
             // [Modular Visibility] Toggle base meshes based on WEARING_MAP
             if (avatarId && WEARING_MAP[avatarId] && WEARING_MAP[avatarId][slotId]) {
@@ -4301,7 +4303,7 @@
                     const currentDeflate = parseFloat(document.getElementById('dbg-deflation')?.value || 0.03);
                     const currentInflate = parseFloat(document.getElementById('dbg-inflation')?.value || 0.02);
 
-                    // Update body shader uniforms based on slot
+                    // [Aesthetic Fix] Apply Deflation specifically for this gear just before binding
                     targetPlayer.traverse(o => {
                         if (o.isMesh && o.material && o.material.userData && o.material.userData.uDeflateChest) {
                             if (normalizedSlot === 'chest' || normalizedSlot === 'body') o.material.userData.uDeflateChest.value = currentDeflate;
