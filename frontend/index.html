@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -135,7 +136,7 @@
         .hud-top {
             display: none;
             padding: 20px 40px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
         }
 
         .toolbar {
@@ -149,8 +150,9 @@
             backdrop-filter: blur(12px);
             border-radius: 12px;
             z-index: 100;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.8);
-            display: none; /* Shown after enterWorld */
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6), 0 10px 30px rgba(0, 0, 0, 0.8);
+            display: none;
+            /* Shown after enterWorld */
         }
 
         .toolbar-btn {
@@ -166,13 +168,13 @@
             align-items: center;
             justify-content: center;
             background: rgba(40, 40, 45, 0.4);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
 
         .toolbar-btn:hover {
             color: #fff;
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
             background: rgba(212, 175, 55, 0.1);
         }
 
@@ -226,15 +228,19 @@
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            border: 4px double #CD7F32; /* Bronze */
-            outline: 2px solid #D4AF37; /* Gold */
+            border: 4px double #CD7F32;
+            /* Bronze */
+            outline: 2px solid #D4AF37;
+            /* Gold */
             background: #000;
             overflow: hidden;
             z-index: 100;
             cursor: pointer;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.6);
-            display: none; /* Shown after enterWorld */
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: none;
+            /* Shown after enterWorld */
         }
+
         #minimap-canvas {
             position: absolute;
             top: 50%;
@@ -243,18 +249,21 @@
             /* Rotation handled via Javascript style.transform for transparency/layering if needed, 
                but we do it via ctx.rotate for drawing performance */
         }
+
         #minimap-pointer {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 12px;
             height: 16px;
-            background: #D4AF37; /* Gold pointer */
+            background: #D4AF37;
+            /* Gold pointer */
             transform: translate(-50%, -50%);
             clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
             z-index: 110;
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.8);
         }
+
         #minimap-compass {
             position: absolute;
             inset: 0;
@@ -264,6 +273,7 @@
             align-items: center;
             justify-content: center;
         }
+
         .compass-label {
             position: absolute;
             font-family: 'Pirata One', cursive;
@@ -271,15 +281,33 @@
             font-size: 20px;
             color: white;
             /* High-Contrast 3D Stack plus Deep Halo filter */
-            text-shadow: 
-                2px 2px 0px rgba(0,0,0,1), 
-                -1px -1px 0px rgba(255,255,255,0.4);
-            filter: drop-shadow(0 0 4px rgba(0,0,0,1)) drop-shadow(0 0 8px rgba(0,0,0,0.8));
+            text-shadow:
+                2px 2px 0px rgba(0, 0, 0, 1),
+                -1px -1px 0px rgba(255, 255, 255, 0.4);
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
         }
-        .compass-n { position: absolute; top: 6px; color: #ffbc00; } /* Golden North */
-        .compass-e { position: absolute; right: 6px; }
-        .compass-s { position: absolute; bottom: 6px; }
-        .compass-w { position: absolute; left: 6px; }
+
+        .compass-n {
+            position: absolute;
+            top: 6px;
+            color: #ffbc00;
+        }
+
+        /* Golden North */
+        .compass-e {
+            position: absolute;
+            right: 6px;
+        }
+
+        .compass-s {
+            position: absolute;
+            bottom: 6px;
+        }
+
+        .compass-w {
+            position: absolute;
+            left: 6px;
+        }
 
         #coord-panel {
             position: fixed;
@@ -297,14 +325,15 @@
             text-align: center;
             z-index: 101;
             letter-spacing: 1px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.5);
             display: none;
         }
 
         #big-map-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5); /* Reduced dimming */
+            background: rgba(0, 0, 0, 0.5);
+            /* Reduced dimming */
             backdrop-filter: blur(5px);
             z-index: 200;
             display: none;
@@ -312,9 +341,10 @@
             justify-content: center;
             flex-direction: column;
         }
+
         #big-map-canvas {
             background: #111;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             border: 4px double #CD7F32;
             outline: 2px solid #D4AF37;
             border-radius: 8px;
@@ -324,13 +354,14 @@
         #inventory-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px);
             z-index: 2100;
             display: none;
             align-items: center;
             justify-content: center;
         }
+
         .inventory-window {
             width: 950px;
             max-width: 95vw;
@@ -342,15 +373,18 @@
             display: flex;
             padding: 30px;
             gap: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             color: white;
             overflow-y: auto;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
+            /* Prevent horizontal scroll */
         }
+
         .inv-section {
             display: flex;
             flex-direction: column;
         }
+
         .inv-section-title {
             font-size: 14px;
             font-weight: bold;
@@ -361,27 +395,30 @@
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             padding-bottom: 5px;
         }
+
         .char-panel {
             flex: 1;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(5, 1fr);
             gap: 10px;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             padding: 15px;
             border-radius: 8px;
             position: relative;
         }
+
         .inv-grid {
             flex: 1.5;
             display: grid;
             grid-template-columns: repeat(5, minmax(60px, 1fr));
             grid-template-rows: repeat(4, minmax(60px, 1fr));
             gap: 12px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             padding: 20px;
             border-radius: 8px;
         }
+
         .inv-slot {
             aspect-ratio: 1;
             background: rgba(255, 255, 255, 0.05);
@@ -393,21 +430,25 @@
             position: relative;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
         }
+
         .inv-slot:hover {
             background: rgba(205, 127, 50, 0.1);
             border-color: #D4AF37;
         }
+
         .inv-slot.equipped {
             border-color: #D4AF37;
             background: rgba(212, 175, 55, 0.1);
         }
+
         .inv-slot.selected {
             border-color: #fff;
             box-shadow: 0 0 15px #D4AF37, inset 0 0 10px #D4AF37;
             background: rgba(212, 175, 55, 0.2);
         }
+
         .inv-item-content {
             width: 100%;
             height: 100%;
@@ -418,6 +459,7 @@
             user-select: none;
             pointer-events: none;
         }
+
         .inv-stack-size {
             position: absolute;
             bottom: 2px;
@@ -427,6 +469,7 @@
             color: #fff;
             text-shadow: 1px 1px 2px #000;
         }
+
         .slot-label {
             position: absolute;
             top: -12px;
@@ -434,29 +477,67 @@
             width: 100%;
             text-align: center;
             font-size: 8px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
         }
-        
+
         /* Specific Slot Layout */
-        .slot-bag-1 { grid-area: 1 / 1 / 2 / 2; }
-        .slot-head { grid-area: 1 / 2 / 2 / 3; }
-        .slot-bag-2 { grid-area: 1 / 3 / 2 / 4; }
-        
-        .slot-back { grid-area: 2 / 1 / 3 / 2; }
-        .slot-neck { grid-area: 2 / 2 / 3 / 3; }
-        .slot-shoulder { grid-area: 2 / 3 / 3 / 4; }
-        
-        .slot-offhand { grid-area: 3 / 1 / 4 / 2; }
-        .slot-chest { grid-area: 3 / 2 / 4 / 3; }
-        .slot-mainhand { grid-area: 3 / 3 / 4 / 4; }
-        
-        .slot-ring1 { grid-area: 4 / 1 / 5 / 2; }
-        .slot-legs { grid-area: 4 / 2 / 5 / 3; }
-        .slot-ring2 { grid-area: 4 / 3 / 5 / 4; }
-        
-        .slot-foot { grid-area: 5 / 2 / 6 / 3; }
-        
+        .slot-bag-1 {
+            grid-area: 1 / 1 / 2 / 2;
+        }
+
+        .slot-head {
+            grid-area: 1 / 2 / 2 / 3;
+        }
+
+        .slot-bag-2 {
+            grid-area: 1 / 3 / 2 / 4;
+        }
+
+        .slot-back {
+            grid-area: 2 / 1 / 3 / 2;
+        }
+
+        .slot-neck {
+            grid-area: 2 / 2 / 3 / 3;
+        }
+
+        .slot-shoulder {
+            grid-area: 2 / 3 / 3 / 4;
+        }
+
+        .slot-offhand {
+            grid-area: 3 / 1 / 4 / 2;
+        }
+
+        .slot-chest {
+            grid-area: 3 / 2 / 4 / 3;
+        }
+
+        .slot-mainhand {
+            grid-area: 3 / 3 / 4 / 4;
+        }
+
+        .slot-arms {
+            grid-area: 4 / 1 / 5 / 2;
+        }
+
+        .slot-legs {
+            grid-area: 4 / 2 / 5 / 3;
+        }
+
+        .slot-ring1 {
+            grid-area: 5 / 1 / 6 / 2;
+        }
+
+        .slot-ring2 {
+            grid-area: 5 / 3 / 6 / 4;
+        }
+
+        .slot-foot {
+            grid-area: 5 / 2 / 6 / 3;
+        }
+
         #item-tooltip {
             position: fixed;
             z-index: 3000;
@@ -465,11 +546,12 @@
             border: 1px solid #D4AF37;
             padding: 12px;
             border-radius: 4px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
             display: none;
             min-width: 180px;
             backdrop-filter: blur(4px);
         }
+
         .tooltip-header {
             display: flex;
             justify-content: space-between;
@@ -477,29 +559,69 @@
             margin-bottom: 8px;
             padding-bottom: 4px;
         }
-        .tooltip-name { font-weight: bold; color: #fff; }
-        .tooltip-rarity { font-size: 10px; text-transform: uppercase; }
-        .tooltip-stat { font-size: 12px; color: #aaa; margin-top: 4px; }
 
-        .rarity-common { color: #fff; }
-        .rarity-uncommon { color: #1eff00; }
-        .rarity-rare { color: #0070dd; }
-        .rarity-epic { color: #a335ee; }
-        .rarity-legendary { color: #ff8000; }
+        .tooltip-name {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .tooltip-rarity {
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .tooltip-stat {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .rarity-common {
+            color: #fff;
+        }
+
+        .rarity-uncommon {
+            color: #1eff00;
+        }
+
+        .rarity-rare {
+            color: #0070dd;
+        }
+
+        .rarity-epic {
+            color: #a335ee;
+        }
+
+        .rarity-legendary {
+            color: #ff8000;
+        }
 
         .inv-item-icon {
             width: 85%;
             height: 85%;
             object-fit: contain;
-            filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.8));
         }
 
-        .slot-bag-1 { grid-area: 5 / 2 / 6 / 3; }
-        .slot-bag-2 { grid-area: 5 / 3 / 6 / 4; } /* Overlaps foot-r if not careful, adjust */
-        
+        .slot-bag-1 {
+            grid-area: 5 / 2 / 6 / 3;
+        }
+
+        .slot-bag-2 {
+            grid-area: 5 / 3 / 6 / 4;
+        }
+
+        /* Overlaps foot-r if not careful, adjust */
+
         /* Correct grid-area for bags to avoid overlaps */
-        .slot-bag-1 { grid-area: 1 / 1 / 2 / 2; }
-        .slot-bag-2 { grid-area: 1 / 3 / 2 / 4; }
+        .slot-bag-1 {
+            grid-area: 1 / 1 / 2 / 2;
+        }
+
+        .slot-bag-2 {
+            grid-area: 1 / 3 / 2 / 4;
+        }
+
         .map-title {
             font-size: 12px;
             font-weight: bold;
@@ -508,9 +630,10 @@
             letter-spacing: 2px;
             margin-bottom: 20px;
         }
+
         .map-hint {
             margin-top: 20px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 0.3);
             font-size: 10px;
             text-transform: uppercase;
         }
@@ -522,7 +645,8 @@
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 760px; /* Wider for side-by-side elements */
+            width: 760px;
+            /* Wider for side-by-side elements */
             padding: 20px 24px;
             display: flex;
             flex-direction: column;
@@ -532,7 +656,7 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1000;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             pointer-events: auto;
         }
 
@@ -607,10 +731,12 @@
         }
     </style>
 </head>
+
 <body>
     <div id="loading" class="loading-screen">
         <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-        <p id="loading-text" class="text-indigo-400 font-bold tracking-widest text-sm uppercase">Synchronizing Realities...</p>
+        <p id="loading-text" class="text-indigo-400 font-bold tracking-widest text-sm uppercase">Synchronizing
+            Realities...</p>
     </div>
 
     <div id="canvas-container"></div>
@@ -657,7 +783,10 @@
         <header id="hudTop" class="hud-top flex items-center justify-between w-full">
             <div class="flex items-center gap-4">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 8v4l3 3"></path>
+                    </svg>
                 </div>
                 <div>
                     <h2 class="text-lg font-bold text-white leading-tight">Homeworld</h2>
@@ -669,7 +798,8 @@
                     <span id="userName" class="text-indigo-100 font-medium block">--</span>
                     <span class="text-[10px] text-white/30 uppercase tracking-widest">Sector 01</span>
                 </div>
-                <button onclick="logout()" class="px-3 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-400/10 rounded-lg transition-all">TERMINATE</button>
+                <button onclick="logout()"
+                    class="px-3 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-400/10 rounded-lg transition-all">TERMINATE</button>
             </div>
         </header>
 
@@ -678,54 +808,78 @@
             <!-- Row 1: Identity & Confirm -->
             <div class="selection-row">
                 <div class="avatar-grid">
-                    <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Female_FullBody')" id="card-Superhero_Female_FullBody">
+                    <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer"
+                        onclick="selectAvatar('Superhero_Female_FullBody')" id="card-Superhero_Female_FullBody">
                         <div class="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Identity A</div>
                         <div class="text-indigo-400 font-bold uppercase text-xs">Female-01</div>
                     </div>
-                    <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer" onclick="selectAvatar('Superhero_Male_FullBody')" id="card-Superhero_Male_FullBody">
+                    <div class="avatar-card interactive flex flex-col items-center justify-center cursor-pointer"
+                        onclick="selectAvatar('Superhero_Male_FullBody')" id="card-Superhero_Male_FullBody">
                         <div class="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-1">Identity B</div>
                         <div class="text-indigo-400 font-bold uppercase text-xs">Male-01</div>
                     </div>
                 </div>
-                
+
                 <button onclick="enterWorld()" id="confirmBtn" class="btn-confirm uppercase tracking-[3px]">
                     Establish Link
                 </button>
             </div>
-            
+
             <!-- Row 2: Customization Ribbon -->
             <div class="customization-row">
                 <div id="hairSelection" class="flex flex-col items-center">
-                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hairstyle</span>
-                    <div class="flex gap-3 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
-                        <div class="hair-dot w-5 h-5 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair(null)" title="None"></div>
-                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buns')" data-id="Buns" title="Buns"></div>
-                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Long')" data-id="Long" title="Long"></div>
-                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('BuzzedFemale')" data-id="BuzzedFemale" title="Buzzed Female"></div>
-                        <div class="hair-dot male-only w-5 h-5 rounded-full bg-[#1A1A1A] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('Buzzed')" data-id="Buzzed" title="Buzzed"></div>
-                        <div class="hair-dot male-only w-5 h-5 rounded-full bg-[#4A3728] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectHair('SimpleParted')" data-id="SimpleParted" title="Simple Parted"></div>
+                    <span
+                        class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hairstyle</span>
+                    <div
+                        class="flex gap-3 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                        <div class="hair-dot w-5 h-5 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectHair(null)" title="None"></div>
+                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectHair('Buns')" data-id="Buns" title="Buns"></div>
+                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectHair('Long')" data-id="Long" title="Long"></div>
+                        <div class="hair-dot female-only w-5 h-5 rounded-full bg-[#2A1B14] border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectHair('BuzzedFemale')" data-id="BuzzedFemale" title="Buzzed Female"></div>
+                        <div class="hair-dot male-only w-5 h-5 rounded-full bg-[#1A1A1A] border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectHair('Buzzed')" data-id="Buzzed" title="Buzzed"></div>
+                        <div class="hair-dot male-only w-5 h-5 rounded-full bg-[#4A3728] border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectHair('SimpleParted')" data-id="SimpleParted" title="Simple Parted"></div>
                     </div>
                 </div>
 
                 <div id="beardSelection" class="flex flex-col items-center" style="display: none;">
-                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Facial Hair</span>
-                    <div class="flex gap-3 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
-                        <div class="beard-dot w-5 h-5 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard(null)" title="None"></div>
-                        <div class="beard-dot w-5 h-5 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all" onclick="selectBeard('Beard')" data-id="Beard" title="Full Beard"></div>
+                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Facial
+                        Hair</span>
+                    <div
+                        class="flex gap-3 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                        <div class="beard-dot w-5 h-5 rounded-full bg-zinc-900 border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectBeard(null)" title="None"></div>
+                        <div class="beard-dot w-5 h-5 rounded-full bg-[#3D2314] border border-white/20 cursor-pointer hover:border-white/50 transition-all"
+                            onclick="selectBeard('Beard')" data-id="Beard" title="Full Beard"></div>
                     </div>
                 </div>
 
                 <div id="colorSelection" class="flex flex-col items-center text-center">
-                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hair Color</span>
-                    <div class="flex gap-2.5 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#E6BE8A] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#E6BE8A')" data-hex="#E6BE8A" title="Blonde"></div>
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#59392D] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#59392D')" data-hex="#59392D" title="Brown"></div>
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#2A1B14] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#2A1B14')" data-hex="#2A1B14" title="Dark Brown"></div>
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#0F0F0F] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#0F0F0F')" data-hex="#0F0F0F" title="Black"></div>
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#8D2D1B] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#8D2D1B')" data-hex="#8D2D1B" title="Red"></div>
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#A0A0A0] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#A0A0A0')" data-hex="#A0A0A0" title="Grey"></div>
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#3B82F6] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#3B82F6')" data-hex="#3B82F6" title="Blue"></div>
-                        <div class="color-dot w-4 h-4 rounded-full bg-[#EC4899] border border-white/10 cursor-pointer hover:scale-110 transition-all" onclick="selectHairColor('#EC4899')" data-hex="#EC4899" title="Pink"></div>
+                    <span class="text-[8px] uppercase tracking-[2px] opacity-40 mb-2 font-bold text-indigo-400">Hair
+                        Color</span>
+                    <div
+                        class="flex gap-2.5 px-3 py-1.5 bg-white/5 rounded-full border border-white/10 shadow-xl backdrop-blur-md">
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#E6BE8A] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#E6BE8A')" data-hex="#E6BE8A" title="Blonde"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#59392D] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#59392D')" data-hex="#59392D" title="Brown"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#2A1B14] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#2A1B14')" data-hex="#2A1B14" title="Dark Brown"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#0F0F0F] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#0F0F0F')" data-hex="#0F0F0F" title="Black"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#8D2D1B] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#8D2D1B')" data-hex="#8D2D1B" title="Red"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#A0A0A0] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#A0A0A0')" data-hex="#A0A0A0" title="Grey"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#3B82F6] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#3B82F6')" data-hex="#3B82F6" title="Blue"></div>
+                        <div class="color-dot w-4 h-4 rounded-full bg-[#EC4899] border border-white/10 cursor-pointer hover:scale-110 transition-all"
+                            onclick="selectHairColor('#EC4899')" data-hex="#EC4899" title="Pink"></div>
                     </div>
                 </div>
             </div>
@@ -734,47 +888,65 @@
         <!-- ACTION TOOLBAR -->
         <div id="toolbar" class="toolbar interactive glass">
             <div id="btn-inventory" onclick="toggleInventory()" class="toolbar-btn" title="Inventory (I)">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
             </div>
 
-        <!-- Rendering Debug Panel (Hidden) -->
-        <div id="renderDebug" class="fixed top-4 right-4 glass p-4 text-[10px] space-y-2 z-50 shadow-2xl" style="display: none !important;">
-            <div class="font-bold border-b border-white/10 pb-1 mb-2 text-indigo-400">Avatar Fine-Tuning</div>
-            <div class="flex justify-between gap-4">
-                <span>Hair Y</span>
-                <input type="range" id="dbg-hairY" min="-0.2" max="0.2" step="0.005" value="0.05" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+            <!-- Rendering Debug Panel (Hidden) -->
+            <div id="renderDebug" class="fixed top-4 right-4 glass p-4 text-[10px] space-y-2 z-50 shadow-2xl"
+                style="display: none !important;">
+                <div class="font-bold border-b border-white/10 pb-1 mb-2 text-indigo-400">Avatar Fine-Tuning</div>
+                <div class="flex justify-between gap-4">
+                    <span>Hair Y</span>
+                    <input type="range" id="dbg-hairY" min="-0.2" max="0.2" step="0.005" value="0.05"
+                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span>Hair Z</span>
+                    <input type="range" id="dbg-hairZ" min="-0.2" max="0.2" step="0.005" value="-0.03"
+                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span>Norm X</span>
+                    <input type="range" id="dbg-normX" min="-2.0" max="2.0" step="0.1" value="0.5"
+                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span>Norm Y</span>
+                    <input type="range" id="dbg-normY" min="-2.0" max="2.0" step="0.1" value="-0.5"
+                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span>Rough</span>
+                    <input type="range" id="dbg-rough" min="0" max="1.0" step="0.05" value="0.8"
+                        oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span>FlipY</span>
+                    <input type="checkbox" id="dbg-flipY">
+                </div>
             </div>
-            <div class="flex justify-between gap-4">
-                <span>Hair Z</span>
-                <input type="range" id="dbg-hairZ" min="-0.2" max="0.2" step="0.005" value="-0.03" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-            </div>
-            <div class="flex justify-between gap-4">
-                <span>Norm X</span>
-                <input type="range" id="dbg-normX" min="-2.0" max="2.0" step="0.1" value="0.5" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-            </div>
-            <div class="flex justify-between gap-4">
-                <span>Norm Y</span>
-                <input type="range" id="dbg-normY" min="-2.0" max="2.0" step="0.1" value="-0.5" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-            </div>
-            <div class="flex justify-between gap-4">
-                <span>Rough</span>
-                <input type="range" id="dbg-rough" min="0" max="1.0" step="0.05" value="0.8" oninput="applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)">
-            </div>
-            <div class="flex justify-between gap-4">
-                <span>FlipY</span>
-                <input type="checkbox" id="dbg-flipY">
-            </div>
-        </div>
             <div id="btn-map" onclick="toggleBigMap()" class="toolbar-btn" title="Toggle Map">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                    </path>
+                </svg>
             </div>
             <div id="btn-build" onclick="toggleBuildMode()" class="toolbar-btn" title="Build Mode">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
             </div>
         </div>
 
         <!-- INVENTORY OVERLAY -->
-        <div id="inventory-overlay" onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="if(event.target==this) { toggleInventory(); } event.stopPropagation();">
+        <div id="inventory-overlay" onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()"
+            onclick="if(event.target==this) { toggleInventory(); } event.stopPropagation();">
             <div class="inventory-window" style="pointer-events: auto;">
                 <div class="inv-section" style="flex: 1;">
                     <div class="inv-section-title">Character</div>
@@ -801,8 +973,10 @@
         <input type="text" id="inv-drag-bridge" style="display:none">
 
         <!-- WEATHER STATUS HUD -->
-        <div id="weatherHUD" class="fixed top-24 left-8 glass px-4 py-2 rounded-xl text-[10px] font-bold text-indigo-400 uppercase tracking-widest pointer-events-none" style="display: block;">
-            Satellite Link: <span id="syncIndicator" class="text-amber-400">Connecting...</span><br/>
+        <div id="weatherHUD"
+            class="fixed top-24 left-8 glass px-4 py-2 rounded-xl text-[10px] font-bold text-indigo-400 uppercase tracking-widest pointer-events-none"
+            style="display: block;">
+            Satellite Link: <span id="syncIndicator" class="text-amber-400">Connecting...</span><br />
             Atmosphere: <span id="weatherText" class="text-white">Analyzing...</span>
         </div>
     </div>
@@ -823,9 +997,9 @@
 
         // --- CONSTANTS ---
         const GRID_SIZE = 100;
-        const TILE_SCALE = 2; 
+        const TILE_SCALE = 2;
         const AVATARS = ['Superhero_Male_FullBody', 'Superhero_Female_FullBody'];
-        
+
         // --- GLOBALS ---
         let scene, camera, renderer, clock;
         let player, mixer, currentAnimation;
@@ -834,17 +1008,17 @@
         let moveSpeed = 0.1;
         let rotationSpeed = 5;
         let isSprinting = false;
-        
+
         // [Identity] Default Customization (Simplified)
-        let currentCustoms = {}; 
-        let isActionPlaying = false; 
+        let currentCustoms = {};
+        let isActionPlaying = false;
         window.lastActionStartTime = 0;
         window.lastActionName = "";
         window.lastSendTime = 0;
         window.lastReceiveTime = 0;
         window.lastAckTime = 0;
         window.pendingAction = null;
-        
+
         let state = 'SELECTION';
         let models = window.models = {};                // [Tactical] Asset Registry Restored
         let username = ""; // [Tactical] Identity Registry Restored
@@ -873,18 +1047,18 @@
         inventory[0] = 'stone_sword';
         inventory[1] = { ...ITEMS.wood, count: 12 }; // Static materials remain as objects for now
         inventory[2] = { ...ITEMS.stone, count: 5 };
- // [Tactical] Building & Digging State
-        
+        // [Tactical] Building & Digging State
+
         console.log(`[Homeworld] Connectivity Bridge initialized: ${API_BASE}`);
         const API_OPTIONS = { credentials: 'include' };
 
         let worldData = null;
         let selectedAvatarId = window.selectedAvatarId = 'Superhero_Female_FullBody';
-        let selectedHairId = window.selectedHairId = null; 
-        let selectedBeardId = window.selectedBeardId = null; 
+        let selectedHairId = window.selectedHairId = null;
+        let selectedBeardId = window.selectedBeardId = null;
         let selectedHairColor = window.selectedHairColor = '#ffffff';
         // [Modular] Hair is now managed locally within each avatar's scene tree
-        
+
         let orbit_angle_horizontal = Math.PI;
         let orbit_angle_vertical = 0.5;
         let orbit_distance = 6;
@@ -896,24 +1070,24 @@
         const mouse = new THREE.Vector2();
         let targetObject = null;
 
-        const keys = { 
-            KeyW:false, KeyA:false, KeyS:false, KeyD:false, 
-            Space:false, ShiftLeft: false, ShiftRight: false, KeyC: false,
-            KeyG:false, KeyI:false, KeyM:false 
+        const keys = {
+            KeyW: false, KeyA: false, KeyS: false, KeyD: false,
+            Space: false, ShiftLeft: false, ShiftRight: false, KeyC: false,
+            KeyG: false, KeyI: false, KeyM: false
         };
         const playerRadius = 0.6;
         let isRaining = false;
         let rainIntensity = 0.0;
-        
-        const collisions = []; 
+
+        const collisions = [];
         let currentAvatarId = 'Human_1.gltf';
         let terrainHeightMap = {};
-        let waterMat, rainSystemA, rainSystemB; 
-        
+        let waterMat, rainSystemA, rainSystemB;
+
         window.weatherMaterials = [];
         let grassMat, forestMat, desertMat, snowMat, cliffMat, swampMat;
         let barkDetail, foliageDetail, stoneDetail;
-        
+
         let leaves, leafData = [];
         let treeTops = [];
         let lightningFlash = 0;
@@ -940,7 +1114,7 @@
             scene.add(hemi);
 
             const sun = window.sun = new THREE.DirectionalLight(0xffffff, 2.5);
-            sun.position.set(20, 60, 20); 
+            sun.position.set(20, 60, 20);
             sun.castShadow = true;
             sun.shadow.camera.left = -20;
             sun.shadow.camera.right = 20;
@@ -952,7 +1126,7 @@
             sun.shadow.mapSize.height = 2048;
             sun.shadow.bias = 0.0005; // [Fix] Positive bias to eliminate Shadow Acne (striped artifacts)
             scene.add(sun);
-            scene.sun = sun; 
+            scene.sun = sun;
 
             const loader = new GLTFLoader();
             const texLoader = new THREE.TextureLoader();
@@ -965,8 +1139,8 @@
                 try {
                     const gltf = await loader.loadAsync(`${charPath}${id}.gltf`);
                     gltf.scene.visible = false;
-                    gltf.scene.traverse(c => { if(c.isMesh) { c.castShadow = true; c.receiveShadow = true; }});
-                    
+                    gltf.scene.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+
                     // [Animation] Extract embedded animations from the avatar model itself
                     if (gltf.animations && gltf.animations.length > 0) {
                         gltf.animations.forEach(clip => {
@@ -998,7 +1172,7 @@
             try {
                 const configId = window.CONFIG ? window.CONFIG.avatar_id : null;
                 await checkAuth();
-                
+
                 // [Identity] Auto-Login Selection from injected CONFIG
                 const config = window.CONFIG;
                 if (config && config.avatar_id) {
@@ -1008,29 +1182,40 @@
                         const match = AVATARS.find(a => a.endsWith(selectedAvatarId));
                         if (match) selectedAvatarId = match;
                     }
-                // Restore appearance
-                if (config.visuals) {
-                    window.selectedHairId = config.visuals.hairId || null;
-                    window.selectedBeardId = config.visuals.beardId || null;
-                    window.selectedHairColor = config.visuals.hairColor || '#ffffff';
-                    console.log(`[Init] Restored appearance: Hair=${window.selectedHairId}, Beard=${window.selectedBeardId}, Color=${window.selectedHairColor}`);
-                }
-                
-                selectAvatar(selectedAvatarId);
+                    // Restore appearance
+                    if (config.visuals) {
+                        window.selectedHairId = config.visuals.hairId || null;
+                        window.selectedBeardId = config.visuals.beardId || null;
+                        window.selectedHairColor = config.visuals.hairColor || '#ffffff';
+                        console.log(`[Init] Restored appearance: Hair=${window.selectedHairId}, Beard=${window.selectedBeardId}, Color=${window.selectedHairColor}`);
+                    }
+
+                    // [Sync] Early State Hydration for Gear Preview
+                    try {
+                        const stateRes = await fetch(`${API_BASE}/api/game/state`, API_OPTIONS);
+                        const stateData = await stateRes.json();
+                        if (stateData.equipment) {
+                            Object.assign(equipment, stateData.equipment);
+                            // Trigger metadata fetch so preview has model paths
+                            fetchMissingItemDetails();
+                        }
+                    } catch (e) { console.warn("[Init] Gear hydration failed:", e); }
+
+                    selectAvatar(selectedAvatarId);
                 } else {
                     selectAvatar(AVATARS[0]); // Default to first available
                 }
             } catch (e) {
                 console.error("[Init] Auth/Persistence check failed:", e);
             }
-            
+
             // Hide the loading overlay so the identity matrix becomes visible
             const loadingOverlay = document.getElementById('loading');
             if (loadingOverlay) loadingOverlay.style.display = 'none';
             setupRain();
-            setInterval(syncWeather, 1000); 
+            setInterval(syncWeather, 1000);
             syncWeather();
-            
+
             animate();
         }
 
@@ -1042,7 +1227,7 @@
         window.toggleInventory = toggleInventory;
 
         // --- GLOBAL EVENT LISTENERS (Moved out of init for immediate responsiveness) ---
-        window.addEventListener('keydown', e => { 
+        window.addEventListener('keydown', e => {
             if (e.repeat) return; // [Fix] Prevent repetitive input logic
             if (e.code === 'KeyG') {
                 if (isBuildMode) performDig();
@@ -1080,37 +1265,41 @@
             }
         });
 
-        window.addEventListener('keyup', e => { 
+        window.addEventListener('keyup', e => {
             if (keys && e.code in keys) {
-                keys[e.code] = false; 
+                keys[e.code] = false;
             }
         });
 
-        window.addEventListener('mousedown', e => { if(e.button === 2) isOrbiting = true; });
-        window.addEventListener('mouseup', e => { if(e.button === 2) isOrbiting = false; });
-        window.addEventListener('mousemove', (e) => { if(window.onMouseMove) window.onMouseMove(e); });
-        window.addEventListener('click', (e) => { if(window.onMouseClick) window.onMouseClick(e); });
+        window.addEventListener('mousedown', e => { if (e.button === 2) isOrbiting = true; });
+        window.addEventListener('mouseup', e => { if (e.button === 2) isOrbiting = false; });
+        window.addEventListener('mousemove', (e) => { if (window.onMouseMove) window.onMouseMove(e); });
+        window.addEventListener('click', (e) => { if (window.onMouseClick) window.onMouseClick(e); });
         window.addEventListener('contextmenu', e => e.preventDefault());
         window.addEventListener('wheel', e => {
             orbit_distance = Math.max(2, Math.min(20, orbit_distance + e.deltaY * 0.005));
         });
-        window.addEventListener('resize', () => { if(window.onWindowResize) window.onWindowResize(); });
+        window.addEventListener('resize', () => { if (window.onWindowResize) window.onWindowResize(); });
 
         async function checkAuth() {
             const res = await fetch(`${API_BASE}/api/auth/status`, API_OPTIONS);
             const data = await res.json();
-            if(!data.logged_in) window.location.href = '/login';
+            if (!data.logged_in) window.location.href = '/login';
             username = data.username; // [Tactical] Populate global identity for filtering
             document.getElementById('userName').textContent = (data.full_name || data.username).toUpperCase();
         }
 
         // [Identity] Removed legacy customizeAppearance as per request
 
-        function applyAvatarConfig(root, avatarId) {
-            if (!root || !avatarId) return;
+        function applyAvatarConfig(root, avatarIdOriginal) {
+            if (!root || !avatarIdOriginal) return;
+
+            // [Identity] Strip folder prefixes (e.g. male/Avatar -> Avatar) to match WEARING_MAP keys
+            const avatarId = avatarIdOriginal.includes('/') ? avatarIdOriginal.split('/').pop() : avatarIdOriginal;
+
             const config = WEARING_MAP[avatarId];
             if (!config) {
-                console.warn(`[Avatar] No config found for ${avatarId}`);
+                console.warn(`[Avatar] No config found for sanitized ID: ${avatarId}`);
                 return;
             }
 
@@ -1127,8 +1316,9 @@
 
             const texLoader = new THREE.TextureLoader();
             const isFemale = avatarId.toLowerCase().includes('female');
-            
+
             // Texture Library (Cached once per call)
+            // [Fix] Models and textures are in /Avatars/ directly, avoid gender subfolders in path
             const charPath = window.CONFIG?.API_BASE + '/models/Characters/Avatars/';
             const baseFile = isFemale ? "T_Superhero_Female_Dark_BaseColor.png" : "T_Superhero_Male_Dark.png";
             const normalFile = isFemale ? "T_Superhero_Female_Normal.png" : "T_Superhero_Male_Normal.png";
@@ -1138,7 +1328,7 @@
             const bodyMap = texLoader.load(`${charPath}${baseFile}`);
             bodyMap.colorSpace = 'srgb';
             const bodyNormal = texLoader.load(`${charPath}${normalFile}`);
-            bodyNormal.colorSpace = ''; 
+            bodyNormal.colorSpace = '';
             const bodyRoughness = texLoader.load(`${charPath}${roughnessFile}`);
             bodyRoughness.colorSpace = '';
 
@@ -1182,7 +1372,7 @@
                                 side: THREE.DoubleSide,
                                 shadowSide: THREE.FrontSide
                             });
-                            
+
                             newMat.map.wrapS = newMat.map.wrapT = THREE.RepeatWrapping;
                             newMat.normalMap.wrapS = newMat.normalMap.wrapT = THREE.RepeatWrapping;
                             newMat.roughnessMap.wrapS = newMat.roughnessMap.wrapT = THREE.RepeatWrapping;
@@ -1195,12 +1385,13 @@
 
                             newMat.normalScale.set(nx, ny);
                             obj.material = newMat;
-                        } 
+                        }
                         else if (meshName.toLowerCase().includes('eye')) {
                             // Base material check
                             if (obj.material) {
                                 obj.material = obj.material.clone();
-                                const variant = 'T_Eye_Brown.png'; 
+                                const variant = 'T_Eye_Brown.png';
+                                // Ensure no duplicate slashes or gender subfolders are added
                                 const eyeMap = texLoader.load(`${charPath}${variant}`);
                                 eyeMap.colorSpace = 'srgb';
                                 obj.material.map = eyeMap;
@@ -1225,7 +1416,7 @@
 
             slots.forEach(slot => {
                 const hairPath = HAIR_MAP[slot.id];
-                
+
                 // Cleanup previous item for this slot
                 const oldItem = root.getObjectByName(slot.groupName);
                 if (oldItem) {
@@ -1239,9 +1430,10 @@
 
                     new GLTFLoader().load(fullHairPath, (gltf) => {
                         const hairScene = gltf.scene;
-                        
+
                         // Apply hair textures
                         const style = HAIR_TEXTURE_MAP['Style1']; // Defaulting for now
+                        // [Fix] Use root Avatars path consistently
                         const texPath = window.CONFIG?.API_BASE + '/models/Characters/Avatars/Hairstyles/Textures/';
                         const hBase = texLoader.load(`${texPath}${style.base}`);
                         const hNorm = texLoader.load(`${texPath}${style.normal}`);
@@ -1254,8 +1446,8 @@
                             normalMap: hNorm,
                             color: new THREE.Color(window.selectedHairColor || '#ffffff'),
                             roughness: 0.9,
-                            transparent: true,
-                            alphaTest: 0.1, 
+                            transparent: false, // [Fix] Solve sorting issues
+                            alphaTest: 0.5,     // [Fix] Cutout rendering
                             side: THREE.DoubleSide,
                             depthWrite: true,
                             depthTest: true
@@ -1267,6 +1459,7 @@
                                 obj.material = hairMat;
                                 obj.castShadow = true;
                                 obj.receiveShadow = true;
+                                obj.frustumCulled = false; // [Fix] Prevent disappearing at certain angles
                                 meshes.push(obj);
                             }
                         });
@@ -1275,7 +1468,7 @@
                             const modGroup = new THREE.Group();
                             modGroup.name = slot.groupName;
                             root.add(modGroup);
-                            
+
                             meshes.forEach(m => {
                                 if (m.isSkinnedMesh) {
                                     m.bind(characterSkeleton, characterMesh.bindMatrix);
@@ -1293,13 +1486,13 @@
         window.selectHair = async (hairId) => {
             window.selectedHairId = hairId;
             console.log(`[Avatar] Selecting Hairstyle: ${hairId}`);
-            
+
             // Apply visually
             const avatarId = window.selectedAvatarId;
             if (avatarId && models[avatarId]) {
                 applyAvatarConfig(models[avatarId].scene, avatarId);
             }
-            
+
             saveVisuals();
 
             // Update active state in UI
@@ -1311,13 +1504,13 @@
         window.selectBeard = async (beardId) => {
             window.selectedBeardId = beardId;
             console.log(`[Avatar] Selecting Facial Hair: ${beardId}`);
-            
+
             // Apply visually
             const avatarId = window.selectedAvatarId;
             if (avatarId && models[avatarId]) {
                 applyAvatarConfig(models[avatarId].scene, avatarId);
             }
-            
+
             saveVisuals();
 
             // Update active state in UI
@@ -1357,13 +1550,13 @@
                 visuals.hairId = window.selectedHairId;
                 visuals.beardId = window.selectedBeardId;
                 visuals.hairColor = window.selectedHairColor;
-                
+
                 await fetch(`${window.CONFIG?.API_BASE}/api/game/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         avatar_id: window.selectedAvatarId,
-                        visuals 
+                        visuals
                     })
                 });
             } catch (err) {
@@ -1374,7 +1567,7 @@
         window.selectAvatar = (id) => {
             selectedAvatarId = window.selectedAvatarId = id;
             console.log(`[Avatar] Selected Active Avatar: ${id}`);
-            
+
             // Update gender-specific UI
             const isFemale = id.toLowerCase().includes('female');
             document.querySelectorAll('.female-only').forEach(el => el.style.display = isFemale ? 'block' : 'none');
@@ -1384,19 +1577,29 @@
             AVATARS.forEach(cid => {
                 if (models[cid]) models[cid].scene.visible = (cid === id);
             });
-            
+
             const gltf = models[id];
             if (!gltf) return;
-            
+
             applyAvatarConfig(gltf.scene, id);
+
+            // [Sync] Show equipped gear on the selection screen preview
+            Object.keys(equipment).forEach(slotId => {
+                const itemId = equipment[slotId];
+                if (itemId) {
+                    console.log(`[Selection] Previewing Equipment for ${slotId}: ${itemId}`);
+                    updateCharacterVisuals(gltf.scene, slotId, itemId);
+                }
+            });
+
             updateModularUI(); // Ensure dots are highlighted on startup/switch
 
-            if(mixer) mixer.stopAllAction();
+            if (mixer) mixer.stopAllAction();
             mixer = new THREE.AnimationMixer(gltf.scene);
 
             // [Sync] Fetch animation from external library
             const idleClip = animationLibrary['Idle_Loop'];
-            if(idleClip) mixer.clipAction(idleClip).play();
+            if (idleClip) mixer.clipAction(idleClip).play();
 
             camera.position.set(0, 1.5, 4);
             camera.lookAt(0, 1, 0);
@@ -1427,7 +1630,7 @@
 
         window.enterWorld = async () => {
             if (!selectedAvatarId) return;
-            
+
             console.log(`[Identity] Establishing Link with Avatar: ${selectedAvatarId}`);
 
             const selectionUI = document.getElementById('selectionUI');
@@ -1437,7 +1640,7 @@
             try {
                 const res = await fetch(`${API_BASE}/api/game/state`, API_OPTIONS);
                 const data = await res.json();
-                
+
                 // [Sync] Restore visuals and identity from DB
                 if (data.avatar_id) {
                     selectedAvatarId = window.selectedAvatarId = data.avatar_id;
@@ -1449,7 +1652,7 @@
                     window.selectedBeardId = data.visuals.beardId || null;
                     window.selectedHairColor = data.visuals.hairColor || '#ffffff';
                     console.log(`[World] Restored Visuals: Hair=${window.selectedHairId}, Color=${window.selectedHairColor}`);
-                    
+
                     // Re-apply to global scene character
                     const gltf = models[selectedAvatarId];
                     if (gltf) applyAvatarConfig(gltf.scene, selectedAvatarId);
@@ -1464,7 +1667,7 @@
                     inventory.length = 0;
                     while (inventory.length < 20) inventory.push(null);
                 }
-                
+
                 if (data.equipment) {
                     Object.keys(data.equipment).forEach(k => {
                         equipment[k] = data.equipment[k];
@@ -1473,6 +1676,9 @@
                     });
                 }
 
+                // [Sync] Trigger data fetch for missing items to ensure visual hydration
+                fetchMissingItemDetails();
+
                 if (data.pos && (data.pos.x !== 0 || data.pos.z !== 0)) {
                     console.log(`[World] Restoring Position: ${data.pos.x}, ${data.pos.z}`);
                     playerBaseGroup.position.set(data.pos.x, data.pos.y, data.pos.z);
@@ -1480,15 +1686,15 @@
                     // Start at a default spawn if new
                     console.log("[World] New character detected, using default spawn.");
                     playerBaseGroup.position.set(100 * TILE_SCALE, 0, 100 * TILE_SCALE);
-                    
+
                     // Immediately save this new spawn
                     await fetch(`${API_BASE}/api/game/save`, {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: { 'Content-Type': 'application/json' },
                         ...API_OPTIONS,
-                        body: JSON.stringify({ 
+                        body: JSON.stringify({
                             avatar_id: selectedAvatarId,
-                            pos: {x: 100, y: 0, z: 100}
+                            pos: { x: 100, y: 0, z: 100 }
                         })
                     });
                 }
@@ -1508,48 +1714,49 @@
                 ]);
                 const tiles = await tilesRes.json();
                 const worldObjs = await objsRes.json();
-                
+
                 await buildWorld(tiles, worldObjs);
-                
+
                 window.allTiles = tiles;
-                
                 setupLeaves(worldObjs);
+
                 setupExplorer();
 
-                // [Fix] Initialize heartbeat memory with the restored state to prevent immediate reset
-                lastSentState = { 
-                    x: playerBaseGroup.position.x, 
-                    y: playerBaseGroup.position.y, 
-                    z: playerBaseGroup.position.z, 
-                    rot_y: player.rotation.y, 
-                    status: 'Idle' 
-                };
-
-                // [Fix] ONLY now do we activate the game loop and heartbeat saves
+                // [Fix] Atomic state transition after initialization is complete
+                currentAnimation = null;
                 state = 'EXPLORING';
+
+                // [Fix] Initialize heartbeat memory with the restored state to prevent immediate reset
+                lastSentState = {
+                    x: playerBaseGroup.position.x,
+                    y: playerBaseGroup.position.y,
+                    z: playerBaseGroup.position.z,
+                    rot_y: player.rotation.y,
+                    status: 'Idle'
+                };
 
                 document.getElementById('loading').style.display = 'none';
                 const hud = document.getElementById('hudTop');
-                if(hud) hud.style.display = 'flex';
-            
+                if (hud) hud.style.display = 'flex';
+
                 const mini = document.getElementById('minimap-wrapper');
                 const coord = document.getElementById('coord-panel');
-                if(mini) mini.style.display = 'block';
-                if(coord) coord.style.display = 'block';
+                if (mini) mini.style.display = 'block';
+                if (coord) coord.style.display = 'block';
 
                 const toolbar = document.getElementById('toolbar');
-                if(toolbar) toolbar.style.display = 'flex';
+                if (toolbar) toolbar.style.display = 'flex';
                 document.getElementById('weatherHUD').style.display = 'block';
-                
+
                 // Initial Visuals for Local Player
                 Object.keys(equipment).forEach(slotId => {
                     const item = equipment[slotId];
                     if (item) updateCharacterVisuals(player, slotId, item);
                 });
-                
+
                 // Auto-save every 30 seconds
                 setInterval(savePlayerState, 30000);
-                
+
                 // EXPOSE FOR DEBUGGING
                 window.playerExposed = playerBaseGroup;
                 window.heightMapExposed = terrainHeightMap;
@@ -1562,23 +1769,23 @@
                     else btn.classList.remove('active');
                     console.log("[Mode] Build Mode:", isBuildMode ? "ACTIVE" : "INACTIVE");
                 };
-                
+
             } catch (e) {
                 console.error(e);
                 alert("Failed to materialize world.");
             }
         };
 
-        
+
 
 
         async function buildWorld(tiles, worldObjs) {
             const TILE_DEPTH = 10;
             const boxGeo = new THREE.BoxGeometry(TILE_SCALE, TILE_DEPTH, TILE_SCALE);
-            
+
             const loader = new THREE.TextureLoader();
             const texPath = API_BASE + '/static/textures/';
-            
+
             const loadTex = (name) => {
                 const t = loader.load(`${texPath}${name}`);
                 t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -1592,7 +1799,7 @@
             const snowTex = loadTex('snow_texture_1775012663559.png');
             window.waterNormal = loadTex('water_normal_map_1775012680802.png');
             window.waterNormal2 = loadTex('water_normal_map_1775012680802.png');
-            window.waterNormal.repeat.set(0.15, 0.15); 
+            window.waterNormal.repeat.set(0.15, 0.15);
             window.waterNormal2.repeat.set(0.12, 0.12);
 
             // BIOME MATERIALS (Higher specularity for 'wet' look)
@@ -1603,30 +1810,30 @@
             cliffMat = new THREE.MeshPhongMaterial({ map: rockTex, specular: 0x555555, shininess: 40 });
             swampMat = new THREE.MeshPhongMaterial({ map: grassTex, color: 0x222211, specular: 0x223322, shininess: 15 });
 
-            waterMat = new THREE.MeshStandardMaterial({ 
-                color: 0x2040C0, 
-                transparent: true, 
+            waterMat = new THREE.MeshStandardMaterial({
+                color: 0x2040C0,
+                transparent: true,
                 opacity: 0.7,
                 roughness: 0.1,
                 metalness: 0.3,
                 normalMap: waterNormal
             });
 
-              [grassMat, forestMat, desertMat, snowMat, cliffMat, swampMat, waterMat].forEach(m => {
-                  if (m) {
-                      patchTerrainMaterial(m);
-                      window.weatherMaterials.push(m);
-                  }
-              });
-              
-              // Force immediate sync for new materials
-              syncWeather();
+            [grassMat, forestMat, desertMat, snowMat, cliffMat, swampMat, waterMat].forEach(m => {
+                if (m) {
+                    patchTerrainMaterial(m);
+                    window.weatherMaterials.push(m);
+                }
+            });
+
+            // Force immediate sync for new materials
+            syncWeather();
 
             waterMat.onBeforeCompile = (shader) => {
                 shader.uniforms.uTime = { value: 0 };
-                shader.uniforms.uIsRaining = { value: 0.0 }; 
+                shader.uniforms.uIsRaining = { value: 0.0 };
                 shader.uniforms.normalMap2 = { value: waterNormal2 };
-                
+
                 shader.vertexShader = shader.vertexShader.replace(
                     '#include <common>',
                     `#include <common>
@@ -1670,21 +1877,21 @@
                      
                      normal = normalize(normal * 0.4 + normal2 * 0.4 + vec3(ripple * 0.7, ripple * 0.7, 1.0));`
                 );
-                
+
                 shader.fragmentShader = shader.fragmentShader.replace(
                     '#include <color_fragment>',
                     `#include <color_fragment>
                      diffuseColor.rgb *= (0.92 + 0.08 * sin(uTime * 1.5));`
                 );
-                
-                waterMat.userData.shader = shader; 
+
+                waterMat.userData.shader = shader;
             };
-            
+
             // POPULATE ACCURATE TERRAIN HEIGHT MAP FROM ALL TILES
             tiles.forEach(t => {
                 terrainHeightMap[`${t.x},${t.y}`] = t.e;
             });
-            
+
             const grassTiles = tiles.filter(t => t.b === 'g');
             const forestTiles = tiles.filter(t => t.b === 'f');
             const desertTiles = tiles.filter(t => t.b === 'd');
@@ -1699,13 +1906,13 @@
             const snowMesh = new THREE.InstancedMesh(boxGeo, snowMat, snowTiles.length);
             const cliffMesh = new THREE.InstancedMesh(boxGeo, cliffMat, cliffTiles.length);
             const swampMesh = new THREE.InstancedMesh(boxGeo, swampMat, swampTiles.length);
-            
+
             const waterPlaneGeo = new THREE.PlaneGeometry(TILE_SCALE, TILE_SCALE);
             const waterMesh = new THREE.InstancedMesh(waterPlaneGeo, waterMat, waterTiles.length);
-            
+
             waterMesh.receiveShadow = true;
             const WATER_LEVEL = -1.8;
-            
+
             grassMesh.receiveShadow = true;
             forestMesh.receiveShadow = true;
             desertMesh.receiveShadow = true;
@@ -1713,7 +1920,7 @@
             snowMesh.receiveShadow = true;
             cliffMesh.receiveShadow = true;
             swampMesh.receiveShadow = true;
-            
+
             const dummy = new THREE.Object3D();
 
             function drawTiles(list, mesh, isWater = false) {
@@ -1721,7 +1928,7 @@
                     const yPos = isWater ? -1.8 : (t.e || 0);
                     dummy.position.set(t.x * TILE_SCALE, yPos - (isWater ? 0 : TILE_DEPTH / 2), t.y * TILE_SCALE);
                     if (isWater) {
-                        dummy.rotation.x = -Math.PI / 2; 
+                        dummy.rotation.x = -Math.PI / 2;
                     } else {
                         dummy.rotation.x = 0;
                     }
@@ -1736,7 +1943,7 @@
 
             drawTiles(grassTiles, grassMesh);
             drawTiles(forestTiles, forestMesh);
-            
+
             drawTiles(desertTiles, desertMesh);
             waterTiles.forEach((t, i) => {
                 const floorY = t.e || -1.8;
@@ -1753,8 +1960,8 @@
             drawTiles(swampTiles, swampMesh);
 
             scene.add(grassMesh, forestMesh, desertMesh, waterMesh, snowMesh, cliffMesh, swampMesh);
-            
-            window.meshes = { 
+
+            window.meshes = {
                 g: { mesh: grassMesh, list: grassTiles },
                 f: { mesh: forestMesh, list: forestTiles },
                 d: { mesh: desertMesh, list: desertTiles },
@@ -1767,11 +1974,11 @@
             const envLoader = new GLTFLoader();
             const envPath = API_BASE + '/models/Environment/glTF/';
             const uniqueModels = [...new Set(worldObjs.map(o => o.m))];
-            
+
             // Wind Global State
-            window.vegUniforms = { 
+            window.vegUniforms = {
                 uTime: { value: 0 },
-                uWindIntensity: { value: 0.5 } 
+                uWindIntensity: { value: 0.5 }
             };
             window.targetWind = 0.5;
 
@@ -1780,7 +1987,7 @@
                 const isTree = nameUpper.includes('TREE');
                 const isRock = nameUpper.includes('ROCK') || nameUpper.includes('STONE');
                 const isVeg = isTree || isRock || ['GRASS', 'FLOWER', 'REED', 'SEAWEED', 'BUSH', 'PLANT', 'MUSHROOM', 'LILY', 'STUMP', 'LOG', 'TRUNK', 'BRANCH', 'DEAD'].some(v => nameUpper.includes(v));
-                
+
                 // [Optimization] Never patch avatar materials with environment shaders
                 if (!isVeg || m.userData.isVegPatched || m.userData.isPlayer || nameUpper.includes('SUPERHERO')) {
                     if (m.userData.isPlayer) console.log(`[Shader] Exempting Player Material: ${m.name}`);
@@ -1790,12 +1997,12 @@
 
                 m.onBeforeCompile = (shader) => {
                     shader.uniforms.uTime = window.vegUniforms.uTime;
-                    shader.uniforms.uIntensity = { value: 1.0 }; 
+                    shader.uniforms.uIntensity = { value: 1.0 };
                     shader.uniforms.uIsRaining = { value: 0.0 };
                     shader.uniforms.uBarkDetail = { value: barkDetail };
                     shader.uniforms.uFoliageDetail = { value: foliageDetail };
                     shader.uniforms.uStoneDetail = { value: stoneDetail };
-                    
+
                     const isMushroom = nameUpper.includes('MUSHROOM');
                     const isFlower = nameUpper.includes('FLOWER');
                     const isDead = nameUpper.includes('DEAD') || nameUpper.includes('STUMP') || nameUpper.includes('LOG') || nameUpper.includes('TRUNK') || nameUpper.includes('BRANCH');
@@ -1804,10 +2011,10 @@
                     const noise = isTree ? 0.2 : 0.4;
                     const strength = (isStatic) ? 0.0 : (isTree ? 0.15 : 0.25);
                     const curve = isTree ? 'pow(position.y * 0.15, 2.0)' : 'position.y';
-                    
+
                     m.customProgramCacheKey = () => `${modelName}_${isDead}_${isRock}_${isMushroom}_vBloom`;
                     m.needsUpdate = true;
-                    
+
                     console.log(`[Material] Finalizing ${modelName} | Static: ${isStatic}, Sway: ${strength.toFixed(2)}`);
 
 
@@ -1905,19 +2112,19 @@
             }
 
             const modelPrototypes = {};
-            for(const mName of uniqueModels) {
+            for (const mName of uniqueModels) {
                 try {
                     const firstObj = worldObjs.find(o => o.m === mName);
                     const identifier = (firstObj ? firstObj.t : mName) + "_" + mName;
-                    
+
                     const gltf = await envLoader.loadAsync(`${envPath}${mName}`);
-                    gltf.scene.traverse(c => { 
-                        if(c.isMesh) { 
-                            c.castShadow = true; 
-                            c.receiveShadow = true; 
-                            if(c.material) {
+                    gltf.scene.traverse(c => {
+                        if (c.isMesh) {
+                            c.castShadow = true;
+                            c.receiveShadow = true;
+                            if (c.material) {
                                 // CLONE MATERIALS TO AVOID CROSS-POLLINATION BETWEEN DEAD/ALIVE TREES
-                                if(Array.isArray(c.material)) {
+                                if (Array.isArray(c.material)) {
                                     c.material = c.material.map(mat => {
                                         const m2 = mat.clone();
                                         m2.userData.isVegPatched = false;
@@ -1970,22 +2177,22 @@
                 clone.rotation.y = rotY;
 
                 if (typeUpper === 'TREE') {
-                    clone.scale.set(o.s * 0.8, o.s * 1.2, o.s * 0.8); 
+                    clone.scale.set(o.s * 0.8, o.s * 1.2, o.s * 0.8);
                 }
-                
+
                 clone.userData = { type: o.t };
                 scene.add(clone);
 
                 if (typeUpper.includes('TREE') || typeUpper.includes('ROCK')) {
                     const isSmallRock = (typeUpper.includes('ROCK') && o.s < 1.1);
-                    
+
                     if (!isSmallRock) {
                         collisions.push({
                             x: worldX,
                             z: worldZ,
                             y: yPos,
                             h: typeUpper.includes('TREE') ? 5.0 * o.s : 0.8 * o.s,
-                            r: typeUpper.includes('TREE') ? 0.5 * o.s : 1.2 * o.s 
+                            r: typeUpper.includes('TREE') ? 0.5 * o.s : 1.2 * o.s
                         });
                     }
                 }
@@ -1996,8 +2203,8 @@
             const gltf = models[selectedAvatarId];
             player = gltf.scene;
             player.visible = true;
-            player.position.set(0, 0, 0); 
-            
+            player.position.set(0, 0, 0);
+
             playerBaseGroup.add(player);
             scene.add(playerBaseGroup);
 
@@ -2021,10 +2228,10 @@
                 const res = await fetch(`${API_BASE}/api/game/weather?nc=${Math.random()}`, API_OPTIONS);
                 if (!res.ok) throw new Error("Server communication failure");
                 const data = await res.json();
-                
+
                 isRaining = !!data.is_raining;
                 rainIntensity = data.intensity || 0;
-                
+
                 // Update HUD
                 const weatherText = document.getElementById('weatherText');
                 if (weatherText) {
@@ -2040,18 +2247,18 @@
 
                 // Target Wind Intensity
                 window.weatherWindTarget = isRaining ? (0.8 + rainIntensity * 1.5) : 0.45;
-                if(!window.weatherWindCurrent) window.weatherWindCurrent = 0.45;
+                if (!window.weatherWindCurrent) window.weatherWindCurrent = 0.45;
 
                 // --- TARGET COLORS ---
                 window.targetBgColor = isRaining ? new THREE.Color(0x0a0a12) : new THREE.Color(0x0a1a2e);
-                if(!window.currentBgColor) window.currentBgColor = new THREE.Color(0x0a1a2e);
-                
+                if (!window.currentBgColor) window.currentBgColor = new THREE.Color(0x0a1a2e);
+
                 window.weatherMaterials.forEach(m => {
                     if (m && m.userData.shader && m.userData.shader.uniforms.uIsRaining) {
                         m.userData.shader.uniforms.uIsRaining.value = isRaining ? 1.0 : 0.0;
                     }
                 });
-                
+
                 if (isRaining) {
                     if (rainSystemA) rainSystemA.visible = true;
                     if (rainSystemB) rainSystemB.visible = true;
@@ -2072,7 +2279,7 @@
             mat.onBeforeCompile = (shader) => {
                 shader.uniforms.uTime = { value: 0 };
                 shader.uniforms.uIsRaining = { value: 0.0 };
-                
+
                 shader.vertexShader = shader.vertexShader.replace(
                     '#include <common>',
                     `#include <common>
@@ -2125,28 +2332,28 @@
             const rainGeo = new THREE.BufferGeometry();
             const rainCount = 4000;
             const positions = new Float32Array(rainCount * 3);
-            for(let i=0; i<rainCount*3; i+=3) {
-                positions[i] = (Math.random() - 0.5) * 60;   
-                positions[i+1] = Math.random() * 40;         
-                positions[i+2] = (Math.random() - 0.5) * 60; 
+            for (let i = 0; i < rainCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 60;
+                positions[i + 1] = Math.random() * 40;
+                positions[i + 2] = (Math.random() - 0.5) * 60;
             }
             rainGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            
+
             const rainMat = new THREE.PointsMaterial({
                 color: 0xaaaaaa, size: 0.12, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending
             });
-            
+
             rainSystemA = new THREE.Points(rainGeo, rainMat);
             rainSystemB = rainSystemA.clone();
-            rainSystemB.position.y = 40; 
+            rainSystemB.position.y = 40;
             scene.add(rainSystemA);
             scene.add(rainSystemB);
         }
 
         function playAnimation(name) {
             try {
-                if(currentAnimation === name) return;
-                
+                if (currentAnimation === name) return;
+
                 // [Sync] Map logical names to library names
                 const nameMap = {
                     'Idle': 'Idle_Loop',
@@ -2160,10 +2367,10 @@
                 };
                 const clipName = nameMap[name] || name;
                 const clip = animationLibrary[clipName];
-                
-                if(clip && mixer) {
+
+                if (clip && mixer) {
                     const newAction = mixer.clipAction(clip);
-                    if(currentAnimation) {
+                    if (currentAnimation) {
                         const oldClipName = nameMap[currentAnimation] || currentAnimation;
                         const oldClip = animationLibrary[oldClipName];
                         if (oldClip) {
@@ -2171,7 +2378,9 @@
                             oldAction.fadeOut(0.15); // [Tactical] Sharper crossfade for movement
                         }
                     }
-                    newAction.reset().fadeIn(0.15).play();
+                    newAction.reset().setEffectiveWeight(1.0).fadeIn(0.15).play();
+                    // [Fix] Immediate update to avoid first-frame T-pose lag
+                    mixer.update(0);
                     currentAnimation = name;
                 } else {
                     if (name !== 'Idle') playAnimation('Idle');
@@ -2185,7 +2394,7 @@
             if (isActionPlaying) return;
             playAnimation(name);
             isActionPlaying = true;
-            window.lastActionStartTime = Date.now(); 
+            window.lastActionStartTime = Date.now();
             // [Sync] One-Shot Event: Ensures each jump triggers exactly once on other screens
             window.pendingAction = `${name}:${window.lastActionStartTime}`;
             setTimeout(() => {
@@ -2249,22 +2458,22 @@
                 const fetchUrl = API_BASE ? `${API_BASE}/api/game/player/all` : "/api/game/player/all";
                 const res = await fetch(fetchUrl, API_OPTIONS);
                 const playersData = await res.json();
-                
+
                 const activeUsernames = new Set();
                 playersData.forEach(pd => {
                     // Skip self or invalid entries
-                    if (pd.username === username || !pd.username) return; 
+                    if (pd.username === username || !pd.username) return;
                     activeUsernames.add(pd.username);
-                    
+
                     let p = remotePlayers.get(pd.username);
                     if (!p) {
                         p = new RemotePlayer(pd.username, pd.avatar_id, pd.visuals);
                         remotePlayers.set(pd.username, p);
                     }
-                    
+
                     // Update movement/rotation
                     p.update(pd);
-                    
+
                     // Sync Equipment Visuals
                     if (pd.equipment) {
                         if (!p.lastEquipment) p.lastEquipment = {};
@@ -2272,7 +2481,7 @@
                             const item = pd.equipment[slotId];
                             const lastItemString = JSON.stringify(p.lastEquipment[slotId]);
                             const currentItemString = JSON.stringify(item);
-                            
+
                             if (currentItemString !== lastItemString) {
                                 updateCharacterVisuals(p.group, slotId, item);
                                 p.lastEquipment[slotId] = item ? JSON.parse(currentItemString) : null;
@@ -2305,34 +2514,35 @@
         class RemotePlayer {
             constructor(username, avatarId, visuals) {
                 this.username = username;
-                
+
                 let id = avatarId;
                 if (id && !id.includes('/')) {
                     const match = AVATARS.find(a => a.endsWith(id));
                     if (match) id = match;
                 }
-                this.avatarId = id || 'female/Superhero_Female_FullBody';
+                this.avatarId = id || 'Superhero_Female_FullBody';
                 const customs = visuals || { hair: 0, eyes: 'brown', skin: 'light' };
 
-                const model = models[this.avatarId] || models['female/Superhero_Female_FullBody'];
+                const model = models[this.avatarId] || models['Superhero_Female_FullBody'];
                 if (!model || !model.scene) {
                     this.group = new THREE.Group();
                 } else {
                     this.group = SkeletonUtils.clone(model.scene);
-                    
+
                     const isFemale = (this.avatarId || "").toLowerCase().includes('female');
-                    const genderFolder = isFemale ? 'female' : 'male';
                     const texLoader = new THREE.TextureLoader();
-                    
+
                     this.group.traverse(obj => {
+                        if (obj.isMesh) obj.frustumCulled = false;
                         if (obj.isMesh && obj.material) {
                             const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
                             materials.forEach(mat => {
                                 const matName = (mat.name || "").toLowerCase();
                                 const objName = (obj.name || "").toLowerCase();
 
-                                const charFolder = `${charPath}${genderFolder}/`;
-                                
+                                // [Fix] All textures are located directly in /Avatars/, no gender subfolders
+                                const charFolder = `${charPath}`;
+
                                 const isHead = matName.includes('hair') || objName.includes('face') || objName.includes('eyebrow');
                                 const isEye = matName.includes('eye');
                                 const isBody = matName.includes('superhero');
@@ -2342,9 +2552,15 @@
                                     const m2 = mat.clone();
                                     m2.map = texLoader.load(`${charFolder}${variant}_BaseColor.png`);
                                     m2.normalMap = texLoader.load(`${charFolder}${variant}_Normal.png`);
+
+                                    if (matName.includes('hair')) {
+                                        m2.transparent = false; // [Fix] Solve sorting issues
+                                        m2.alphaTest = 0.5;     // [Fix] Cutout rendering
+                                        m2.side = THREE.DoubleSide;
+                                    }
                                     m2.needsUpdate = true;
                                     if (Array.isArray(obj.material)) {
-                                        materials[materials.indexOf(mat)] = m2; 
+                                        materials[materials.indexOf(mat)] = m2;
                                         obj.material = [...materials];
                                     } else {
                                         obj.material = m2;
@@ -2356,7 +2572,7 @@
                                     m2.map = texLoader.load(`${charFolder}${variant}.png`);
                                     m2.needsUpdate = true;
                                     if (Array.isArray(obj.material)) {
-                                        materials[materials.indexOf(mat)] = m2; 
+                                        materials[materials.indexOf(mat)] = m2;
                                         obj.material = [...materials];
                                     } else {
                                         obj.material = m2;
@@ -2366,7 +2582,6 @@
                                     const baseTex = isFemale ? "T_Superhero_Female_Dark_BaseColor.png" : "T_Superhero_Male_Dark.png";
                                     const normalTex = isFemale ? "T_Superhero_Female_Normal.png" : "T_Superhero_Male_Normal.png";
                                     const roughnessTex = isFemale ? "T_Superhero_Female_Roughness.png" : "T_Superhero_Male_Roughness.png";
-                                    const charFolder = `${charPath}${genderFolder}/`;
 
                                     // [Isolation] Clone material
                                     const m2 = mat.clone();
@@ -2376,9 +2591,9 @@
                                     m2.normalMap = texLoader.load(`${charFolder}${normalTex}`);
                                     m2.roughnessMap = texLoader.load(`${charFolder}${roughnessTex}`);
                                     m2.needsUpdate = true;
-                                    
+
                                     if (Array.isArray(obj.material)) {
-                                        materials[materials.indexOf(mat)] = m2; 
+                                        materials[materials.indexOf(mat)] = m2;
                                         obj.material = [...materials];
                                     } else {
                                         obj.material = m2;
@@ -2389,7 +2604,7 @@
                     });
                 }
                 this.group.visible = true;
-                
+
                 // Add Name Tag
                 const canvas = document.createElement('canvas');
                 canvas.width = 256; canvas.height = 64;
@@ -2401,17 +2616,17 @@
                 ctx.lineWidth = 4;
                 ctx.strokeText(username, 128, 48);
                 ctx.fillText(username, 128, 48);
-                
+
                 const tex = new THREE.CanvasTexture(canvas);
                 const spriteMat = new THREE.SpriteMaterial({ map: tex });
                 this.nameTag = new THREE.Sprite(spriteMat);
-                this.nameTag.position.y = 2.4; 
+                this.nameTag.position.y = 2.4;
                 this.nameTag.scale.set(3, 0.75, 1);
                 this.group.add(this.nameTag);
-                
+
                 this.targetPos = new THREE.Vector3();
                 this.targetRot = 0;
-                
+
                 scene.add(this.group);
                 this.mixer = new THREE.AnimationMixer(this.group);
                 this.currentStatusStr = "";
@@ -2423,7 +2638,7 @@
                 if (!pd || typeof pd.x !== 'number') return;
                 this.targetPos.set(pd.x, pd.y, pd.z);
                 this.targetRot = pd.rot_y || 0;
-                
+
                 // Animation Mapping
                 const nameMap = {
                     'Idle': 'Idle_Loop',
@@ -2437,11 +2652,11 @@
                     const animName = statusParts[0];
                     const clipName = nameMap[animName] || animName;
                     const clip = animationLibrary[clipName];
-                    
+
                     if (clip) {
                         const action = this.mixer.clipAction(clip);
                         if (this.currentAction) this.currentAction.fadeOut(0.2);
-                        
+
                         if (animName === 'Jump') {
                             action.reset().fadeIn(0.1).setLoop(THREE.LoopOnce).play();
                         } else {
@@ -2502,7 +2717,7 @@
 
         function getTileColor(b, e) {
             let h, s, l;
-            switch(b) {
+            switch (b) {
                 case 'g': h = 122; s = 33; l = 41; break; // Grass
                 case 'f': h = 123; s = 40; l = 18; break; // Forest
                 case 'd': h = 46; s = 36; l = 63; break;  // Desert
@@ -2538,38 +2753,38 @@
             const mctx = miniCanvas.getContext('2d');
             const R = 15; // Radius
             const T = 12; // Draw size
-            
+
             mctx.setTransform(1, 0, 0, 1, 0, 0);
             mctx.clearRect(0, 0, 400, 400);
             mctx.fillStyle = '#111';
-            mctx.fillRect(0,0,400,400);
+            mctx.fillRect(0, 0, 400, 400);
 
             mctx.translate(200, 200);
             mctx.rotate(orbit_angle_horizontal); // Inverted direction 
 
             // Update DOM Compass Rotation to match
             const compass = document.getElementById('minimap-compass');
-            if(compass) compass.style.transform = `rotate(${orbit_angle_horizontal}rad)`;
+            if (compass) compass.style.transform = `rotate(${orbit_angle_horizontal}rad)`;
 
             // Draw nearby tiles
             if (window.allTiles) {
-                for(let x = tx - R; x <= tx + R; x++) {
-                    for(let y = ty - R; y <= ty + R; y++) {
+                for (let x = tx - R; x <= tx + R; x++) {
+                    for (let y = ty - R; y <= ty + R; y++) {
                         const tile = window.allTiles.find(t => t.x === x && t.y === y);
-                        if(tile) {
-                        mctx.fillStyle = getTileColor(tile.b, tile.e);
-                        // Using slight overlap (T + 0.5) to remove "block borders" artifacts
-                        mctx.fillRect((x - tx) * T - 0.5, (y - ty) * T - 0.5, T + 0.5, T + 0.5);
+                        if (tile) {
+                            mctx.fillStyle = getTileColor(tile.b, tile.e);
+                            // Using slight overlap (T + 0.5) to remove "block borders" artifacts
+                            mctx.fillRect((x - tx) * T - 0.5, (y - ty) * T - 0.5, T + 0.5, T + 0.5);
                         }
                     }
                 }
             }
 
             // --- DRAW REMOTE PLAYERS ON MINIMAP ---
-            for(let rp of remotePlayers.values()) {
+            for (let rp of remotePlayers.values()) {
                 const rx = Math.round(rp.group.position.x / TILE_SCALE);
                 const rz = Math.round(rp.group.position.z / TILE_SCALE);
-                if(Math.abs(rx - tx) <= R && Math.abs(rz - ty) <= R) {
+                if (Math.abs(rx - tx) <= R && Math.abs(rz - ty) <= R) {
                     mctx.fillStyle = '#fff';
                     mctx.shadowBlur = 4;
                     mctx.shadowColor = '#fff';
@@ -2581,13 +2796,13 @@
             }
 
             // 3. Render Big Map (if open)
-            if(isBigMapOpen) {
+            if (isBigMapOpen) {
                 const bcanvas = document.getElementById('big-map-canvas');
                 const bctx = bcanvas.getContext('2d');
                 const S = 7.5; // Scale for 750px
-                
+
                 bctx.fillStyle = '#111';
-                bctx.fillRect(0,0,750,750);
+                bctx.fillRect(0, 0, 750, 750);
 
                 window.allTiles.forEach(t => {
                     bctx.fillStyle = getTileColor(t.b, t.e);
@@ -2596,7 +2811,7 @@
                 });
 
                 // DRAW REMOTE PLAYERS ON BIG MAP
-                for(let rp of remotePlayers.values()) {
+                for (let rp of remotePlayers.values()) {
                     const rx = Math.round(rp.group.position.x / TILE_SCALE);
                     const rz = Math.round(rp.group.position.z / TILE_SCALE);
                     bctx.fillStyle = '#fff';
@@ -2611,7 +2826,7 @@
                 // Player icon on big map
                 bctx.fillStyle = '#6366f1';
                 bctx.beginPath();
-                bctx.arc(tx * S, ty * S, 4, 0, Math.PI*2);
+                bctx.arc(tx * S, ty * S, 4, 0, Math.PI * 2);
                 bctx.fill();
                 bctx.strokeStyle = 'white';
                 bctx.lineWidth = 1;
@@ -2624,11 +2839,11 @@
 
             // --- PROXIMITY CULLING & ANIMATION ---
             const distLimit = 50 * TILE_SCALE;
-            for(let rp of remotePlayers.values()) {
+            for (let rp of remotePlayers.values()) {
                 const dist = playerBaseGroup.position.distanceTo(rp.group.position);
                 // Name Tag only visible within 50 blocks
                 rp.nameTag.visible = dist < distLimit;
-                
+
                 rp.lerp(deltaFactor);
                 rp.mixer.update(delta);
             }
@@ -2643,7 +2858,7 @@
                 const fetchUrl = API_BASE ? `${API_BASE}/api/game/chat/messages` : "/api/game/chat/messages";
                 const res = await fetch(fetchUrl, API_OPTIONS);
                 const msgs = await res.json();
-                
+
                 if (msgs.length !== chatMessages.length) {
                     const log = document.getElementById('chat-log');
                     log.innerHTML = '';
@@ -2656,7 +2871,7 @@
                     log.scrollTop = log.scrollHeight;
                     chatMessages = msgs;
                 }
-            } catch(e) { console.warn("[Chat] Sync failed", e); }
+            } catch (e) { console.warn("[Chat] Sync failed", e); }
         }
 
         async function sendChat() {
@@ -2675,7 +2890,7 @@
                 input.value = '';
                 input.style.display = 'none';
                 updateChatLog();
-            } catch(e) { console.error("[Chat] Send failed", e); }
+            } catch (e) { console.error("[Chat] Send failed", e); }
         }
 
 
@@ -2688,12 +2903,12 @@
 
         let lastSentState = { x: 0, y: 0, z: 0, rot_y: 0, status: '' };
         let isInventoryDirty = false;
-        window.savePlayerState = async function() {
+        window.savePlayerState = async function () {
             if (state !== 'EXPLORING' || !player || !playerBaseGroup) return;
             const pos = playerBaseGroup.position;
             const rot = player.rotation.y;
             const status = currentAnimation;
-            
+
             // [Sync] Strict Status Lock: Force actions (Jump, Dig) to have 100% precedence
             let actionStatus = null;
             if (window.pendingAction) {
@@ -2710,11 +2925,11 @@
             const timeSinceLastSave = Date.now() - (lastSaveTime || 0);
 
             if (!actionStatus && !changedPos && !changedRot && !changedStatus && !isInventoryDirty && (timeSinceLastSave < 5000)) {
-                return; 
+                return;
             }
 
             lastSaveTime = Date.now();
-            
+
             // Only update "State Memory" for continuous animations (Idle/Walk), not one-shot actions. 
             // This prevents the "Flicker Back to Idle" from re-triggering logic.
             lastSentState = { x: pos.x, y: pos.y, z: pos.z, rot_y: rot, status: status };
@@ -2727,7 +2942,7 @@
                     body: JSON.stringify({
                         pos: { x: pos.x, y: pos.y, z: pos.z },
                         rot_y: rot,
-                        status: actionStatus || status, 
+                        status: actionStatus || status,
                         avatar_id: selectedAvatarId,
                         visuals: {
                             hairId: window.selectedHairId,
@@ -2738,22 +2953,22 @@
                         equipment: isInventoryDirty ? equipment : undefined
                     })
                 });
-                
-            const now = Date.now();
+
+                const now = Date.now();
                 window.lastAckTime = now; // [Sync] Upload Acknowledged!
                 const indicator = document.getElementById('syncIndicator');
                 if (indicator) {
                     // [Honest Connection HUD] Check if BOTH download AND upload were successful recently
                     const isHealthy = (now - (window.lastAckTime || 0) < 10000) && (now - (window.lastReceiveTime || 0) < 10000);
                     if (isHealthy) {
-                       indicator.textContent = 'Stable';
-                       indicator.className = 'text-emerald-400';
+                        indicator.textContent = 'Stable';
+                        indicator.className = 'text-emerald-400';
                     } else if (now - (window.lastAckTime || 0) >= 10000) {
-                       indicator.textContent = 'Losing Signal';
-                       indicator.className = 'text-amber-400';
+                        indicator.textContent = 'Losing Signal';
+                        indicator.className = 'text-amber-400';
                     } else {
-                       indicator.textContent = 'Sync Delay';
-                       indicator.className = 'text-amber-400';
+                        indicator.textContent = 'Sync Delay';
+                        indicator.className = 'text-amber-400';
                     }
                 }
                 if (isInventoryDirty) isInventoryDirty = false;
@@ -2771,11 +2986,11 @@
         function updateExplorer(delta) {
 
             try {
-                if(state !== 'EXPLORING') return;
-                
+                if (state !== 'EXPLORING') return;
+
                 if (!window.playerPhysics) window.playerPhysics = { velocityY: 0, isJumping: false };
                 if (window.debugFrames === undefined) window.debugFrames = 0;
-                
+
                 const phys = window.playerPhysics;
                 const tx = Math.round(playerBaseGroup.position.x / TILE_SCALE);
                 const ty = Math.round(playerBaseGroup.position.z / TILE_SCALE);
@@ -2786,185 +3001,190 @@
                 if (window.debugFrames < 100 || phys.isJumping || isActionPlaying) {
                     window.debugFrames++;
                     if (window.debugFrames % 5 === 0) { // Every 5 frames to avoid console lag
-                         console.log(`[Trace] Pos(${playerBaseGroup.position.x.toFixed(1)}, ${playerBaseGroup.position.y.toFixed(2)}, ${playerBaseGroup.position.z.toFixed(1)}) | Anim: ${currentAnimation} | Action: ${isActionPlaying} | Jump: ${phys.isJumping}`);
+                        console.log(`[Trace] Pos(${playerBaseGroup.position.x.toFixed(1)}, ${playerBaseGroup.position.y.toFixed(2)}, ${playerBaseGroup.position.z.toFixed(1)}) | Anim: ${currentAnimation} | Action: ${isActionPlaying} | Jump: ${phys.isJumping}`);
                     }
                     if (window.debugFrames > 1000) window.debugFrames = 101; // Cycle
                 }
 
-            // --- Jump Physics State ---
-            const deltaFactor = delta * 60; 
-            const gravity = 0.015 * deltaFactor;
-            const jumpStrength = 0.19 * deltaFactor;
+                // --- Jump Physics State ---
+                const deltaFactor = delta * 60;
+                const gravity = 0.015 * deltaFactor;
+                const jumpStrength = 0.19 * deltaFactor;
 
-            // Handle Jump Input (Space) - ONE SHOT
-            if (keys.Space === true && !phys.isJumping) {
-                phys.velocityY = jumpStrength;
-                phys.isJumping = true;
-                keys.Space = false; // Prevent repeat jump while holding
-                playAction('Jump_Start', 500); // FIXED NAME: Jump_Start (Stage 1)
-                console.log(`[Jump] At: ${playerBaseGroup.position.y.toFixed(2)}, Floor: ${terrainY.toFixed(2)}`);
-            }
-
-            if (!phys.isJumping) {
-                // Ensure we don't 'sink' into terrain
-                if (Math.abs(playerBaseGroup.position.y - terrainY) > 0.01) {
-                    playerBaseGroup.position.y = THREE.MathUtils.lerp(playerBaseGroup.position.y, terrainY, 0.2 * deltaFactor);
+                // Handle Jump Input (Space) - ONE SHOT
+                if (keys.Space === true && !phys.isJumping) {
+                    phys.velocityY = jumpStrength;
+                    phys.isJumping = true;
+                    keys.Space = false; // Prevent repeat jump while holding
+                    playAction('Jump_Start', 500); // FIXED NAME: Jump_Start (Stage 1)
+                    console.log(`[Jump] At: ${playerBaseGroup.position.y.toFixed(2)}, Floor: ${terrainY.toFixed(2)}`);
                 }
-            }
 
-            // 2. Movement Logic
-            let moveX = 0;
-            let moveZ = 0;
-
-            if(keys.KeyW) moveZ -= 1;
-            if(keys.KeyS) moveZ += 1;
-            if(keys.KeyA) moveX -= 1;
-            if(keys.KeyD) moveX += 1;
-
-            const isCrouching = keys.KeyC;
-            const isJogging = keys.ShiftLeft || keys.ShiftRight;
-            const isMoving = (moveX !== 0 || moveZ !== 0);
-
-            let speed = 0.040; // Walk
-            if (isCrouching) speed = 0.02;
-            else if (isJogging) speed = 0.100; 
-
-            if(isMoving) {
-                const camRotY = orbit_angle_horizontal;
-                const forward = new THREE.Vector3(-Math.sin(camRotY), 0, -Math.cos(camRotY));
-                const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0));
-
-                const direction = new THREE.Vector3()
-                    .addScaledVector(forward, -moveZ)
-                    .addScaledVector(right, moveX)
-                    .normalize();
-
-                const moveDist = speed * deltaFactor; 
-                const nextX = playerBaseGroup.position.x + direction.x * moveDist;
-                const nextZ = playerBaseGroup.position.z + direction.z * moveDist;
-                
-                let canMoveX = true;
-                let canMoveZ = true;
-
-                for (const col of collisions) {
-                    if (playerBaseGroup.position.y > col.y + col.h) continue;
-                    
-                    const dx = nextX - col.x;
-                    const dz = playerBaseGroup.position.z - col.z;
-                    const distSQ = dx*dx + dz*dz;
-                    const minDist = playerRadius + col.r;
-                    if (distSQ < minDist * minDist) {
-                        canMoveX = false;
-                    }
-
-                    const dx2 = playerBaseGroup.position.x - col.x;
-                    const dz2 = nextZ - col.z;
-                    const distSQ2 = dx2*dx2 + dz2*dz2;
-                    if (distSQ2 < minDist * minDist) {
-                        canMoveZ = false;
+                if (!phys.isJumping) {
+                    // Ensure we don't 'sink' into terrain
+                    if (Math.abs(playerBaseGroup.position.y - terrainY) > 0.01) {
+                        playerBaseGroup.position.y = THREE.MathUtils.lerp(playerBaseGroup.position.y, terrainY, 0.2 * deltaFactor);
                     }
                 }
 
-                if (canMoveX) playerBaseGroup.position.x = nextX;
-                if (canMoveZ) playerBaseGroup.position.z = nextZ;
-                
-                let targetRotation;
-                if (isOrbiting) {
-                    targetRotation = camRotY + Math.PI; 
+                // 2. Movement Logic
+                let moveX = 0;
+                let moveZ = 0;
+
+                if (keys.KeyW) moveZ -= 1;
+                if (keys.KeyS) moveZ += 1;
+                if (keys.KeyA) moveX -= 1;
+                if (keys.KeyD) moveX += 1;
+
+                const isCrouching = keys.KeyC;
+                const isJogging = keys.ShiftLeft || keys.ShiftRight;
+                const isMoving = (moveX !== 0 || moveZ !== 0);
+
+                let speed = 0.040; // Walk
+                if (isCrouching) speed = 0.02;
+                else if (isJogging) speed = 0.100;
+
+                if (isMoving) {
+                    const camRotY = orbit_angle_horizontal;
+                    const forward = new THREE.Vector3(-Math.sin(camRotY), 0, -Math.cos(camRotY));
+                    const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0));
+
+                    const direction = new THREE.Vector3()
+                        .addScaledVector(forward, -moveZ)
+                        .addScaledVector(right, moveX)
+                        .normalize();
+
+                    const moveDist = speed * deltaFactor;
+                    const nextX = playerBaseGroup.position.x + direction.x * moveDist;
+                    const nextZ = playerBaseGroup.position.z + direction.z * moveDist;
+
+                    let canMoveX = true;
+                    let canMoveZ = true;
+
+                    for (const col of collisions) {
+                        if (playerBaseGroup.position.y > col.y + col.h) continue;
+
+                        const dx = nextX - col.x;
+                        const dz = playerBaseGroup.position.z - col.z;
+                        const distSQ = dx * dx + dz * dz;
+                        const minDist = playerRadius + col.r;
+                        if (distSQ < minDist * minDist) {
+                            canMoveX = false;
+                        }
+
+                        const dx2 = playerBaseGroup.position.x - col.x;
+                        const dz2 = nextZ - col.z;
+                        const distSQ2 = dx2 * dx2 + dz2 * dz2;
+                        if (distSQ2 < minDist * minDist) {
+                            canMoveZ = false;
+                        }
+                    }
+
+                    if (canMoveX) playerBaseGroup.position.x = nextX;
+                    if (canMoveZ) playerBaseGroup.position.z = nextZ;
+
+                    let targetRotation;
+                    if (isOrbiting) {
+                        targetRotation = camRotY + Math.PI;
+                    } else {
+                        targetRotation = Math.atan2(direction.x, direction.z);
+                    }
+
+                    player.rotation.y = THREE.MathUtils.lerp(player.rotation.y, targetRotation, delta * 15);
+                }
+
+                // DIAGNOSTIC TRACE (For debugging T-pose issues)
+                if (window.debugFrames < 10) {
+                    console.log(`[Animation Debug] State: ${state} | Mixer Root: ${mixer?._root?.name} | Animation: ${currentAnimation} | Mixer Valid: ${!!mixer}`);
+                }
+
+                // 1. Animation Logic
+                if (phys.isJumping) {
+                    // If we are airborne and the launch animation (Jump_Start) is finished, switch to Jump_Loop (Stage 2)
+                    if (!isActionPlaying && currentAnimation !== 'Jump_Loop') {
+                        playAnimation('Jump_Loop');
+                    }
+                } else if (isMoving) {
+                    // Moving on ground
+                    if (!isActionPlaying) {
+                        if (isCrouching) playAnimation('Crouch_Walk');
+                        else if (isJogging) playAnimation('Jog');
+                        else playAnimation('Walk');
+                    }
                 } else {
-                    targetRotation = Math.atan2(direction.x, direction.z);
+                    // Idle on ground
+                    if (!isActionPlaying) {
+                        if (isCrouching) playAnimation('Crouch_Idle');
+                        else playAnimation('Idle');
+                    }
                 }
-                
-                player.rotation.y = THREE.MathUtils.lerp(player.rotation.y, targetRotation, delta * 15);
-            }
 
-            // 1. Animation Logic
-            if (phys.isJumping) {
-                // If we are airborne and the launch animation (Jump_Start) is finished, switch to Jump_Loop (Stage 2)
-                if (!isActionPlaying && currentAnimation !== 'Jump_Loop') {
-                    playAnimation('Jump_Loop');
+                // --- Apply Gravity & Jump ---
+                if (phys.isJumping) {
+                    // Apply Gravity
+                    phys.velocityY -= gravity;
+                    playerBaseGroup.position.y += phys.velocityY;
+
+                    // Ground check (ONLY trigger when falling and actually reaching the floor)
+                    // We also add a threshold to prevent landing on data glitches mid-climb
+                    if (phys.velocityY < 0 && playerBaseGroup.position.y <= terrainY) {
+                        playerBaseGroup.position.y = terrainY;
+                        phys.velocityY = 0;
+                        phys.isJumping = false;
+                        playAction('Jump_Land', 400); // TRIGGER LANDING (400ms lock)
+                        console.log(`[Impact] Landed on Floor: ${terrainY.toFixed(2)}`);
+                    }
                 }
-            } else if (isMoving) {
-                // Moving on ground
-                if (!isActionPlaying) {
-                    if (isCrouching) playAnimation('Crouch_Walk');
-                    else if (isJogging) playAnimation('Jog');
-                    else playAnimation('Walk');
+
+                // 2. Update Camera Orbit
+                const camX = playerBaseGroup.position.x + orbit_distance * Math.sin(orbit_angle_horizontal) * Math.cos(orbit_angle_vertical);
+                const camY = playerBaseGroup.position.y + orbit_distance * Math.sin(orbit_angle_vertical) + 1.5;
+                const camZ = playerBaseGroup.position.z + orbit_distance * Math.cos(orbit_angle_horizontal) * Math.cos(orbit_angle_vertical);
+
+                camera.position.set(camX, camY, camZ);
+                camera.lookAt(playerBaseGroup.position.x, playerBaseGroup.position.y + 1.5, playerBaseGroup.position.z);
+
+                // 3. Update Sun/Shadow (Follow Player)
+                if (scene.sun) {
+                    scene.sun.position.set(playerBaseGroup.position.x + 20, 40, playerBaseGroup.position.z + 20);
+                    scene.sun.target = playerBaseGroup;
                 }
-            } else {
-                // Idle on ground
-                if (!isActionPlaying) {
-                    if (isCrouching) playAnimation('Crouch_Idle');
-                    else playAnimation('Idle');
+
+                // 4. Raycasting for Tooltip
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(scene.children, true);
+                const filtered = intersects.filter(i => i.object.parent && i.object.parent.userData && i.object.parent.userData.type);
+
+                const tooltip = document.getElementById('tooltip');
+                if (filtered.length > 0) {
+                    targetObject = filtered[0].object.parent;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = `${(mouse.x + 1) / 2 * 100}%`;
+                    tooltip.style.top = `${-(mouse.y - 1) / 2 * 100}%`;
+                    tooltip.textContent = targetObject.userData.type.toUpperCase();
+                } else {
+                    targetObject = null;
+                    tooltip.style.display = 'none';
                 }
+
+                // --- Update UI Maps ---
+                updateMaps(delta, deltaFactor);
+
+            } catch (e) {
+                console.error("Explorer Update Loop Failed:", e);
             }
-
-            // --- Apply Gravity & Jump ---
-            if (phys.isJumping) {
-                // Apply Gravity
-                phys.velocityY -= gravity;
-                playerBaseGroup.position.y += phys.velocityY;
-
-                // Ground check (ONLY trigger when falling and actually reaching the floor)
-                // We also add a threshold to prevent landing on data glitches mid-climb
-                if (phys.velocityY < 0 && playerBaseGroup.position.y <= terrainY) {
-                    playerBaseGroup.position.y = terrainY;
-                    phys.velocityY = 0;
-                    phys.isJumping = false;
-                    playAction('Jump_Land', 400); // TRIGGER LANDING (400ms lock)
-                    console.log(`[Impact] Landed on Floor: ${terrainY.toFixed(2)}`);
-                }
-            }
-
-            // 2. Update Camera Orbit
-            const camX = playerBaseGroup.position.x + orbit_distance * Math.sin(orbit_angle_horizontal) * Math.cos(orbit_angle_vertical);
-            const camY = playerBaseGroup.position.y + orbit_distance * Math.sin(orbit_angle_vertical) + 1.5;
-            const camZ = playerBaseGroup.position.z + orbit_distance * Math.cos(orbit_angle_horizontal) * Math.cos(orbit_angle_vertical);
-
-            camera.position.set(camX, camY, camZ);
-            camera.lookAt(playerBaseGroup.position.x, playerBaseGroup.position.y + 1.5, playerBaseGroup.position.z);
-
-            // 3. Update Sun/Shadow (Follow Player)
-            if (scene.sun) {
-                scene.sun.position.set(playerBaseGroup.position.x + 20, 40, playerBaseGroup.position.z + 20);
-                scene.sun.target = playerBaseGroup;
-            }
-
-            // 4. Raycasting for Tooltip
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
-            const filtered = intersects.filter(i => i.object.parent && i.object.parent.userData && i.object.parent.userData.type);
-            
-            const tooltip = document.getElementById('tooltip');
-            if(filtered.length > 0) {
-                targetObject = filtered[0].object.parent;
-                tooltip.style.display = 'block';
-                tooltip.style.left = `${(mouse.x + 1) / 2 * 100}%`;
-                tooltip.style.top = `${-(mouse.y - 1) / 2 * 100}%`;
-                tooltip.textContent = targetObject.userData.type.toUpperCase();
-            } else {
-                targetObject = null;
-                tooltip.style.display = 'none';
-            }
-
-            // --- Update UI Maps ---
-            updateMaps(delta, deltaFactor);
-
-        } catch (e) {
-            console.error("Explorer Update Loop Failed:", e);
         }
-    }
 
         async function performDig() {
             if (state !== 'EXPLORING') return;
 
             playAction('Punch', 1200); // USING 'Punch' AS SUBSTITUTE FOR 'Dig'
-            
+
             // For simplicity, we dig the tile the player is CURRENTLY STANDING ON
             // but we could also use raycasting for 'forward' digging
             const tx = Math.round(playerBaseGroup.position.x / TILE_SCALE);
             const ty = Math.round(playerBaseGroup.position.z / TILE_SCALE);
-            
+
             try {
                 const res = await fetch(`${API_BASE}/api/game/world/dig`, {
                     method: 'POST',
@@ -2973,36 +3193,36 @@
                     body: JSON.stringify({ x: tx, y: ty })
                 });
                 const newTile = await res.json();
-                
+
                 // Update local heightmap for physics/climbing
                 terrainHeightMap[`${tx},${ty}`] = newTile.e;
-                
+
                 // Find and update instance in Three.js
                 const oldTile = window.allTiles.find(t => t.x === tx && t.y === ty);
-                
+
                 // If biome changed (e.g. Grass to Water), we reload or rebuild
                 // For now, reload is easiest for biome-mesh migrations
                 if (oldTile.b !== newTile.b) {
-                    window.location.reload(); 
+                    window.location.reload();
                     return;
                 }
-                
+
                 oldTile.e = newTile.e;
-                
+
                 // Real-time mesh update
                 const meshData = window.meshes[newTile.b];
                 const TILE_DEPTH = 10;
                 const dummy = new THREE.Object3D();
-                
+
                 meshData.list.forEach((t, i) => {
-                   if (t.x === tx && t.y === ty) {
-                       dummy.position.set(t.x * TILE_SCALE, (t.e || 0) - (TILE_DEPTH / 2), t.y * TILE_SCALE);
-                       dummy.updateMatrix();
-                       meshData.mesh.setMatrixAt(i, dummy.matrix);
-                   }
+                    if (t.x === tx && t.y === ty) {
+                        dummy.position.set(t.x * TILE_SCALE, (t.e || 0) - (TILE_DEPTH / 2), t.y * TILE_SCALE);
+                        dummy.updateMatrix();
+                        meshData.mesh.setMatrixAt(i, dummy.matrix);
+                    }
                 });
                 meshData.mesh.instanceMatrix.needsUpdate = true;
-                
+
             } catch (e) {
                 console.error("Dig cycle failed:", e);
             }
@@ -3025,7 +3245,7 @@
                 const isTree = name.includes('TREE');
                 const isDead = name.includes('DEAD');
                 if (!isTree || isDead || !window.allTiles) return false;
-                
+
                 const tx = Math.round(o.x);
                 const ty = Math.round(o.y);
                 const tile = window.allTiles.find(t => t.x === tx && t.y === ty);
@@ -3051,10 +3271,10 @@
             for (let i = 0; i < 600; i++) {
                 const tree = treeTops[Math.floor(Math.random() * treeTops.length)];
                 const data = {
-                    pos: new THREE.Vector3(tree.x + (Math.random()-0.5)*2.5, tree.y + Math.random()*2, tree.z + (Math.random()-0.5)*2.5),
-                    vel: new THREE.Vector3((Math.random()-0.5)*0.015, -0.01 - Math.random()*0.02, (Math.random()-0.5)*0.015),
-                    rot: new THREE.Vector3(Math.random()*Math.PI, Math.random()*Math.PI, 0),
-                    rotVel: new THREE.Vector3(Math.random()*0.05, Math.random()*0.05, Math.random()*0.05),
+                    pos: new THREE.Vector3(tree.x + (Math.random() - 0.5) * 2.5, tree.y + Math.random() * 2, tree.z + (Math.random() - 0.5) * 2.5),
+                    vel: new THREE.Vector3((Math.random() - 0.5) * 0.015, -0.01 - Math.random() * 0.02, (Math.random() - 0.5) * 0.015),
+                    rot: new THREE.Vector3(Math.random() * Math.PI, Math.random() * Math.PI, 0),
+                    rotVel: new THREE.Vector3(Math.random() * 0.05, Math.random() * 0.05, Math.random() * 0.05),
                 };
                 leafData.push(data);
             }
@@ -3073,9 +3293,9 @@
                 d.pos.z += d.vel.z + (Math.cos(time + d.pos.x) * 0.008 * activeWind);
                 d.rot.x += d.rotVel.x; d.rot.y += d.rotVel.y;
 
-                if (d.pos.y < (terrainHeightMap[`${Math.round(d.pos.x/TILE_SCALE)},${Math.round(d.pos.z/TILE_SCALE)}`] || -2)) {
+                if (d.pos.y < (terrainHeightMap[`${Math.round(d.pos.x / TILE_SCALE)},${Math.round(d.pos.z / TILE_SCALE)}`] || -2)) {
                     const tree = treeTops[Math.floor(Math.random() * treeTops.length)];
-                    d.pos.set(tree.x + (Math.random()-0.5)*2.5, tree.y + Math.random()*1.5, tree.z + (Math.random()-0.5)*2.5);
+                    d.pos.set(tree.x + (Math.random() - 0.5) * 2.5, tree.y + Math.random() * 1.5, tree.z + (Math.random() - 0.5) * 2.5);
                 }
                 dummy.position.copy(d.pos); dummy.rotation.set(d.rot.x, d.rot.y, d.rot.z); dummy.updateMatrix();
                 leaves.setMatrixAt(i, dummy.matrix);
@@ -3088,15 +3308,15 @@
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
             const time = clock.getElapsedTime();
-            
-            if(mixer) mixer.update(delta);
+
+            if (state === 'SELECTION' && mixer) mixer.update(delta);
 
             if (waterMat) {
                 if (waterMat.userData.shader) {
                     waterMat.uniforms ? waterMat.uniforms.uTime.value = time : waterMat.userData.shader.uniforms.uTime.value = time;
                 }
                 if (window.vegUniforms) window.vegUniforms.uTime.value = time;
-                
+
                 // Texture offset updates (using global references if they exist)
                 if (window.waterNormal) {
                     window.waterNormal.offset.x += delta * 0.02;
@@ -3107,9 +3327,9 @@
                     window.waterNormal2.offset.y += delta * 0.02;
                 }
             }
-            
+
             // Update all active shaders via registry
-            if(window.weatherWindTarget !== undefined) {
+            if (window.weatherWindTarget !== undefined) {
                 window.weatherWindCurrent = THREE.MathUtils.lerp(window.weatherWindCurrent || 0.45, window.weatherWindTarget, 0.015);
             }
 
@@ -3117,11 +3337,11 @@
                 if (m && m.userData.shader) {
                     const s = m.userData.shader;
                     s.uniforms.uTime.value = time;
-                    if(s.uniforms.uIntensity) s.uniforms.uIntensity.value = window.weatherWindCurrent;
-                    if(s.uniforms.uIsRaining) s.uniforms.uIsRaining.value = isRaining ? 1.0 : 0.0;
+                    if (s.uniforms.uIntensity) s.uniforms.uIntensity.value = window.weatherWindCurrent;
+                    if (s.uniforms.uIsRaining) s.uniforms.uIsRaining.value = isRaining ? 1.0 : 0.0;
                 }
             });
-            
+
             [rainSystemA, rainSystemB].forEach(rs => {
                 if (rs) {
                     rs.position.y -= delta * 35; // Falling speed
@@ -3129,18 +3349,18 @@
                         rs.position.x = playerBaseGroup.position.x;
                         rs.position.z = playerBaseGroup.position.z;
                     }
-                    if (rs.position.y < -20) rs.position.y += 40; 
+                    if (rs.position.y < -20) rs.position.y += 40;
                 }
             });
 
             // --- LEAVES & LIGHTNING ---
             updateLeaves(delta, time);
-            
+
             // Background/Fog Lerp (Color Transition)
-            if(window.targetBgColor) {
-               window.currentBgColor.lerp(window.targetBgColor, 0.02);
-               scene.background.copy(window.currentBgColor);
-               scene.fog.color.copy(window.currentBgColor);
+            if (window.targetBgColor) {
+                window.currentBgColor.lerp(window.targetBgColor, 0.02);
+                scene.background.copy(window.currentBgColor);
+                scene.fog.color.copy(window.currentBgColor);
             }
 
             if (isRaining && rainIntensity > 0.6) {
@@ -3152,7 +3372,7 @@
                 }
             }
             if (lightningFlash > 0) {
-                lightningFlash -= delta * 5.0; 
+                lightningFlash -= delta * 5.0;
                 const flashVal = Math.pow(Math.max(0, lightningFlash), 2.0);
                 const col = 0.04 + flashVal;
                 // Add lightning flash on top of current background color
@@ -3161,17 +3381,18 @@
                 scene.background.b += (flashVal + 0.03);
                 scene.fog.color.copy(scene.background);
             }
-            
-            if(state === 'EXPLORING') {
+
+            if (state === 'EXPLORING') {
+                if (mixer) mixer.update(delta);
                 updateExplorer(delta);
                 // Update remote player interpolation
                 const deltaFactor = delta * 60;
-                for(let rp of remotePlayers.values()) {
+                for (let rp of remotePlayers.values()) {
                     rp.lerp(deltaFactor);
                     rp.mixer.update(delta); // Local mixer update for smooth anims
                 }
-            } else if(state === 'SELECTION') {
-                if(player) player.rotation.y += delta * 0.5;
+            } else if (state === 'SELECTION') {
+                if (player) player.rotation.y += delta * 0.5;
             }
 
             renderer.render(scene, camera);
@@ -3184,23 +3405,24 @@
         }
 
         async function equipTool(parentModel, toolPath, boneName) {
-            // [Compatibility] Prepend API_BASE for absolute paths from DB
-            if (toolPath.startsWith('/models/') && API_BASE && !toolPath.startsWith(API_BASE)) {
-                toolPath = API_BASE + toolPath;
+            // [Fix] Correct orientation for models directory vs site root
+            if (toolPath && !toolPath.includes('://') && !toolPath.startsWith(API_BASE)) {
+                // Ensure /models/ is between API_BASE and the relative path
+                const base = API_BASE.endsWith('/') ? API_BASE : API_BASE + '/';
+                const modelsSegment = toolPath.startsWith('models/') ? '' : 'models/';
+                toolPath = base + modelsSegment + toolPath;
             }
 
             const loader = new GLTFLoader();
             try {
                 const gltf = await loader.loadAsync(toolPath);
                 const tool = gltf.scene;
-                
+
                 let bone = null;
-                const foundNames = [];
                 parentModel.traverse(child => {
-                    foundNames.push(child.name);
                     const normalizedName = child.name.replace(/[._]/g, '').toLowerCase();
                     const targetNormalized = boneName.replace(/[._]/g, '').toLowerCase();
-                    
+
                     if (child.name === boneName || normalizedName === targetNormalized || child.name.includes(boneName)) {
                         bone = child;
                     }
@@ -3208,15 +3430,39 @@
 
                 if (bone) {
                     bone.add(tool);
-                    // Standardize orientation for this asset pack
-                    if (toolPath.includes('Tool') || toolPath.includes('Sword')) {
+
+                    // [Modular Alignment] Dynamic offsets based on gear type
+                    const pathLower = toolPath.toLowerCase();
+                    if (pathLower.includes('legs') || pathLower.includes('peasant_legs')) {
+                        tool.position.set(0, -0.2, 0); // Lowered for pelvis mounting
+                        tool.scale.set(1.1, 1.1, 1.1);
+                    } else if (pathLower.includes('shoulder')) {
                         tool.position.set(0, 0, 0);
+                        tool.scale.set(0.1, 0.1, 0.1); // Small scale for these assets
+                    } else if (pathLower.includes('foot') || pathLower.includes('boot')) {
+                        tool.position.set(0, 0, 0);
+                        tool.scale.set(0.015, 0.015, 0.015); // Hand-tuned for foot_l_r
+                    } else if (pathLower.includes('head') || pathLower.includes('hood') || pathLower.includes('helm')) {
+                        // [Trace] Debug log bone position for diagnostic purposes
+                        const worldPos = bone.getWorldPosition(new THREE.Vector3());
+                        console.log(`[Equipment] Static Head Attachment to ${bone.name} at Y=${worldPos.y.toFixed(3)}`);
+                        
+                        // [Fix] For modular items that are pre-offset to character height, 
+                        // we must counteract the bone's local height to prevent "double stacking".
+                        // This aligns the model's origin with the bone center.
+                        const boneLocalPos = new THREE.Vector3();
+                        bone.getWorldPosition(boneLocalPos);
+                        parentModel.worldToLocal(boneLocalPos);
+                        
+                        tool.position.copy(boneLocalPos).negate();
+                        tool.rotation.set(0, 0, 0);
+                        console.log(`[Equipment] Calculated corrective offset for ${bone.name}: ${tool.position.y.toFixed(3)}`);
+                    } else if (pathLower.includes('tool') || pathLower.includes('sword')) {
+                        tool.position.set(0, 0, 0.05);
                         tool.rotation.set(Math.PI / 2, 0, 0);
                         tool.scale.set(0.5, 0.5, 0.5);
                     }
                     console.log(`[Equipment] ${toolPath} attached to ${bone.name}`);
-                } else {
-                    console.error(`[Equipment] Bone ${boneName} not found. Available nodes:`, foundNames);
                 }
             } catch (e) {
                 console.error(`[Equipment] Failed to load tool ${toolPath}`, e);
@@ -3235,7 +3481,7 @@
             const grid = document.getElementById('inventory-grid');
             const equip = document.getElementById('equipment-slots');
             if (!grid || !equip) return;
-            
+
             // Safety: Ensure inventory has 20 slots
             while (inventory.length < 20) inventory.push(null);
             if (inventory.length > 20) inventory.length = 20;
@@ -3246,44 +3492,48 @@
                 slot.className = 'inv-slot';
                 slot.dataset.index = index;
                 slot.dataset.type = 'INV';
-                
+
                 if (selectedSlot && selectedSlot.type === 'INV' && selectedSlot.id === index) {
                     slot.classList.add('selected');
                 }
 
-                    const item = resolveItem(item_id);
-                    if (item) {
-                        const content = document.createElement('div');
-                        content.className = 'inv-item-content';
-                        
-                        // [Compatibility] Resolve Icon URL
-                        let iconUrl = item.icon;
-                        if (iconUrl && iconUrl.startsWith('/static/') && API_BASE && !iconUrl.startsWith(API_BASE)) {
-                            iconUrl = API_BASE + iconUrl;
-                        }
+                const item = resolveItem(item_id);
+                if (item) {
+                    const content = document.createElement('div');
+                    content.className = 'inv-item-content';
 
-                        if (iconUrl) {
-                            content.innerHTML = `<img src="${iconUrl}" class="inv-item-icon">`;
-                        } else if (item.character) {
-                            content.innerHTML = item.character;
-                        } else {
-                            content.innerHTML = '🛡️';
-                        }
-                        slot.appendChild(content);
-                        
-                        if (item.stackable) {
-                            const count = document.createElement('div');
-                            count.className = 'inv-stack-size';
-                            count.innerText = item.count;
-                            slot.appendChild(count);
-                        }
+                    // [Compatibility] Resolve Icon URL
+                    let iconUrl = item.icon;
+                    if (iconUrl && iconUrl.startsWith('/static/') && API_BASE && !iconUrl.startsWith(API_BASE)) {
+                        iconUrl = API_BASE + iconUrl;
                     }
-                    
-                    slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('INV', index); };
-                
+
+                    if (iconUrl) {
+                        if (iconUrl.includes('/') || iconUrl.includes('.')) {
+                            content.innerHTML = `<img src="${iconUrl}" class="inv-item-icon">`;
+                        } else {
+                            content.innerHTML = `<div class="inv-item-icon h-full w-full flex items-center justify-center text-xl">${iconUrl}</div>`;
+                        }
+                    } else if (item.character) {
+                        content.innerHTML = item.character;
+                    } else {
+                        content.innerHTML = '🛡️';
+                    }
+                    slot.appendChild(content);
+
+                    if (item.stackable) {
+                        const count = document.createElement('div');
+                        count.className = 'inv-stack-size';
+                        count.innerText = item.count;
+                        slot.appendChild(count);
+                    }
+                }
+
+                slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('INV', index); };
+
                 // [Tooltip] Tactical Hover
                 slot.onmousemove = (e) => updateTooltip(e, item);
-                slot.onmouseenter = () => { if(item) document.getElementById('item-tooltip').style.display = 'block'; };
+                slot.onmouseenter = () => { if (item) document.getElementById('item-tooltip').style.display = 'block'; };
                 slot.onmouseleave = () => { document.getElementById('item-tooltip').style.display = 'none'; };
 
                 grid.appendChild(slot);
@@ -3293,20 +3543,21 @@
                 { id: 'bag1', label: 'Bag 1', class: 'slot-bag-1' },
                 { id: 'head', label: 'Head', class: 'slot-head' },
                 { id: 'bag2', label: 'Bag 2', class: 'slot-bag-2' },
-                
+
                 { id: 'back', label: 'Back', class: 'slot-back' },
                 { id: 'neck', label: 'Neck', class: 'slot-neck' },
                 { id: 'shoulder', label: 'Shoulder', class: 'slot-shoulder' },
-                
+
                 { id: 'offhand', label: 'Off-hand', class: 'slot-offhand' },
                 { id: 'chest', label: 'Chest', class: 'slot-chest' },
                 { id: 'mainhand', label: 'Main-hand', class: 'slot-mainhand' },
-                
-                { id: 'ring1', label: 'Ring 1', class: 'slot-ring1' },
+
+                { id: 'arms', label: 'Arms', class: 'slot-arms' },
                 { id: 'legs', label: 'Legs', class: 'slot-legs' },
-                { id: 'ring2', label: 'Ring 2', class: 'slot-ring2' },
-                
-                { id: 'foot', label: 'Foot', class: 'slot-foot' }
+
+                { id: 'ring1', label: 'Ring 1', class: 'slot-ring1' },
+                { id: 'foot', label: 'Foot', class: 'slot-foot' },
+                { id: 'ring2', label: 'Ring 2', class: 'slot-ring2' }
             ];
 
             equip.innerHTML = '';
@@ -3317,7 +3568,7 @@
                 if (selectedSlot && selectedSlot.type === 'EQUIP' && selectedSlot.id === s.id) {
                     slot.classList.add('selected');
                 }
-                
+
                 const label = document.createElement('div');
                 label.className = 'slot-label';
                 label.innerText = s.label;
@@ -3327,7 +3578,7 @@
                 if (item) {
                     const content = document.createElement('div');
                     content.className = 'inv-item-content';
-                    
+
                     // [Compatibility] Resolve Icon URL
                     let iconUrl = item.icon;
                     if (iconUrl && iconUrl.startsWith('/static/') && API_BASE && !iconUrl.startsWith(API_BASE)) {
@@ -3335,7 +3586,11 @@
                     }
 
                     if (iconUrl) {
-                        content.innerHTML = `<img src="${iconUrl}" class="inv-item-icon">`;
+                        if (iconUrl.includes('/') || iconUrl.includes('.')) {
+                            content.innerHTML = `<img src="${iconUrl}" class="inv-item-icon">`;
+                        } else {
+                            content.innerHTML = `<div class="inv-item-icon h-full w-full flex items-center justify-center text-xl">${iconUrl}</div>`;
+                        }
                     } else {
                         content.innerHTML = item.character || '⚔️';
                     }
@@ -3343,10 +3598,10 @@
                 }
 
                 slot.onmousedown = (e) => { e.stopPropagation(); onSlotClick('EQUIP', s.id); };
-                
+
                 // [Tooltip] Tactical Hover
                 slot.onmousemove = (e) => updateTooltip(e, item);
-                slot.onmouseenter = () => { if(item) document.getElementById('item-tooltip').style.display = 'block'; };
+                slot.onmouseenter = () => { if (item) document.getElementById('item-tooltip').style.display = 'block'; };
                 slot.onmouseleave = () => { document.getElementById('item-tooltip').style.display = 'none'; };
 
                 equip.appendChild(slot);
@@ -3361,15 +3616,20 @@
             if (typeof idOrObj === 'object' && idOrObj.name) return idOrObj;
             const rid = String(idOrObj);
             const cached = itemCache[rid];
-            
+
             if (cached) {
-                // Ensure model paths are also normalized for 3D equipment
-                if (cached.model && cached.model.startsWith('/models/') && API_BASE && !cached.model.startsWith(API_BASE)) {
-                    cached.model = API_BASE + cached.model;
+                // [Fix] Ensure model paths are normalized for both base avatars and equipment
+                if (cached.model && API_BASE) {
+                    if (cached.model.startsWith('/models/') && !cached.model.startsWith(API_BASE)) {
+                        cached.model = API_BASE + cached.model;
+                    } else if (!cached.model.startsWith('http') && !cached.model.startsWith('/')) {
+                        // Equipment models are stored relative to /models/Equipment/
+                        cached.model = API_BASE + '/models/Equipment/' + cached.model;
+                    }
                 }
                 return cached;
             }
-            
+
             return { name: 'Identifying...', loading: true };
         }
 
@@ -3393,11 +3653,15 @@
                 const data = await res.json();
                 Object.assign(itemCache, data);
                 renderInventory();
-                
+
                 // [Sync] Secondary visual pass now that we have models
                 Object.keys(equipment).forEach(slotId => {
                     if (equipment[slotId] && data[equipment[slotId]]) {
-                        updateCharacterVisuals(player, slotId, equipment[slotId]);
+                        if (player) updateCharacterVisuals(player, slotId, equipment[slotId]);
+                        // [Fix] Also update the selection screen preview if the item just became available
+                        if (state === 'SELECTION' && window.selectedAvatarId && models[window.selectedAvatarId]) {
+                            updateCharacterVisuals(models[window.selectedAvatarId].scene, slotId, equipment[slotId]);
+                        }
                     }
                 });
             } catch (e) {
@@ -3494,7 +3758,7 @@
                 equipment[target.id] = sourceId;
                 updateCharacterVisuals(player, target.id, sourceId);
             }
-            
+
             isInventoryDirty = true;
             savePlayerState(); // [Persistent]
         }
@@ -3502,7 +3766,7 @@
         function canEquip(item, slotId) {
             if (!item || item.loading) return true;
             const slot = (item.slot || item.type || "").toUpperCase();
-            if (slotId === 'mainhand' || slotId === 'offhand') return slot === 'WEAPON' || slot === 'TOOL' || slot === 'ARMS';
+            if (slotId === 'mainhand' || slotId === 'offhand') return slot === 'WEAPON' || slot === 'TOOL';
             if (slotId === 'head') return slot === 'HEAD';
             if (slotId === 'neck') return slot === 'NECK';
             if (slotId === 'back') return slot === 'BACK' || slot === 'ACC';
@@ -3512,44 +3776,148 @@
             if (slotId === 'shoulder') return slot === 'ACC' || slot === 'SHOULDER';
             if (slotId === 'chest') return slot === 'BODY' || slot === 'CHEST';
             if (slotId === 'legs') return slot === 'LEGS';
+            if (slotId === 'arms' || slotId === 'ARMS') return slot === 'ARMS' || slot === 'HANDS';
+            if (slotId === 'foot' || slotId === 'FEET') return slot === 'FEET';
+            if (slotId === 'shoulder' || slotId === 'ACC') return slot === 'ACC';
             return false;
         }
 
         function updateCharacterVisuals(targetPlayer, slotId, itemId) {
             if (!targetPlayer) return;
             const item = resolveItem(itemId);
-            
-            const slotToBones = {
-                "head": ["Head"],
-                "mainhand": ["Fist.R"],
-                "offhand": ["Fist.L"],
-                "foot": ["Foot.L", "Foot.R"],
-                "shoulder": ["Shoulder.L", "Shoulder.R"],
-                "legs": ["Legs"],
-                "chest": ["Torso"],
-                "back": ["Spine2"]
-            };
-            
-            const boneNames = slotToBones[slotId];
-            if (!boneNames) return;
+            const avatarId = targetPlayer.userData.avatarId;
 
-            boneNames.forEach(boneName => {
-                const bone = findBone(targetPlayer, boneName);
-                if (bone) {
-                    const itemsToRemove = bone.children.filter(c => c.userData.isEquipped);
-                    itemsToRemove.forEach(c => bone.remove(c));
+            // Group for all modular equipment to keep scene tree clean
+            let modRoot = targetPlayer.getObjectByName('Modular_Equipment');
+            if (!modRoot) {
+                modRoot = new THREE.Group();
+                modRoot.name = 'Modular_Equipment';
+                targetPlayer.add(modRoot);
+            }
+
+            // Cleanup existing item in this specific slot group
+            const slotGroupName = `Equipment_Slot_${slotId}`;
+            const oldSlotGroup = modRoot.getObjectByName(slotGroupName);
+            if (oldSlotGroup) {
+                modRoot.remove(oldSlotGroup);
+                console.log(`[Equipment] Cleaned up slot: ${slotId}`);
+            }
+
+            // [Modular Visibility] Toggle base meshes based on WEARING_MAP
+            if (avatarId && WEARING_MAP[avatarId] && WEARING_MAP[avatarId][slotId]) {
+                const baseMeshesToHide = WEARING_MAP[avatarId][slotId];
+                targetPlayer.traverse(obj => {
+                    if (obj.isMesh && baseMeshesToHide.some(m => m.toLowerCase() === obj.name.toLowerCase())) {
+                        // [Fix] Toggle visibility of underlying base parts (e.g. Face under Hood)
+                        obj.visible = (itemId === null);
+                        console.log(`[Equipment] Toggling base mesh ${obj.name} visibility to ${obj.visible}`);
+                    }
+                });
+            }
+
+            if (!item || !item.model) return;
+
+            // Define Conforming vs Static slots
+            // [Fix] Many head items (Hoods) are actually rigged, but we default to CONFORMING for modular stability
+            const CONFORMING_SLOTS = ['chest', 'legs', 'foot', 'shoulder', 'arms', 'head', 'ACC', 'ARMS', 'FEET'];
+            const STATIC_SLOTS = {
+                'mainhand': 'hand_r',
+                'offhand': 'hand_l',
+                'back': 'spine_03'
+            };
+
+            const slotGroup = new THREE.Group();
+            slotGroup.name = slotGroupName;
+            modRoot.add(slotGroup);
+
+            const normalizedSlot = slotId.toLowerCase();
+            if (CONFORMING_SLOTS.includes(normalizedSlot) || STATIC_SLOTS[normalizedSlot] === 'Head') {
+                // --- CONFORMING GEAR (SkinnedMesh Binding) ---
+                console.log(`[Equipment] Loading Conforming Item: ${item.name} for slot ${slotId}`);
+
+                // Find target skeleton from base avatar
+                let characterSkeleton = null;
+                let characterMesh = null;
+                targetPlayer.traverse(obj => {
+                    if (obj.isSkinnedMesh && !obj.name.toLowerCase().includes('hair') && !obj.name.toLowerCase().includes('equipment') && !obj.name.toLowerCase().includes('hood')) {
+                        characterSkeleton = obj.skeleton;
+                        characterMesh = obj;
+                    }
+                });
+
+                if (!characterSkeleton) {
+                    console.error("[Equipment] No skeleton found on player for binding.");
+                    return;
                 }
 
-                if (item && item.model) {
-                    equipTool(targetPlayer, item.model, boneName).then(() => {
-                        const bone = findBone(targetPlayer, boneName);
-                        if (bone && bone.children.length > 0) {
-                            const lastChild = bone.children[bone.children.length - 1];
-                            lastChild.userData.isEquipped = true;
+                // [Trace] Resolved model path for debugging
+                console.log(`[Equipment] Fetching Model: ${item.model}`);
+
+                new GLTFLoader().load(item.model, (gltf) => {
+                    // [Check] Auto-fallback to static if no skin is found in the model
+                    let hasSkin = false;
+                    gltf.scene.traverse(o => { if (o.isSkinnedMesh) hasSkin = true; });
+
+                    if (!hasSkin && (slotId === 'head' || slotId === 'HEAD')) {
+                        console.log(`[Equipment] Head item "${item.name}" is static, falling back to bone parenting.`);
+                        equipTool(targetPlayer, item.model, 'Head');
+                        return;
+                    }
+
+                    const clonedScene = SkeletonUtils.clone(gltf.scene);
+                    clonedScene.traverse(obj => {
+                        if (obj.isMesh) {
+                            obj.castShadow = true;
+                            obj.receiveShadow = true;
+                            obj.frustumCulled = false; // [Fix] Prevent disappearing at certain angles
+
+                            // [Fidelity] Gear Inflation - Vertex Normal Offset (True Inflation)
+                            // This offsets vertices along their normals to "thicken" gear, preventing body clipping
+                            // without scaling the character's height or skeletal proportions.
+                            const inflation = 0.033; // [Tune] ~5mm offset is usually enough to clear body
+                            if (obj.material) {
+                                obj.material = obj.material.clone();
+                                // [Fidelity] Ensure textures use correct color space
+                                if (obj.material.map) obj.material.map.colorSpace = 'srgb';
+
+                                obj.material.onBeforeCompile = (shader) => {
+                                    shader.vertexShader = shader.vertexShader.replace(
+                                        '#include <begin_vertex>',
+                                        `#include <begin_vertex>
+                                         transformed += normal * ${inflation};`
+                                    );
+                                };
+                            }
+
+                            // [Trace] Log binding details
+                            console.log(`[Equipment] Binding Mesh: ${obj.name} with scale ${obj.scale.x}, Inflation: ${inflation}`);
+
+                            if (obj.isSkinnedMesh) {
+                                // [Fix] Robust binding - ensure matrices are up to date before skinning
+                                targetPlayer.updateMatrixWorld(true);
+                                obj.bind(characterSkeleton, characterMesh.bindMatrix);
+                            }
                         }
                     });
-                }
-            });
+                    clonedScene.name = `Equipment_Asset_${item.name}`;
+                    slotGroup.add(clonedScene);
+                    console.log(`[Equipment] Bound conforming item ${item.name} to skeleton`);
+                });
+            } else if (STATIC_SLOTS[slotId]) {
+                // --- STATIC GEAR (Bone Parenting) ---
+                const boneName = STATIC_SLOTS[slotId];
+                console.log(`[Equipment] Loading Static Item: ${item.name} for bone ${boneName}`);
+
+                equipTool(targetPlayer, item.model, boneName).then(() => {
+                    const bone = findBone(targetPlayer, boneName);
+                    if (bone && bone.children.length > 0) {
+                        const tool = bone.children[bone.children.length - 1];
+                        tool.userData.isEquipped = true;
+                        // Move to slot group if we want centralized management, 
+                        // but bone parenting requires staying under the bone.
+                    }
+                });
+            }
         }
 
         function findBone(parent, name) {
@@ -3581,9 +3949,10 @@
     </script>
 
     <!-- Debug Panel (Temporary - Hidden by default) -->
-    <div id="debug-panel" class="glass interactive" style="display:none !important; position:fixed; top:20px; right:20px; width:300px; padding:20px; z-index:9999; font-size:11px; color:white; border-radius:1rem; pointer-events:auto;">
+    <div id="debug-panel" class="glass interactive"
+        style="display:none !important; position:fixed; top:20px; right:20px; width:300px; padding:20px; z-index:9999; font-size:11px; color:white; border-radius:1rem; pointer-events:auto;">
         <h3 class="font-bold text-xs uppercase mb-2 text-indigo-400">Rendering Debug</h3>
-        
+
         <div class="debug-row">
             <span>Normal X</span>
             <input type="range" id="dbg-normX" min="-2" max="2" step="0.1" value="0.5" oninput="updateDebug()">
@@ -3596,7 +3965,8 @@
         </div>
         <div class="debug-row">
             <span>Shadow Bias</span>
-            <input type="range" id="dbg-bias" min="-0.01" max="0.01" step="0.0001" value="0.0005" oninput="updateDebug()">
+            <input type="range" id="dbg-bias" min="-0.01" max="0.01" step="0.0001" value="0.0005"
+                oninput="updateDebug()">
             <span class="debug-val" id="val-bias">0.0005</span>
         </div>
         <div class="debug-row">
@@ -3618,8 +3988,9 @@
             <span>Flip Y</span>
             <input type="checkbox" id="dbg-flipY" onchange="updateDebug()">
         </div>
-        
-        <button onclick="if(models[selectedAvatarId]) applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)" 
+
+        <button
+            onclick="if(models[selectedAvatarId]) applyAvatarConfig(models[selectedAvatarId].scene, selectedAvatarId)"
             class="mt-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded py-2 text-[10px] uppercase font-bold">
             Force Re-Apply
         </button>
@@ -3638,7 +4009,7 @@
                 amb: parseFloat(document.getElementById('dbg-amb').value),
                 flipY: document.getElementById('dbg-flipY').checked
             };
-            
+
             document.getElementById('val-normX').textContent = vals.normX;
             document.getElementById('val-normY').textContent = vals.normY;
             document.getElementById('val-bias').textContent = vals.bias;
@@ -3650,7 +4021,7 @@
                 window.scene.sun.shadow.bias = vals.bias;
                 window.scene.sun.shadow.normalBias = vals.normBias;
             }
-            
+
             // Re-apply material settings to body if avatar is selected
             if (window.selectedAvatarId && window.models[window.selectedAvatarId]) {
                 const root = window.models[window.selectedAvatarId].scene;
@@ -3681,4 +4052,5 @@
         }, 500);
     </script>
 </body>
+
 </html>
